@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { useEffect } from "react";
+import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
 
 function IconToday({ active }: { active: boolean }) {
   return (
@@ -100,6 +101,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           })}
         </div>
       </nav>
+
+      <AddToHomescreen />
     </div>
   );
 }

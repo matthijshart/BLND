@@ -1,0 +1,37 @@
+{
+  "name": "BLEND",
+  "short_name": "BLEND",
+  "description": "Skip the chat. Meet for real. Coffee dates in Amsterdam.",
+  "start_url": "/today",
+  "display": "standalone",
+  "background_color": "#6b1520",
+  "theme_color": "#6b1520",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
