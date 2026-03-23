@@ -48,7 +48,7 @@ export default function DatesPage() {
             href="/matches"
             className="mt-6 px-6 py-3 rounded-full bg-wine text-cream font-medium text-sm hover:bg-burgundy transition-colors"
           >
-            Check your matches
+            Check your blends
           </Link>
         </div>
       </div>

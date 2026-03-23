@@ -49,7 +49,7 @@ function IconProfile({ active }: { active: boolean }) {
 
 const navItems = [
   { href: "/today", label: "Today", Icon: IconToday },
-  { href: "/matches", label: "Matches", Icon: IconMatches },
+  { href: "/matches", label: "Blends", Icon: IconMatches },
   { href: "/dates", label: "Dates", Icon: IconDates },
   { href: "/profile", label: "Profile", Icon: IconProfile },
 ];

@@ -92,7 +92,7 @@ export default function TodayPage() {
             </div>
 
             <h2 className="text-5xl font-display text-cream text-center">
-              It&apos;s a match!
+              It&apos;s a blend!
             </h2>
             <p className="text-cream/60 mt-4 text-center max-w-xs">
               Time to plan a coffee date. We&apos;ll pick the café.

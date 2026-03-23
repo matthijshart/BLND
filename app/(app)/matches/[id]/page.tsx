@@ -95,12 +95,12 @@ export default function MatchDetailPage() {
   if (!match || !otherUser) {
     return (
       <div className="px-4 pt-8 text-center">
-        <p className="text-gray">Match not found.</p>
+        <p className="text-gray">Blend not found.</p>
         <button
           onClick={() => router.push("/matches")}
           className="mt-4 text-wine font-medium"
         >
-          Back to matches
+          Back to blends
         </button>
       </div>
     );

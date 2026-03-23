@@ -24,7 +24,7 @@ export function DoneForToday() {
         href="/matches"
         className="mt-6 px-6 py-3 rounded-full bg-wine text-cream font-medium text-sm hover:bg-burgundy transition-colors"
       >
-        Check matches
+        Check blends
       </Link>
 
       <p className="text-gray-light text-xs mt-8 font-mono tracking-wide">

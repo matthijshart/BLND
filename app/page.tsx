@@ -190,8 +190,8 @@ export default function LandingPage() {
             <span className="text-xl text-gray">/month</span>
           </div>
           <p className="mt-6 text-ink-mid text-lg leading-relaxed">
-            Daily profiles. Matched dates.<br />
-            Café selected for you.
+            Daily profiles. Real blends.<br />
+            Spot selected for you.
           </p>
 
           <div className="w-px h-10 bg-ink/10 mx-auto mt-10" />
@@ -203,6 +203,29 @@ export default function LandingPage() {
           <p className="mt-3 text-gray text-sm tracking-wide">
             No commitment. Cancel anytime.
           </p>
+        </div>
+      </section>
+
+      {/* ─── FOR EVERYONE: Inclusive positioning ─── */}
+      <section className="bg-stripe-white py-24 sm:py-32 px-6">
+        <div className="max-w-lg mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug">
+            Whether you&apos;re looking for love, friendship, or just someone to grab coffee with.
+          </h2>
+          <p className="mt-6 text-ink-mid text-lg leading-relaxed max-w-md mx-auto">
+            BLEND isn&apos;t just for dating. New to Amsterdam? Looking for your people? We get two humans to sit down, face to face, over good coffee. That&apos;s it.
+          </p>
+
+          <div className="flex flex-wrap justify-center gap-3 mt-10">
+            {["Dating", "Friendship", "New in town", "Expats", "Coffee people"].map((tag) => (
+              <span
+                key={tag}
+                className="px-5 py-2 rounded-full bg-wine/10 text-wine text-sm font-medium"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
