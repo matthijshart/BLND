@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { addToWaitlist } from "@/lib/db";
 
 export default function LandingPage() {
@@ -55,6 +56,21 @@ export default function LandingPage() {
           <p className="mt-6 text-cream/50 text-sm max-w-xs mx-auto">
             Every day we pick a few people for you. Mutual like? We book the café. You just show up.
           </p>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-10">
+            <Link
+              href="/signup"
+              className="px-8 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors"
+            >
+              Get started
+            </Link>
+            <Link
+              href="/login"
+              className="px-8 py-4 rounded-full border border-cream/20 text-cream font-medium hover:bg-cream/10 transition-colors"
+            >
+              I have an account
+            </Link>
+          </div>
         </div>
 
         {/* Scroll indicator */}
