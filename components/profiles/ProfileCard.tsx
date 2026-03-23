@@ -85,8 +85,20 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
               </div>
             )}
 
-            {/* Profile prompt */}
-            {profile.profilePrompt && (
+            {/* Prompts */}
+            {profile.prompts && profile.prompts.length > 0 && (
+              <div className="mt-5 space-y-2">
+                {profile.prompts.map((p, i) => (
+                  <div key={i} className="bg-wine/5 rounded-xl p-4">
+                    <p className="text-wine text-xs font-medium italic mb-1">{p.question}</p>
+                    <p className="text-ink text-[15px]">{p.answer}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Legacy profile prompt */}
+            {profile.profilePrompt && !profile.prompts?.length && (
               <div className="mt-5 bg-wine/5 rounded-xl p-4">
                 <p className="text-wine text-xs font-medium italic mb-1">
                   The last thing that made me laugh out loud was...

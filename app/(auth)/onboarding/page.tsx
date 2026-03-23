@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { createUser } from "@/lib/db";
 import { uploadUserPhoto } from "@/lib/storage";
+import { PromptPicker } from "@/components/prompts/PromptPicker";
 
 const NEIGHBORHOODS = [
   "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
@@ -38,6 +39,7 @@ export default function OnboardingPage() {
   const [profilePrompt, setProfilePrompt] = useState("");
   const [profileSong, setProfileSong] = useState("");
   const [coffeeOrder, setCoffeeOrder] = useState("");
+  const [prompts, setPrompts] = useState<{ question: string; answer: string }[]>([]);
 
   // Step 3
   const [photos, setPhotos] = useState<(File | null)[]>([null, null, null, null, null, null]);
@@ -132,6 +134,7 @@ export default function OnboardingPage() {
         profilePrompt: profilePrompt || undefined,
         profileSong: profileSong || undefined,
         coffeeOrder: coffeeOrder || undefined,
+        prompts: prompts.length > 0 ? prompts : undefined,
         bio,
         neighborhood,
         interests,
@@ -336,6 +339,16 @@ export default function OnboardingPage() {
                 onChange={(e) => setProfilePrompt(e.target.value.slice(0, 150))}
                 placeholder="Be honest, be weird"
                 className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+            </div>
+
+            {/* Fun prompts */}
+            <div>
+              <p className="text-cream/60 text-sm mb-2">Pick up to 3 prompts</p>
+              <PromptPicker
+                existingPrompts={prompts}
+                onSave={(p) => setPrompts(p)}
+                dark
               />
             </div>
 

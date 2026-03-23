@@ -7,6 +7,7 @@ import { updateUser } from "@/lib/db";
 import { uploadUserPhoto, deleteUserPhoto } from "@/lib/storage";
 import { signOut } from "@/lib/auth";
 import Image from "next/image";
+import { PromptPicker } from "@/components/prompts/PromptPicker";
 
 const NEIGHBORHOODS = [
   "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
@@ -38,6 +39,7 @@ export default function ProfilePage() {
   const [profilePrompt, setProfilePrompt] = useState("");
   const [profileSong, setProfileSong] = useState("");
   const [coffeeOrder, setCoffeeOrder] = useState("");
+  const [prompts, setPrompts] = useState<{ question: string; answer: string }[]>([]);
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -59,6 +61,7 @@ export default function ProfilePage() {
       setProfilePrompt(profile.profilePrompt || "");
       setProfileSong(profile.profileSong || "");
       setCoffeeOrder(profile.coffeeOrder || "");
+      setPrompts(profile.prompts || []);
     }
   }, [profile]);
 
@@ -375,36 +378,17 @@ export default function ProfilePage() {
         )}
       </section>
 
-      {/* Profile prompt */}
+      {/* Prompts */}
       <section className="px-5 py-5 bg-white border-b border-cream">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs text-gray uppercase tracking-wider font-medium">Prompt</h2>
-          {editing === "prompt" ? (
-            <button onClick={() => saveField("profilePrompt", profilePrompt)} className="text-xs font-medium text-wine">
-              {saving ? "Saving..." : "Save"}
-            </button>
-          ) : (
-            <button onClick={() => setEditing("prompt")} className="text-xs text-gray-light">
-              Edit
-            </button>
-          )}
-        </div>
-        <p className="text-wine text-xs font-medium mb-2 italic">
-          The last thing that made you laugh out loud was...
-        </p>
-        {editing === "prompt" ? (
-          <input
-            type="text"
-            value={profilePrompt}
-            onChange={(e) => setProfilePrompt(e.target.value.slice(0, 150))}
-            placeholder="Be honest, be weird"
-            className="w-full px-0 py-0 text-ink text-[15px] bg-transparent border-none focus:outline-none placeholder:text-gray-light"
-          />
-        ) : (
-          <p className="text-ink text-[15px]">
-            {profile.profilePrompt || <span className="text-gray-light italic">Not answered yet...</span>}
-          </p>
-        )}
+        <h2 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Prompts</h2>
+        <PromptPicker
+          existingPrompts={prompts}
+          onSave={async (p) => {
+            setPrompts(p);
+            await saveField("prompts", p);
+          }}
+          saving={saving}
+        />
       </section>
 
       {/* Profile song */}

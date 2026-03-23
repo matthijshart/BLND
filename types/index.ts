@@ -12,6 +12,7 @@ export interface User {
   profilePrompt?: string; // answer to a fun question
   profileSong?: string; // Spotify track URL
   coffeeOrder?: string; // their go-to coffee order
+  prompts?: { question: string; answer: string }[]; // fun prompt Q&As
   gender: string;
   genderPreference: string[];
   ageRange: [number, number];
