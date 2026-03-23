@@ -20,9 +20,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Blend — Where dates begin.",
+  title: "BLEND — Where dates begin.",
   description:
-    "Skip the chat. Meet for real. Blend picks the café, you bring the charm.",
+    "Skip the chat. Meet for real. BLEND picks the café, you bring the charm.",
 };
 
 export default function RootLayout({
