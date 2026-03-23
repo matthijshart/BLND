@@ -42,7 +42,7 @@ export default function DatesPage() {
           </div>
           <h2 className="text-2xl font-display text-ink">No dates planned</h2>
           <p className="text-gray mt-3 max-w-[260px] leading-relaxed">
-            Your first coffee date is one match away. We pick the café, you bring the charm.
+            Your first coffee date is one match away. We pick the spot, you bring the charm.
           </p>
           <Link
             href="/matches"
