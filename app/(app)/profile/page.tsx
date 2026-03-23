@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { updateUser } from "@/lib/db";
 import { uploadUserPhoto, deleteUserPhoto } from "@/lib/storage";
@@ -10,6 +11,166 @@ import Image from "next/image";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
+
+/* ─── Photo Carousel with swipe gestures ─── */
+function PhotoCarousel({
+  photos,
+  activeIndex,
+  onChangeIndex,
+  name,
+  age,
+  neighborhood,
+}: {
+  photos: string[];
+  activeIndex: number;
+  onChangeIndex: (i: number) => void;
+  name: string;
+  age: number;
+  neighborhood: string;
+}) {
+  const [direction, setDirection] = useState(0);
+
+  const goTo = useCallback(
+    (newIndex: number) => {
+      if (newIndex < 0 || newIndex >= photos.length) return;
+      setDirection(newIndex > activeIndex ? 1 : -1);
+      onChangeIndex(newIndex);
+    },
+    [activeIndex, photos.length, onChangeIndex]
+  );
+
+  const variants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? "40%" : "-40%",
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? "-40%" : "40%",
+      opacity: 0,
+    }),
+  };
+
+  function handleDragEnd(_: unknown, info: { offset: { x: number }; velocity: { x: number } }) {
+    const swipeThreshold = 50;
+    const velocityThreshold = 300;
+
+    if (info.offset.x < -swipeThreshold || info.velocity.x < -velocityThreshold) {
+      goTo(activeIndex + 1);
+    } else if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
+      goTo(activeIndex - 1);
+    }
+  }
+
+  return (
+    <div className="relative aspect-[3/4] overflow-hidden">
+      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        <motion.div
+          key={activeIndex}
+          custom={direction}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            x: { type: "spring", stiffness: 500, damping: 40 },
+            opacity: { duration: 0.15 },
+          }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.12}
+          onDragEnd={handleDragEnd}
+          className="absolute inset-0"
+        >
+          <Image
+            src={photos[activeIndex]}
+            alt={name}
+            fill
+            className="object-cover pointer-events-none select-none"
+            priority
+            draggable={false}
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Gradient overlay — always on top */}
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent z-10 pointer-events-none" />
+
+      {/* Progress bars */}
+      {photos.length > 1 && (
+        <div className="absolute top-[max(1rem,env(safe-area-inset-top,1rem))] inset-x-0 flex gap-1 px-3 z-20">
+          {photos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/25"
+            >
+              <motion.div
+                className="h-full bg-white rounded-full"
+                initial={false}
+                animate={{ width: i === activeIndex ? "100%" : i < activeIndex ? "100%" : "0%" }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Arrows — desktop/tablet */}
+      {photos.length > 1 && (
+        <>
+          <AnimatePresence>
+            {activeIndex > 0 && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center z-20"
+                onClick={() => goTo(activeIndex - 1)}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {activeIndex < photos.length - 1 && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center z-20"
+                onClick={() => goTo(activeIndex + 1)}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </>
+      )}
+
+      {/* Name overlay */}
+      <div className="absolute bottom-0 inset-x-0 p-6 z-10">
+        <h1 className="text-3xl font-display text-white leading-tight">
+          {name}, {age}
+        </h1>
+        <div className="flex items-center gap-2 mt-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span className="text-white/60 text-sm">{neighborhood}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const NEIGHBORHOODS = [
   "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
@@ -158,86 +319,17 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-sm mx-auto pb-28">
-      {/* Hero photo with swipeable dots */}
+      {/* Hero photo carousel */}
       <div className="relative">
         {validPhotos.length > 0 ? (
-          <div className="relative aspect-[3/4] overflow-hidden">
-            <Image
-              src={validPhotos[activePhotoIndex] || validPhotos[0]}
-              alt={profile.displayName}
-              fill
-              className="object-cover"
-              priority
-            />
-            {/* Gradient overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent" />
-
-            {/* Photo dots */}
-            {validPhotos.length > 1 && (
-              <div className="absolute top-[max(1rem,env(safe-area-inset-top,1rem))] inset-x-0 flex justify-center gap-1.5 px-4">
-                {validPhotos.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActivePhotoIndex(i)}
-                    className={`h-0.5 flex-1 rounded-full transition-all ${
-                      i === activePhotoIndex ? "bg-white" : "bg-white/30"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Arrow navigation */}
-            {validPhotos.length > 1 && (
-              <>
-                {/* Left arrow */}
-                {activePhotoIndex > 0 && (
-                  <button
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-ink/30 backdrop-blur-sm flex items-center justify-center z-10 hover:bg-ink/50 transition-colors"
-                    onClick={() => setActivePhotoIndex(activePhotoIndex - 1)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                  </button>
-                )}
-                {/* Right arrow */}
-                {activePhotoIndex < validPhotos.length - 1 && (
-                  <button
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-ink/30 backdrop-blur-sm flex items-center justify-center z-10 hover:bg-ink/50 transition-colors"
-                    onClick={() => setActivePhotoIndex(activePhotoIndex + 1)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  </button>
-                )}
-                {/* Tap zones (invisible, for mobile) */}
-                <button
-                  className="absolute inset-y-0 left-0 w-1/3"
-                  onClick={() => setActivePhotoIndex(Math.max(0, activePhotoIndex - 1))}
-                />
-                <button
-                  className="absolute inset-y-0 right-0 w-1/3"
-                  onClick={() => setActivePhotoIndex(Math.min(validPhotos.length - 1, activePhotoIndex + 1))}
-                />
-              </>
-            )}
-
-            {/* Name overlay */}
-            <div className="absolute bottom-0 inset-x-0 p-6">
-              <h1 className="text-3xl font-display text-white leading-tight">
-                {profile.displayName}, {profile.age}
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span className="text-white/60 text-sm">{profile.neighborhood}</span>
-              </div>
-            </div>
-          </div>
+          <PhotoCarousel
+            photos={validPhotos}
+            activeIndex={activePhotoIndex}
+            onChangeIndex={setActivePhotoIndex}
+            name={profile.displayName}
+            age={profile.age}
+            neighborhood={profile.neighborhood}
+          />
         ) : (
           <div className="aspect-[3/4] bg-stripe-white flex items-center justify-center">
             <button
