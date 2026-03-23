@@ -184,9 +184,32 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Tap zones for photo navigation */}
+            {/* Arrow navigation */}
             {validPhotos.length > 1 && (
               <>
+                {/* Left arrow */}
+                {activePhotoIndex > 0 && (
+                  <button
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-ink/30 backdrop-blur-sm flex items-center justify-center z-10 hover:bg-ink/50 transition-colors"
+                    onClick={() => setActivePhotoIndex(activePhotoIndex - 1)}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                )}
+                {/* Right arrow */}
+                {activePhotoIndex < validPhotos.length - 1 && (
+                  <button
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-ink/30 backdrop-blur-sm flex items-center justify-center z-10 hover:bg-ink/50 transition-colors"
+                    onClick={() => setActivePhotoIndex(activePhotoIndex + 1)}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </button>
+                )}
+                {/* Tap zones (invisible, for mobile) */}
                 <button
                   className="absolute inset-y-0 left-0 w-1/3"
                   onClick={() => setActivePhotoIndex(Math.max(0, activePhotoIndex - 1))}
@@ -300,7 +323,7 @@ export default function ProfilePage() {
       )}
 
       {/* Stats row — like Instagram */}
-      <div className="flex items-center justify-around py-4 bg-white border-b border-cream">
+      <div className="flex items-center justify-around py-4 bg-cream/50 border-b border-wine/5">
         <div className="text-center">
           <p className="text-lg font-display text-ink">{validPhotos.length}</p>
           <p className="text-[10px] text-gray uppercase tracking-wider">Photos</p>
@@ -318,7 +341,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Bio section */}
-      <section className="px-5 py-5 bg-white border-b border-cream">
+      <section className="px-5 py-5 bg-cream/50 border-b border-wine/5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs text-gray uppercase tracking-wider font-medium">About</h2>
           {editing === "bio" ? (
@@ -326,7 +349,7 @@ export default function ProfilePage() {
               {saving ? "Saving..." : "Save"}
             </button>
           ) : (
-            <button onClick={() => setEditing("bio")} className="text-xs text-gray-light">
+            <button onClick={() => setEditing("bio")} className="text-xs text-wine font-medium">
               Edit
             </button>
           )}
@@ -350,7 +373,7 @@ export default function ProfilePage() {
       </section>
 
       {/* Coffee order */}
-      <section className="px-5 py-5 bg-white border-b border-cream">
+      <section className="px-5 py-5 bg-cream/50 border-b border-wine/5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs text-gray uppercase tracking-wider font-medium">Coffee Order</h2>
           {editing === "coffee" ? (
@@ -358,7 +381,7 @@ export default function ProfilePage() {
               {saving ? "Saving..." : "Save"}
             </button>
           ) : (
-            <button onClick={() => setEditing("coffee")} className="text-xs text-gray-light">
+            <button onClick={() => setEditing("coffee")} className="text-xs text-wine font-medium">
               Edit
             </button>
           )}
@@ -379,7 +402,7 @@ export default function ProfilePage() {
       </section>
 
       {/* Prompts */}
-      <section className="px-5 py-5 bg-white border-b border-cream">
+      <section className="px-5 py-5 bg-cream/50 border-b border-wine/5">
         <h2 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Prompts</h2>
         <PromptPicker
           existingPrompts={prompts}
@@ -392,7 +415,7 @@ export default function ProfilePage() {
       </section>
 
       {/* Profile song */}
-      <section className="px-5 py-5 bg-white border-b border-cream">
+      <section className="px-5 py-5 bg-cream/50 border-b border-wine/5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs text-gray uppercase tracking-wider font-medium">My Song</h2>
           {editing === "song" ? (
@@ -400,7 +423,7 @@ export default function ProfilePage() {
               {saving ? "Saving..." : "Save"}
             </button>
           ) : (
-            <button onClick={() => setEditing("song")} className="text-xs text-gray-light">
+            <button onClick={() => setEditing("song")} className="text-xs text-wine font-medium">
               Edit
             </button>
           )}
@@ -430,7 +453,7 @@ export default function ProfilePage() {
       </section>
 
       {/* Interests */}
-      <section className="px-5 py-5 bg-white border-b border-cream">
+      <section className="px-5 py-5 bg-cream/50 border-b border-wine/5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs text-gray uppercase tracking-wider font-medium">Interests</h2>
           {editing === "interests" ? (
@@ -438,7 +461,7 @@ export default function ProfilePage() {
               {saving ? "Saving..." : "Save"}
             </button>
           ) : (
-            <button onClick={() => setEditing("interests")} className="text-xs text-gray-light">
+            <button onClick={() => setEditing("interests")} className="text-xs text-wine font-medium">
               Edit
             </button>
           )}
@@ -474,7 +497,7 @@ export default function ProfilePage() {
       </section>
 
       {/* Details */}
-      <section className="px-5 py-5 bg-white border-b border-cream">
+      <section className="px-5 py-5 bg-cream/50 border-b border-wine/5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xs text-gray uppercase tracking-wider font-medium">Details</h2>
           {editing === "details" ? (
@@ -489,7 +512,7 @@ export default function ProfilePage() {
               {saving ? "Saving..." : "Save"}
             </button>
           ) : (
-            <button onClick={() => setEditing("details")} className="text-xs text-gray-light">
+            <button onClick={() => setEditing("details")} className="text-xs text-wine font-medium">
               Edit
             </button>
           )}
@@ -584,7 +607,7 @@ export default function ProfilePage() {
       </section>
 
       {/* Sign out */}
-      <section className="px-5 py-6 bg-white">
+      <section className="px-5 py-6 bg-cream/50">
         <button
           onClick={handleSignOut}
           className="w-full text-center text-sm text-gray-light hover:text-gray transition-colors"
