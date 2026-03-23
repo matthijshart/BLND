@@ -56,14 +56,30 @@ export default function OnboardingPage() {
   }
 
   function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
     const newPhotos = [...photos];
-    newPhotos[activeSlot] = file;
-    setPhotos(newPhotos);
     const newPreviews = [...previews];
-    newPreviews[activeSlot] = URL.createObjectURL(file);
+
+    // Find empty slots starting from activeSlot
+    let slotIndex = activeSlot;
+    for (let i = 0; i < files.length && slotIndex < 6; i++) {
+      // Find next empty slot
+      while (slotIndex < 6 && newPhotos[slotIndex] !== null) {
+        slotIndex++;
+      }
+      if (slotIndex >= 6) break;
+
+      newPhotos[slotIndex] = files[i];
+      newPreviews[slotIndex] = URL.createObjectURL(files[i]);
+      slotIndex++;
+    }
+
+    setPhotos(newPhotos);
     setPreviews(newPreviews);
+    // Reset input so same files can be selected again
+    e.target.value = "";
   }
 
   function removePhoto(index: number) {
@@ -319,6 +335,7 @@ export default function OnboardingPage() {
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={handlePhotoSelect}
               className="hidden"
             />

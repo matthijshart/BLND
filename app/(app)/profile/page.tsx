@@ -69,20 +69,34 @@ export default function ProfilePage() {
   }
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !firebaseUser) return;
-    setUploading(activeSlot);
-    try {
-      const url = await uploadUserPhoto(firebaseUser.uid, file, activeSlot);
-      const newPhotos = [...photos];
-      newPhotos[activeSlot] = url;
-      setPhotos(newPhotos);
-      await updateUser(firebaseUser.uid, { photos: newPhotos });
-      await refreshProfile();
-    } catch (err) {
-      console.error("Upload error:", err);
+    const files = e.target.files;
+    if (!files || files.length === 0 || !firebaseUser) return;
+
+    const newPhotos = [...photos];
+    let slotIndex = activeSlot;
+
+    for (let i = 0; i < files.length && slotIndex < 6; i++) {
+      // Find next empty slot
+      while (slotIndex < 6 && newPhotos[slotIndex]) {
+        slotIndex++;
+      }
+      if (slotIndex >= 6) break;
+
+      setUploading(slotIndex);
+      try {
+        const url = await uploadUserPhoto(firebaseUser.uid, files[i], slotIndex);
+        newPhotos[slotIndex] = url;
+        setPhotos([...newPhotos]);
+      } catch (err) {
+        console.error("Upload error:", err);
+      }
+      slotIndex++;
     }
+
     setUploading(null);
+    await updateUser(firebaseUser.uid, { photos: newPhotos.filter(Boolean) });
+    await refreshProfile();
+    e.target.value = "";
   }
 
   async function removePhoto(index: number) {
@@ -221,6 +235,7 @@ export default function ProfilePage() {
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            multiple
             onChange={handlePhotoSelect}
             className="hidden"
           />
