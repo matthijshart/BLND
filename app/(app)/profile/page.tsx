@@ -9,6 +9,7 @@ import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
+import { ProfileCard } from "@/components/profiles/ProfileCard";
 
 const NEIGHBORHOODS = [
   "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
@@ -44,6 +45,7 @@ export default function ProfilePage() {
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [uploading, setUploading] = useState<number | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
@@ -340,6 +342,43 @@ export default function ProfilePage() {
           <p className="text-[10px] text-gray uppercase tracking-wider">Looking for</p>
         </div>
       </div>
+
+      {/* Preview your profile */}
+      <div className="px-5 py-4 bg-cream/50 border-b border-wine/5">
+        <button
+          onClick={() => setShowPreview(true)}
+          className="w-full py-3 rounded-full border border-wine/20 text-wine text-sm font-medium hover:bg-wine/5 transition-colors"
+        >
+          Preview your profile
+        </button>
+      </div>
+
+      {/* Profile preview modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 bg-cream overflow-y-auto">
+          <div className="max-w-sm mx-auto pb-8">
+            {/* Close bar */}
+            <div className="sticky top-0 z-10 bg-cream/90 backdrop-blur-sm px-5 py-4 flex items-center justify-between">
+              <h2 className="text-sm font-medium text-ink">Profile preview</h2>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="text-xs text-wine font-medium"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="px-4">
+              <ProfileCard
+                profile={profile}
+                onLike={() => setShowPreview(false)}
+                onPass={() => setShowPreview(false)}
+                previewMode
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bio section */}
       <section className="px-5 py-5 bg-cream/50 border-b border-wine/5">

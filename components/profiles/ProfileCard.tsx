@@ -5,16 +5,27 @@ import { motion, type PanInfo } from "framer-motion";
 import Image from "next/image";
 import type { User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
+import { calculateVibeMatch } from "@/lib/vibe";
+import { getCoffeeCompatibility } from "@/lib/coffee-compat";
 
 interface ProfileCardProps {
   profile: User;
+  currentUser?: User;
   onLike: () => void;
   onPass: () => void;
+  /** When true, hides swipe/action buttons (used for preview mode) */
+  previewMode?: boolean;
 }
 
-export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
+export function ProfileCard({ profile, currentUser, onLike, onPass, previewMode }: ProfileCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
+
+  const vibeMatch = currentUser ? calculateVibeMatch(currentUser, profile) : null;
+  const coffeeCompat =
+    currentUser?.coffeeOrder && profile.coffeeOrder
+      ? getCoffeeCompatibility(currentUser.coffeeOrder, profile.coffeeOrder)
+      : null;
 
   function handleDragEnd(_: unknown, info: PanInfo) {
     if (info.offset.x > 100) {
@@ -53,6 +64,13 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
             >
               x
             </button>
+
+            {/* Vibe match badge on expanded photo */}
+            {vibeMatch !== null && (
+              <div className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-wine/90 backdrop-blur-sm text-cream text-xs font-medium">
+                {vibeMatch}% vibe
+              </div>
+            )}
           </div>
 
           {/* More photos */}
@@ -83,6 +101,13 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
                   <p className="text-[10px] text-gray uppercase tracking-wider">Their order</p>
                   <p className="text-ink text-[15px] font-medium">{profile.coffeeOrder}</p>
                 </div>
+              </div>
+            )}
+
+            {/* Coffee compatibility badge */}
+            {coffeeCompat && (
+              <div className="mt-2 px-4 py-2 rounded-xl bg-wine/10 text-wine text-xs font-medium italic">
+                {coffeeCompat}
               </div>
             )}
 
@@ -130,23 +155,25 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
             )}
           </div>
 
-          {/* Fixed action buttons */}
-          <div className="fixed bottom-0 inset-x-0 bg-cream/90 backdrop-blur-sm pb-8 pt-4 px-6">
-            <div className="flex justify-center gap-6 max-w-sm mx-auto">
-              <button
-                onClick={() => { setExpanded(false); onPass(); }}
-                className="w-16 h-16 rounded-full bg-stripe-white text-gray flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
-              >
-                ✕
-              </button>
-              <button
-                onClick={() => { setExpanded(false); onLike(); }}
-                className="w-16 h-16 rounded-full bg-coral text-white flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
-              >
-                ☕
-              </button>
+          {/* Fixed action buttons — hidden in preview mode */}
+          {!previewMode && (
+            <div className="fixed bottom-0 inset-x-0 bg-cream/90 backdrop-blur-sm pb-8 pt-4 px-6">
+              <div className="flex justify-center gap-6 max-w-sm mx-auto">
+                <button
+                  onClick={() => { setExpanded(false); onPass(); }}
+                  className="w-16 h-16 rounded-full bg-stripe-white text-gray flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
+                >
+                  ✕
+                </button>
+                <button
+                  onClick={() => { setExpanded(false); onLike(); }}
+                  className="w-16 h-16 rounded-full bg-coral text-white flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
+                >
+                  ☕
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </motion.div>
     );
@@ -155,7 +182,7 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
   return (
     <div className="relative">
       <motion.div
-        drag="x"
+        drag={previewMode ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
@@ -182,6 +209,13 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
           </div>
         )}
 
+        {/* Vibe match badge on compact card */}
+        {vibeMatch !== null && (
+          <div className="absolute top-4 left-4 px-2.5 py-1 rounded-full bg-wine/90 backdrop-blur-sm text-cream text-xs font-medium">
+            {vibeMatch}% vibe
+          </div>
+        )}
+
         {/* Gradient overlay */}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent" />
 
@@ -200,21 +234,23 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
         </button>
       </motion.div>
 
-      {/* Action buttons */}
-      <div className="flex justify-center gap-6 mt-6">
-        <button
-          onClick={onPass}
-          className="w-16 h-16 rounded-full bg-stripe-white text-gray flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
-        >
-          ✕
-        </button>
-        <button
-          onClick={onLike}
-          className="w-16 h-16 rounded-full bg-coral text-white flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
-        >
-          ☕
-        </button>
-      </div>
+      {/* Action buttons — hidden in preview mode */}
+      {!previewMode && (
+        <div className="flex justify-center gap-6 mt-6">
+          <button
+            onClick={onPass}
+            className="w-16 h-16 rounded-full bg-stripe-white text-gray flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
+          >
+            ✕
+          </button>
+          <button
+            onClick={onLike}
+            className="w-16 h-16 rounded-full bg-coral text-white flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-shadow"
+          >
+            ☕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

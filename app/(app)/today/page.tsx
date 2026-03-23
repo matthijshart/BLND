@@ -9,7 +9,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TodayPage() {
-  const { firebaseUser } = useAuthContext();
+  const { firebaseUser, profile: currentUser } = useAuthContext();
   const { currentProfile, currentIndex, total, isComplete, loading, handleAction } =
     useDailyProfiles();
   const [matchedUid, setMatchedUid] = useState<string | null>(null);
@@ -69,6 +69,7 @@ export default function TodayPage() {
         >
           <ProfileCard
             profile={currentProfile}
+            currentUser={currentUser ?? undefined}
             onLike={onLike}
             onPass={onPass}
           />
