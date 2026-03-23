@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
@@ -61,6 +62,28 @@ export default function LandingPage() {
           <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-wine leading-[0.95] mt-2 text-center">
             More sipping.
           </h2>
+        </div>
+      </section>
+
+      {/* ─── PHOTOS: Editorial spread ─── */}
+      <section className="bg-cream">
+        <div className="grid grid-cols-2 gap-0">
+          <div className="relative aspect-[3/4]">
+            <Image
+              src="/images/sipping.png"
+              alt="Pouring coffee"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="relative aspect-[3/4]">
+            <Image
+              src="/images/_.jpeg"
+              alt="Couple at a café"
+              fill
+              className="object-cover"
+            />
+          </div>
         </div>
       </section>
 
@@ -202,7 +225,7 @@ export default function LandingPage() {
               />
               <button
                 type="submit"
-                className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-white transition-colors"
+                className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors"
               >
                 Join the waitlist — 2 months free
               </button>
