@@ -174,7 +174,7 @@ export default function ProfilePage() {
 
             {/* Photo dots */}
             {validPhotos.length > 1 && (
-              <div className="absolute top-4 inset-x-0 flex justify-center gap-1.5 px-4">
+              <div className="absolute top-[max(1rem,env(safe-area-inset-top,1rem))] inset-x-0 flex justify-center gap-1.5 px-4">
                 {validPhotos.map((_, i) => (
                   <button
                     key={i}
@@ -257,7 +257,7 @@ export default function ProfilePage() {
         {/* Edit photos button */}
         <button
           onClick={() => setEditing(editing === "photos" ? null : "photos")}
-          className="absolute top-4 right-4 bg-ink/40 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-medium z-10"
+          className="absolute top-[max(1rem,env(safe-area-inset-top,1rem))] right-4 bg-ink/40 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-medium z-10"
         >
           {editing === "photos" ? "Done" : "Edit photos"}
         </button>

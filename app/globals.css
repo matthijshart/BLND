@@ -20,6 +20,12 @@
   --font-mono: var(--font-jetbrains-mono);
 }
 
+html {
+  /* Support safe areas on notched iPhones in PWA mode */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 body {
   background: var(--color-cream);
   color: var(--color-ink);

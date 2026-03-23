@@ -82,8 +82,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col min-h-dvh bg-cream">
       <main className="flex-1 pb-20">{children}</main>
 
-      <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-stripe-white">
-        <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
+      <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-stripe-white pb-[env(safe-area-inset-bottom)]">
+        <div className="flex justify-around items-center h-14 max-w-lg mx-auto">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
