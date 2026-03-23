@@ -20,9 +20,15 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BLEND — Where dates begin.",
+  title: "BLEND — Casual coffee dates in Amsterdam.",
   description:
-    "Skip the chat. Meet for real. BLEND picks the spot, you bring the charm.",
+    "No swiping, no endless chat. Just coffee, at a spot we pick. 60 minutes, daytime, face to face.",
+  openGraph: {
+    title: "BLEND — Casual coffee dates in Amsterdam.",
+    description: "No swiping, no endless chat. Just coffee, at a spot we pick. 60 minutes, daytime, face to face.",
+    siteName: "BLEND",
+    type: "website",
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
