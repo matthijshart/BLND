@@ -119,7 +119,7 @@ export default function LandingPage() {
             </p>
             <p>
               BLEND does one thing: gets two people to sit down for coffee.
-              30 minutes, daytime, at a café we pick. That&apos;s it.
+              60 minutes, daytime, at a café we pick. That&apos;s it.
             </p>
           </div>
         </div>
@@ -158,7 +158,7 @@ export default function LandingPage() {
               {
                 num: "05",
                 title: "Show up",
-                desc: "30 minutes. One coffee. See if there's a vibe. Done.",
+                desc: "60 minutes. One coffee. See if there's a vibe. Done.",
               },
             ].map((step) => (
               <div key={step.num} className="flex gap-6 items-baseline">
