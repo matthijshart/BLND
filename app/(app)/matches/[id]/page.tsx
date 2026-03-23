@@ -159,6 +159,44 @@ export default function MatchDetailPage() {
       {/* Bio */}
       <div className="px-6 mt-6">
         <p className="text-ink-mid leading-relaxed">{otherUser.bio}</p>
+
+        {/* Coffee order */}
+        {otherUser.coffeeOrder && (
+          <div className="mt-4 flex items-center gap-3 bg-cream rounded-xl px-4 py-3">
+            <span className="text-xl">☕</span>
+            <div>
+              <p className="text-[10px] text-gray uppercase tracking-wider">Their order</p>
+              <p className="text-ink text-[15px] font-medium">{otherUser.coffeeOrder}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Prompts */}
+        {otherUser.prompts && otherUser.prompts.length > 0 && (
+          <div className="mt-4 space-y-2">
+            {otherUser.prompts.map((p, i) => (
+              <div key={i} className="bg-wine/5 rounded-xl p-4">
+                <p className="text-wine text-xs font-medium italic mb-1">{p.question}</p>
+                <p className="text-ink text-[15px]">{p.answer}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Profile song — autoplay */}
+        {otherUser.profileSong && (
+          <div className="mt-4">
+            <p className="text-xs text-gray uppercase tracking-wider font-medium mb-2">Their song</p>
+            <iframe
+              src={`https://open.spotify.com/embed/track/${otherUser.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0&autoplay=1`}
+              width="100%"
+              height="152"
+              allow="autoplay; encrypted-media"
+              className="rounded-xl border-0"
+            />
+          </div>
+        )}
+
         {otherUser.interests && otherUser.interests.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
             {otherUser.interests.map((interest) => (

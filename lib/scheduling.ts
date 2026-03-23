@@ -36,7 +36,7 @@ export function pickBestSlot(overlapping: string[]): string | null {
  * Looks ahead up to 14 days to find at least 2 weekends.
  */
 export function generateAvailableSlots(fromDate: Date = new Date()): string[] {
-  const hours = [9, 10, 11, 13, 14, 15];
+  const hours = [9, 10, 11, 12, 13, 14, 15];
   const weekendDays = [5, 6, 0]; // Friday, Saturday, Sunday
   const slots: string[] = [];
 

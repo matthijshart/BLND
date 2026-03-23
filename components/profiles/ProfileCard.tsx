@@ -107,15 +107,15 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
               </div>
             )}
 
-            {/* Profile song */}
+            {/* Profile song — autoplay when viewing someone's profile */}
             {profile.profileSong && (
               <div className="mt-4">
                 <p className="text-xs text-gray uppercase tracking-wider font-medium mb-2">Their song</p>
                 <iframe
-                  src={`https://open.spotify.com/embed/track/${profile.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0`}
+                  src={`https://open.spotify.com/embed/track/${profile.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0&autoplay=1`}
                   width="100%"
-                  height="80"
-                  allow="encrypted-media"
+                  height="152"
+                  allow="autoplay; encrypted-media"
                   className="rounded-xl border-0"
                 />
               </div>
