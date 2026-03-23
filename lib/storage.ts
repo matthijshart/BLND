@@ -7,8 +7,10 @@ import { storage } from "./firebase";
  */
 async function compressImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    const img = document.createElement("img");
+    img.crossOrigin = "anonymous";
     img.onload = () => {
+      URL.revokeObjectURL(img.src);
       const canvas = document.createElement("canvas");
       const MAX_SIZE = 1200;
 
@@ -38,7 +40,10 @@ async function compressImage(file: File): Promise<Blob> {
         0.8
       );
     };
-    img.onerror = () => reject(new Error("Failed to load image"));
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src);
+      reject(new Error("Failed to load image"));
+    };
     img.src = URL.createObjectURL(file);
   });
 }
@@ -48,18 +53,23 @@ export async function uploadUserPhoto(
   file: File,
   index: number
 ): Promise<string> {
+  const storageRef = ref(storage, `users/${uid}/photos/${index}.jpg`);
+
   try {
-    // Compress before uploading
+    // Try compressed upload first
     const compressed = await compressImage(file);
-    const storageRef = ref(storage, `users/${uid}/photos/${index}.jpg`);
     await uploadBytes(storageRef, compressed, {
       contentType: "image/jpeg",
     });
-    return getDownloadURL(storageRef);
-  } catch (err) {
-    console.error("Upload failed:", err);
-    throw err;
+  } catch (compressErr) {
+    console.warn("Compression failed, uploading original:", compressErr);
+    // Fallback: upload original file
+    await uploadBytes(storageRef, file, {
+      contentType: file.type,
+    });
   }
+
+  return getDownloadURL(storageRef);
 }
 
 export async function deleteUserPhoto(
@@ -70,8 +80,6 @@ export async function deleteUserPhoto(
   try {
     await deleteObject(storageRef);
   } catch {
-    // Try without .jpg extension (old uploads)
-    const oldRef = ref(storage, `users/${uid}/photos/${index}`);
-    await deleteObject(oldRef);
+    // Ignore if file doesn't exist
   }
 }
