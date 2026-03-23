@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthContext } from "@/components/providers/AuthProvider";
+import { useEffect } from "react";
 
 const navItems = [
   { href: "/today", label: "Today", icon: "☕" },
@@ -12,6 +14,27 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { firebaseUser, hasProfile, loading } = useAuthContext();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!firebaseUser) {
+      router.push("/login");
+    } else if (!hasProfile) {
+      router.push("/onboarding");
+    }
+  }, [firebaseUser, hasProfile, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-dvh bg-cream flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full bg-wine/20 animate-pulse" />
+      </div>
+    );
+  }
+
+  if (!firebaseUser || !hasProfile) return null;
 
   return (
     <div className="flex flex-col min-h-dvh bg-cream">

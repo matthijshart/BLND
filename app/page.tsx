@@ -2,16 +2,27 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { addToWaitlist } from "@/lib/db";
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email) return;
-    // TODO: write to Firebase waitlist
-    setSubmitted(true);
+    if (!email || isSubmitting) return;
+    setIsSubmitting(true);
+    setError("");
+    try {
+      await addToWaitlist(email, "Amsterdam");
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -105,7 +116,7 @@ export default function LandingPage() {
               Alcohol-fueled evenings where nobody is really themselves.
             </p>
             <p>
-              Blend does one thing: gets two people to sit down for coffee.
+              BLEND does one thing: gets two people to sit down for coffee.
               30 minutes, daytime, at a café we pick. That&apos;s it.
             </p>
           </div>
@@ -225,10 +236,14 @@ export default function LandingPage() {
               />
               <button
                 type="submit"
-                className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors"
+                disabled={isSubmitting}
+                className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
               >
-                Join the waitlist — 2 months free
+                {isSubmitting ? "Joining..." : "Join the waitlist — 2 months free"}
               </button>
+              {error && (
+                <p className="text-coral text-sm mt-2">{error}</p>
+              )}
             </form>
           )}
         </div>
