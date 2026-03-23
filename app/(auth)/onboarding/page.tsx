@@ -102,7 +102,7 @@ export default function OnboardingPage() {
   }
 
   function canProceedStep2() {
-    return bio && neighborhood && interests.length >= 3 && prompts.length >= 3;
+    return neighborhood && interests.length >= 3 && prompts.length >= 3;
   }
 
   function canFinish() {

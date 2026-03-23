@@ -30,16 +30,22 @@ export default function MatchesPage() {
     return (
       <div className="px-4 pt-8">
         <h1 className="text-2xl font-display text-ink mb-6">Matches</h1>
-        <div className="flex flex-col items-center justify-center text-center py-20">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-3 h-3 rounded-full bg-wine/30" />
-            <div className="w-px h-6 bg-ink/10" />
-            <div className="w-3 h-3 rounded-full bg-wine/30" />
+        <div className="flex flex-col items-center justify-center text-center py-16 px-6">
+          <div className="w-20 h-20 rounded-full bg-wine/10 flex items-center justify-center mb-6">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-wine">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
           </div>
           <h2 className="text-2xl font-display text-ink">No matches yet</h2>
-          <p className="text-gray mt-2 max-w-xs">
-            Your daily profiles refresh tomorrow. Keep showing up — good things take time.
+          <p className="text-gray mt-3 max-w-[260px] leading-relaxed">
+            Your daily profiles drop at 11:00. Like someone, they like you back, and we&apos;ll set up a coffee date. Simple as that.
           </p>
+          <Link
+            href="/today"
+            className="mt-6 px-6 py-3 rounded-full bg-wine text-cream font-medium text-sm hover:bg-burgundy transition-colors"
+          >
+            Browse today&apos;s profiles
+          </Link>
         </div>
       </div>
     );
@@ -55,7 +61,7 @@ export default function MatchesPage() {
             href={`/matches/${match.id}`}
             className="flex items-center gap-4 p-4 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow"
           >
-            <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0">
+            <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
               <Image
                 src={match.otherUser.photos[0] || "/images/sipping.png"}
                 alt={match.otherUser.displayName}
@@ -72,16 +78,20 @@ export default function MatchesPage() {
             <span
               className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${
                 match.status === "scheduling"
-                  ? "bg-coral/10 text-coral"
+                  ? "bg-wine/10 text-wine"
                   : match.status === "date_confirmed"
                   ? "bg-blue/10 text-blue"
+                  : match.status === "date_proposed"
+                  ? "bg-coral/10 text-coral"
                   : "bg-stripe-white text-gray"
               }`}
             >
               {match.status === "scheduling"
                 ? "Plan date"
+                : match.status === "date_proposed"
+                ? "Confirm date"
                 : match.status === "date_confirmed"
-                ? "Date planned"
+                ? "Date planned ✓"
                 : match.status}
             </span>
           </Link>
