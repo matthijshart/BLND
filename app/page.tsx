@@ -26,7 +26,7 @@ export default function LandingPage() {
             Amsterdam
           </p>
           <h1 className="text-7xl sm:text-8xl md:text-9xl font-display tracking-tight leading-[0.85]">
-            Blend
+            BLEND
           </h1>
           <p className="mt-6 text-xl sm:text-2xl text-cream/80 max-w-md mx-auto leading-relaxed">
             Skip the chat.<br />
@@ -143,6 +143,33 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── PRICING: Simple, bold ─── */}
+      <section className="bg-cream py-24 sm:py-32 px-6">
+        <div className="max-w-md mx-auto text-center">
+          <p className="font-mono text-xs tracking-[0.3em] uppercase text-gray mb-8">
+            Simple pricing
+          </p>
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-6xl sm:text-7xl font-display text-ink">€8,99</span>
+            <span className="text-xl text-gray">/month</span>
+          </div>
+          <p className="mt-6 text-ink-mid text-lg leading-relaxed">
+            Daily profiles. Matched dates.<br />
+            Café selected for you.
+          </p>
+
+          <div className="w-px h-10 bg-ink/10 mx-auto mt-10" />
+
+          <p className="mt-10 text-2xl sm:text-3xl font-display text-ink leading-snug">
+            Join the waitlist.<br />
+            <span className="text-wine">First 2 months free.</span>
+          </p>
+          <p className="mt-3 text-gray text-sm tracking-wide">
+            No commitment. Cancel anytime.
+          </p>
+        </div>
+      </section>
+
       {/* ─── WAITLIST: Deep red, big CTA ─── */}
       <section className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden">
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-burgundy opacity-25" />
@@ -152,7 +179,7 @@ export default function LandingPage() {
             Where dates<br />begin.
           </h2>
           <p className="mt-4 text-cream/60">
-            Launching in Amsterdam. Be the first to know.
+            Launching in Amsterdam. Join the waitlist and get 2 months free.
           </p>
 
           {submitted ? (
@@ -160,7 +187,7 @@ export default function LandingPage() {
               <div className="w-4 h-4 rounded-full bg-cream mx-auto mb-4" />
               <p className="text-xl font-display">You&apos;re in.</p>
               <p className="text-cream/60 text-sm mt-2">
-                We&apos;ll reach out when it&apos;s your turn.
+                Your first 2 months are on us. We&apos;ll reach out when it&apos;s your turn.
               </p>
             </div>
           ) : (
@@ -177,7 +204,7 @@ export default function LandingPage() {
                 type="submit"
                 className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-white transition-colors"
               >
-                Join the waitlist
+                Join the waitlist — 2 months free
               </button>
             </form>
           )}
@@ -187,7 +214,7 @@ export default function LandingPage() {
       {/* ─── FOOTER: Minimal ─── */}
       <footer className="bg-ink py-8 px-6">
         <div className="max-w-xl mx-auto flex items-center justify-between">
-          <span className="font-display text-cream/80 text-lg">Blend</span>
+          <span className="font-display text-cream/80 text-lg">BLEND</span>
           <span className="text-cream/30 text-xs font-mono">
             Amsterdam, 2026
           </span>
