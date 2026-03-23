@@ -5,6 +5,7 @@ import {
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   type User as FirebaseUser,
 } from "firebase/auth";
 import { auth } from "./firebase";
@@ -25,6 +26,10 @@ export async function signInWithGoogle() {
 
 export async function signOut() {
   return firebaseSignOut(auth);
+}
+
+export async function resetPassword(email: string) {
+  return sendPasswordResetEmail(auth, email);
 }
 
 export function onAuthChange(callback: (user: FirebaseUser | null) => void) {

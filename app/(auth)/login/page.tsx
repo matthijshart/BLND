@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn, signInWithGoogle } from "@/lib/auth";
+import { signIn, signInWithGoogle, resetPassword } from "@/lib/auth";
 import { getUser } from "@/lib/db";
 
 export default function LoginPage() {
@@ -12,6 +12,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [showReset, setShowReset] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +25,24 @@ export default function LoginPage() {
       router.push("/today");
     } catch {
       setError("Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleReset(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) {
+      setError("Enter your email first.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      await resetPassword(email);
+      setResetSent(true);
+    } catch {
+      setError("Could not send reset email. Check your email address.");
     } finally {
       setLoading(false);
     }
@@ -56,36 +76,98 @@ export default function LoginPage() {
           <p className="text-cream/60 mt-2">Welcome back.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            required
-            className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            required
-            className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
-          />
+        {showReset ? (
+          <form onSubmit={handleReset} className="space-y-4">
+            <p className="text-cream/70 text-sm text-center mb-2">
+              Enter your email and we&apos;ll send you a link to reset your password.
+            </p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+              className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+            />
 
-          {error && (
-            <p className="text-coral text-sm text-center">{error}</p>
-          )}
+            {error && (
+              <p className="text-coral text-sm text-center">{error}</p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
+            {resetSent ? (
+              <div className="text-center space-y-3">
+                <p className="text-cream text-sm">
+                  ✓ Reset link sent! Check your inbox.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setShowReset(false); setResetSent(false); }}
+                  className="text-cream/60 text-sm"
+                >
+                  Back to login
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Sending..." : "Send reset link"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowReset(false); setError(""); }}
+                  className="w-full text-cream/60 text-sm mt-2"
+                >
+                  Back to login
+                </button>
+              </>
+            )}
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+              className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+            />
+
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => { setShowReset(true); setError(""); }}
+                className="text-cream/50 text-sm hover:text-cream/70 transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
+
+            {error && (
+              <p className="text-coral text-sm text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
+            >
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
+        )}
 
         <div className="flex items-center gap-3 my-8">
           <div className="flex-1 h-px bg-cream/20" />
