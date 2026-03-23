@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, type PanInfo } from "framer-motion";
 import Image from "next/image";
 import type { User } from "@/types";
+import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 
 interface ProfileCardProps {
   profile: User;
@@ -111,13 +112,7 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
             {profile.profileSong && (
               <div className="mt-4">
                 <p className="text-xs text-gray uppercase tracking-wider font-medium mb-2">Their song</p>
-                <iframe
-                  src={`https://open.spotify.com/embed/track/${profile.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0&autoplay=1`}
-                  width="100%"
-                  height="152"
-                  allow="autoplay; encrypted-media"
-                  className="rounded-xl border-0"
-                />
+                <SpotifyPlayer trackUrl={profile.profileSong} autoplay />
               </div>
             )}
 

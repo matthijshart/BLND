@@ -11,6 +11,7 @@ import { getUser } from "@/lib/db";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { SlotPicker } from "@/components/match/SlotPicker";
 import type { Match, User } from "@/types";
+import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -187,13 +188,7 @@ export default function MatchDetailPage() {
         {otherUser.profileSong && (
           <div className="mt-4">
             <p className="text-xs text-gray uppercase tracking-wider font-medium mb-2">Their song</p>
-            <iframe
-              src={`https://open.spotify.com/embed/track/${otherUser.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0&autoplay=1`}
-              width="100%"
-              height="152"
-              allow="autoplay; encrypted-media"
-              className="rounded-xl border-0"
-            />
+            <SpotifyPlayer trackUrl={otherUser.profileSong} autoplay />
           </div>
         )}
 

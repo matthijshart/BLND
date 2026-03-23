@@ -8,6 +8,7 @@ import { uploadUserPhoto, deleteUserPhoto } from "@/lib/storage";
 import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
+import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 
 const NEIGHBORHOODS = [
   "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
@@ -440,13 +441,7 @@ export default function ProfilePage() {
             <p className="text-gray-light text-[10px] mt-1">open.spotify.com/track/...</p>
           </div>
         ) : profile.profileSong ? (
-          <iframe
-            src={`https://open.spotify.com/embed/track/${profile.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0`}
-            width="100%"
-            height="80"
-            allow="encrypted-media"
-            className="rounded-xl border-0"
-          />
+          <SpotifyPlayer trackUrl={profile.profileSong} />
         ) : (
           <p className="text-gray-light text-[15px] italic">No song yet...</p>
         )}
