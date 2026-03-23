@@ -97,12 +97,6 @@ export const PROFILE_PROMPTS: ProfilePromptConfig[] = [
     options: ["Yes obviously", "Absolutely not"],
   },
   {
-    id: "apartment",
-    question: "Tiny apartment with canal view or spacious place in Nieuw-West?",
-    type: "choice",
-    options: ["Tiny + canal view", "Spacious Nieuw-West"],
-  },
-  {
     id: "borrel",
     question: "Friday borrel or Friday night in?",
     type: "choice",
