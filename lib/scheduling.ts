@@ -31,16 +31,20 @@ export function pickBestSlot(overlapping: string[]): string | null {
 }
 
 /**
- * Generate available daytime slots for the next 7 days.
- * Slots: 9-10, 10-11, 11-12, 13-14, 14-15, 15-16
+ * Generate available daytime slots for upcoming Fri/Sat/Sun only.
+ * Slots: 9:00, 10:00, 11:00, 13:00, 14:00, 15:00
+ * Looks ahead up to 14 days to find at least 2 weekends.
  */
 export function generateAvailableSlots(fromDate: Date = new Date()): string[] {
   const hours = [9, 10, 11, 13, 14, 15];
+  const weekendDays = [5, 6, 0]; // Friday, Saturday, Sunday
   const slots: string[] = [];
 
-  for (let dayOffset = 1; dayOffset <= 7; dayOffset++) {
+  for (let dayOffset = 1; dayOffset <= 14; dayOffset++) {
     const date = new Date(fromDate);
     date.setDate(date.getDate() + dayOffset);
+
+    if (!weekendDays.includes(date.getDay())) continue;
 
     for (const hour of hours) {
       const d = new Date(date);

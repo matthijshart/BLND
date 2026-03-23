@@ -35,6 +35,9 @@ export default function ProfilePage() {
   const [gender, setGender] = useState("");
   const [genderPreference, setGenderPreference] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [profilePrompt, setProfilePrompt] = useState("");
+  const [profileSong, setProfileSong] = useState("");
+  const [coffeeOrder, setCoffeeOrder] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -53,6 +56,9 @@ export default function ProfilePage() {
       setGender(profile.gender || "");
       setGenderPreference(profile.genderPreference || []);
       setPhotos(profile.photos || []);
+      setProfilePrompt(profile.profilePrompt || "");
+      setProfileSong(profile.profileSong || "");
+      setCoffeeOrder(profile.coffeeOrder || "");
     }
   }, [profile]);
 
@@ -340,6 +346,105 @@ export default function ProfilePage() {
         )}
       </section>
 
+      {/* Coffee order */}
+      <section className="px-5 py-5 bg-white border-b border-cream">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs text-gray uppercase tracking-wider font-medium">Coffee Order</h2>
+          {editing === "coffee" ? (
+            <button onClick={() => saveField("coffeeOrder", coffeeOrder)} className="text-xs font-medium text-wine">
+              {saving ? "Saving..." : "Save"}
+            </button>
+          ) : (
+            <button onClick={() => setEditing("coffee")} className="text-xs text-gray-light">
+              Edit
+            </button>
+          )}
+        </div>
+        {editing === "coffee" ? (
+          <input
+            type="text"
+            value={coffeeOrder}
+            onChange={(e) => setCoffeeOrder(e.target.value.slice(0, 50))}
+            placeholder="Oat flat white, espresso, chai latte..."
+            className="w-full px-0 py-0 text-ink text-[15px] bg-transparent border-none focus:outline-none placeholder:text-gray-light"
+          />
+        ) : (
+          <p className="text-ink text-[15px]">
+            {profile.coffeeOrder || <span className="text-gray-light italic">No order yet...</span>}
+          </p>
+        )}
+      </section>
+
+      {/* Profile prompt */}
+      <section className="px-5 py-5 bg-white border-b border-cream">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs text-gray uppercase tracking-wider font-medium">Prompt</h2>
+          {editing === "prompt" ? (
+            <button onClick={() => saveField("profilePrompt", profilePrompt)} className="text-xs font-medium text-wine">
+              {saving ? "Saving..." : "Save"}
+            </button>
+          ) : (
+            <button onClick={() => setEditing("prompt")} className="text-xs text-gray-light">
+              Edit
+            </button>
+          )}
+        </div>
+        <p className="text-wine text-xs font-medium mb-2 italic">
+          The last thing that made you laugh out loud was...
+        </p>
+        {editing === "prompt" ? (
+          <input
+            type="text"
+            value={profilePrompt}
+            onChange={(e) => setProfilePrompt(e.target.value.slice(0, 150))}
+            placeholder="Be honest, be weird"
+            className="w-full px-0 py-0 text-ink text-[15px] bg-transparent border-none focus:outline-none placeholder:text-gray-light"
+          />
+        ) : (
+          <p className="text-ink text-[15px]">
+            {profile.profilePrompt || <span className="text-gray-light italic">Not answered yet...</span>}
+          </p>
+        )}
+      </section>
+
+      {/* Profile song */}
+      <section className="px-5 py-5 bg-white border-b border-cream">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs text-gray uppercase tracking-wider font-medium">My Song</h2>
+          {editing === "song" ? (
+            <button onClick={() => saveField("profileSong", profileSong)} className="text-xs font-medium text-wine">
+              {saving ? "Saving..." : "Save"}
+            </button>
+          ) : (
+            <button onClick={() => setEditing("song")} className="text-xs text-gray-light">
+              Edit
+            </button>
+          )}
+        </div>
+        {editing === "song" ? (
+          <div>
+            <input
+              type="url"
+              value={profileSong}
+              onChange={(e) => setProfileSong(e.target.value)}
+              placeholder="Paste a Spotify song link"
+              className="w-full px-0 py-0 text-ink text-[15px] bg-transparent border-none focus:outline-none placeholder:text-gray-light"
+            />
+            <p className="text-gray-light text-[10px] mt-1">open.spotify.com/track/...</p>
+          </div>
+        ) : profile.profileSong ? (
+          <iframe
+            src={`https://open.spotify.com/embed/track/${profile.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0`}
+            width="100%"
+            height="80"
+            allow="encrypted-media"
+            className="rounded-xl border-0"
+          />
+        ) : (
+          <p className="text-gray-light text-[15px] italic">No song yet...</p>
+        )}
+      </section>
+
       {/* Interests */}
       <section className="px-5 py-5 bg-white border-b border-cream">
         <div className="flex items-center justify-between mb-3">
@@ -440,7 +545,7 @@ export default function ProfilePage() {
             <div>
               <p className="text-[10px] text-gray uppercase tracking-wider mb-1.5">Looking for</p>
               <div className="grid grid-cols-2 gap-1.5">
-                {["Relationship", "Casual", "Friends", "Open to anything"].map((l) => {
+                {["Dating", "Friends", "Open to anything"].map((l) => {
                   const val = l === "Open to anything" ? "open" : l.toLowerCase();
                   return (
                     <button

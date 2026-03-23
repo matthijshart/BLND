@@ -74,6 +74,41 @@ export function ProfileCard({ profile, onLike, onPass }: ProfileCardProps) {
 
             <p className="text-ink-mid mt-4 leading-relaxed">{profile.bio}</p>
 
+            {/* Coffee order */}
+            {profile.coffeeOrder && (
+              <div className="mt-5 flex items-center gap-3 bg-cream rounded-xl px-4 py-3">
+                <span className="text-xl">☕</span>
+                <div>
+                  <p className="text-[10px] text-gray uppercase tracking-wider">Their order</p>
+                  <p className="text-ink text-[15px] font-medium">{profile.coffeeOrder}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Profile prompt */}
+            {profile.profilePrompt && (
+              <div className="mt-5 bg-wine/5 rounded-xl p-4">
+                <p className="text-wine text-xs font-medium italic mb-1">
+                  The last thing that made me laugh out loud was...
+                </p>
+                <p className="text-ink text-[15px]">{profile.profilePrompt}</p>
+              </div>
+            )}
+
+            {/* Profile song */}
+            {profile.profileSong && (
+              <div className="mt-4">
+                <p className="text-xs text-gray uppercase tracking-wider font-medium mb-2">Their song</p>
+                <iframe
+                  src={`https://open.spotify.com/embed/track/${profile.profileSong.split("/track/")[1]?.split("?")[0]}?theme=0`}
+                  width="100%"
+                  height="80"
+                  allow="encrypted-media"
+                  className="rounded-xl border-0"
+                />
+              </div>
+            )}
+
             {profile.interests && profile.interests.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
                 {profile.interests.map((interest) => (

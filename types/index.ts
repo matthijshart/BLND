@@ -8,7 +8,10 @@ export interface User {
   photos: string[]; // Firebase Storage URLs, max 6
   neighborhood: string; // Amsterdam neighborhood
   interests: string[]; // tags: "specialty coffee", "cycling", "art", etc.
-  lookingFor: "relationship" | "casual" | "friends" | "open";
+  lookingFor: "dating" | "friends" | "open";
+  profilePrompt?: string; // answer to a fun question
+  profileSong?: string; // Spotify track URL
+  coffeeOrder?: string; // their go-to coffee order
   gender: string;
   genderPreference: string[];
   ageRange: [number, number];

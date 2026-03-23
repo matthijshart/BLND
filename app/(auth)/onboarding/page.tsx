@@ -35,6 +35,9 @@ export default function OnboardingPage() {
   const [bio, setBio] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
+  const [profilePrompt, setProfilePrompt] = useState("");
+  const [profileSong, setProfileSong] = useState("");
+  const [coffeeOrder, setCoffeeOrder] = useState("");
 
   // Step 3
   const [photos, setPhotos] = useState<(File | null)[]>([null, null, null, null, null, null]);
@@ -125,7 +128,10 @@ export default function OnboardingPage() {
         age: parseInt(age),
         gender,
         genderPreference,
-        lookingFor: lookingFor as "relationship" | "casual" | "friends" | "open",
+        lookingFor: lookingFor as "dating" | "friends" | "open",
+        profilePrompt: profilePrompt || undefined,
+        profileSong: profileSong || undefined,
+        coffeeOrder: coffeeOrder || undefined,
         bio,
         neighborhood,
         interests,
@@ -229,7 +235,7 @@ export default function OnboardingPage() {
             <div>
               <p className="text-cream/60 text-sm mb-2">Looking for</p>
               <div className="grid grid-cols-2 gap-2">
-                {["Relationship", "Casual", "Friends", "Open to anything"].map((l) => {
+                {["Dating", "Friends", "Open to anything"].map((l) => {
                   const val = l === "Open to anything" ? "open" : l.toLowerCase();
                   return (
                     <button
@@ -305,6 +311,45 @@ export default function OnboardingPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Coffee order */}
+            <div>
+              <p className="text-cream/60 text-sm mb-2">Your coffee order</p>
+              <input
+                type="text"
+                value={coffeeOrder}
+                onChange={(e) => setCoffeeOrder(e.target.value.slice(0, 50))}
+                placeholder="Oat flat white, espresso, chai latte..."
+                className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+            </div>
+
+            {/* Profile prompt */}
+            <div>
+              <p className="text-cream/60 text-sm mb-2">
+                The last thing that made you laugh out loud was...
+              </p>
+              <input
+                type="text"
+                value={profilePrompt}
+                onChange={(e) => setProfilePrompt(e.target.value.slice(0, 150))}
+                placeholder="Be honest, be weird"
+                className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+            </div>
+
+            {/* Profile song */}
+            <div>
+              <p className="text-cream/60 text-sm mb-2">Your date soundtrack</p>
+              <input
+                type="url"
+                value={profileSong}
+                onChange={(e) => setProfileSong(e.target.value)}
+                placeholder="Paste a Spotify song link"
+                className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+              <p className="text-cream/30 text-xs mt-1">open.spotify.com/track/...</p>
             </div>
 
             <div className="flex gap-3 mt-4">
