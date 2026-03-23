@@ -7,6 +7,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/lib/db";
 import { useAuthContext } from "@/components/providers/AuthProvider";
+import { MiniChat } from "@/components/date/MiniChat";
 import type { DateRecord, User } from "@/types";
 
 interface DateData extends DateRecord {
@@ -24,6 +25,7 @@ export default function DateDetailPage() {
   const [otherUser, setOtherUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Real-time date subscription
   useEffect(() => {
@@ -219,49 +221,79 @@ export default function DateDetailPage() {
         </div>
       </div>
 
-      {/* Chat status */}
-      <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm">
-        {isChatOpen && !isPast ? (
-          <div className="text-center">
-            <p className="text-ink font-medium mb-1">Chat is open</p>
-            <p className="text-gray text-sm mb-4">
-              Say hi before you meet. Keep it light — logistics only.
-            </p>
+      {/* Chat section */}
+      {isChatOpen && !isPast && chatOpen ? (
+        /* Full chat view */
+        <div className="fixed inset-0 z-50 bg-cream flex flex-col">
+          {/* Chat header with back */}
+          <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-stripe-white">
             <button
-              onClick={() => {/* TODO: open chat */}}
-              className="w-full py-3 rounded-full bg-wine text-cream font-medium hover:bg-burgundy transition-colors"
+              onClick={() => setChatOpen(false)}
+              className="text-gray text-sm shrink-0"
             >
-              Open chat
+              ← Back
             </button>
+            <div className="flex-1 text-center">
+              <p className="font-display text-ink text-sm">
+                {otherUser.displayName}
+              </p>
+            </div>
+            <div className="w-12" /> {/* spacer for centering */}
           </div>
-        ) : isPast ? (
-          <div className="text-center">
-            <p className="text-gray text-sm">
-              Hope it went well! Rating coming soon.
-            </p>
+
+          {/* Chat body */}
+          <div className="flex-1 overflow-hidden">
+            <MiniChat
+              dateId={dateData.id}
+              otherName={otherUser.displayName}
+            />
           </div>
-        ) : (
-          <div className="text-center">
-            <p className="text-gray text-sm">
-              Chat opens 2 hours before your date
-              <br />
-              <span className="text-ink-mid font-medium">
-                {chatOpenAt.toLocaleDateString("en-US", {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })}
-                {" at "}
-                {chatOpenAt.toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: false,
-                })}
-              </span>
-            </p>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* Chat status card */
+        <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm">
+          {isChatOpen && !isPast ? (
+            <div className="text-center">
+              <p className="text-ink font-medium mb-1">Chat is open</p>
+              <p className="text-gray text-sm mb-4">
+                Say hi before you meet. Keep it light — logistics only.
+              </p>
+              <button
+                onClick={() => setChatOpen(true)}
+                className="w-full py-3 rounded-full bg-wine text-cream font-medium hover:bg-burgundy transition-colors"
+              >
+                Open chat
+              </button>
+            </div>
+          ) : isPast ? (
+            <div className="text-center">
+              <p className="text-gray text-sm">
+                Hope it went well! Rating coming soon.
+              </p>
+            </div>
+          ) : (
+            <div className="text-center">
+              <p className="text-gray text-sm">
+                Chat opens 2 hours before your date
+                <br />
+                <span className="text-ink-mid font-medium">
+                  {chatOpenAt.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {" at "}
+                  {chatOpenAt.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+                </span>
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
