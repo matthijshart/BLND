@@ -485,7 +485,7 @@ export default function ProfilePage() {
         ) : (
           <div className="flex flex-wrap gap-1.5">
             {(profile.interests || []).map((i) => (
-              <span key={i} className="px-3 py-1 rounded-full bg-cream text-ink-mid text-xs">
+              <span key={i} className="px-3 py-1 rounded-full bg-wine/10 text-wine text-xs font-medium">
                 {i}
               </span>
             ))}
