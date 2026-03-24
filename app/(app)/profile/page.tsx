@@ -344,17 +344,39 @@ export default function ProfilePage() {
   // ─── VIEW MODE (default) — looks like how others see you ───
   return (
     <div className="max-w-sm mx-auto pb-28">
-      {/* Photo hero — fullscreen, edge-to-edge */}
+      {/* Photo hero — fullscreen, swipeable */}
       <div className="relative aspect-[4/5] overflow-hidden">
         {validPhotos.length > 0 ? (
           <>
-            <Image
-              src={validPhotos[photoIndex]}
-              alt={profile.displayName}
-              fill
-              className="object-cover"
-              priority
-            />
+            <AnimatePresence initial={false} mode="popLayout" custom={photoIndex}>
+              <motion.div
+                key={photoIndex}
+                initial={{ opacity: 0, x: 80 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -80 }}
+                transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.12}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x < -50 || info.velocity.x < -300) {
+                    setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1));
+                  } else if (info.offset.x > 50 || info.velocity.x > 300) {
+                    setPhotoIndex(Math.max(0, photoIndex - 1));
+                  }
+                }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={validPhotos[photoIndex]}
+                  alt={profile.displayName}
+                  fill
+                  className="object-cover pointer-events-none select-none"
+                  priority
+                  draggable={false}
+                />
+              </motion.div>
+            </AnimatePresence>
 
             {/* Photo progress bars */}
             {validPhotos.length > 1 && (
@@ -379,7 +401,7 @@ export default function ProfilePage() {
             <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent z-10 pointer-events-none" />
 
             {/* Name overlay */}
-            <div className="absolute bottom-0 inset-x-0 p-6 z-10">
+            <div className="absolute bottom-0 inset-x-0 p-6 z-10 pointer-events-none">
               <h1 className="text-3xl font-display text-white">{profile.displayName}, {profile.age}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
