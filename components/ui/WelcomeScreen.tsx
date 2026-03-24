@@ -106,7 +106,7 @@ export function WelcomeScreen() {
               {[
                 { num: "01", text: "Every day at 11:00, you get a fresh set of profiles." },
                 { num: "02", text: "Like someone? If they like you back — it's a blend." },
-                { num: "03", text: "We pick a café. You both show up. 60 minutes." },
+                { num: "03", text: "We pick the spot. You both show up. 60 minutes." },
               ].map((item, i) => (
                 <motion.div
                   key={i}
