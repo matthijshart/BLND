@@ -107,6 +107,24 @@ export default function MatchDetailPage() {
     );
   }
 
+  // Compute overlaps
+  const sharedInterests = new Set(
+    (profile?.interests || []).filter((i: string) => (otherUser?.interests || []).includes(i))
+  );
+  const myPromptMap = new Map(
+    (profile?.prompts || []).map((p: { question: string; answer: string }) => [p.question, p.answer])
+  );
+  const sharedQuestions = new Set<string>();
+  const sameAnswers = new Set<string>();
+  for (const p of otherUser?.prompts || []) {
+    if (myPromptMap.has(p.question)) {
+      sharedQuestions.add(p.question);
+      if (myPromptMap.get(p.question) === p.answer) sameAnswers.add(p.question);
+    }
+  }
+  const sameCoffee = !!(profile?.coffeeOrder && otherUser?.coffeeOrder &&
+    profile.coffeeOrder.toLowerCase() === otherUser.coffeeOrder.toLowerCase());
+
   const myAvailability = firebaseUser
     ? match.availability?.[firebaseUser.uid]
     : null;
@@ -164,24 +182,39 @@ export default function MatchDetailPage() {
 
         {/* Coffee order */}
         {otherUser.coffeeOrder && (
-          <div className="mt-4 flex items-center gap-3 bg-cream rounded-xl px-4 py-3">
+          <div className={`mt-4 flex items-center gap-3 rounded-xl px-4 py-3 ${sameCoffee ? "bg-wine/10 border border-wine/20" : "bg-cream"}`}>
             <span className="text-xl">☕</span>
-            <div>
-              <p className="text-[10px] text-gray uppercase tracking-wider">Their order</p>
+            <div className="flex-1">
+              <p className="text-[10px] text-gray uppercase tracking-wider">Go-to coffee</p>
               <p className="text-ink text-[15px] font-medium">{otherUser.coffeeOrder}</p>
             </div>
+            {sameCoffee && (
+              <span className="text-[10px] text-wine font-medium bg-wine/15 px-2 py-0.5 rounded-full">Same!</span>
+            )}
           </div>
         )}
 
-        {/* Prompts */}
+        {/* Prompts — with overlap highlights */}
         {otherUser.prompts && otherUser.prompts.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {otherUser.prompts.map((p, i) => (
-              <div key={i} className="bg-wine/5 rounded-xl p-4">
-                <p className="text-wine text-xs font-medium italic mb-1">{p.question}</p>
-                <p className="text-ink text-[15px]">{p.answer}</p>
-              </div>
-            ))}
+          <div className="mt-4 space-y-2.5">
+            {otherUser.prompts.map((p, i) => {
+              const isSameQ = sharedQuestions.has(p.question);
+              const isSameA = sameAnswers.has(p.question);
+              return (
+                <div key={i} className={`rounded-xl px-4 py-3.5 ${isSameA ? "bg-wine/10 border border-wine/20" : isSameQ ? "bg-wine/5 border border-wine/10" : "bg-cream"}`}>
+                  <div className="flex items-center justify-between">
+                    <p className="text-wine text-[10px] font-medium uppercase tracking-wider mb-1">{p.question}</p>
+                    {isSameA && (
+                      <span className="text-[9px] text-wine font-medium bg-wine/15 px-2 py-0.5 rounded-full">Same answer!</span>
+                    )}
+                    {isSameQ && !isSameA && (
+                      <span className="text-[9px] text-wine/70 font-medium">You too</span>
+                    )}
+                  </div>
+                  <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -195,14 +228,21 @@ export default function MatchDetailPage() {
 
         {otherUser.interests && otherUser.interests.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
-            {otherUser.interests.map((interest) => (
-              <span
-                key={interest}
-                className="px-3 py-1 rounded-full bg-stripe-white text-ink-mid text-sm"
-              >
-                {interest}
-              </span>
-            ))}
+            {[...otherUser.interests]
+              .sort((a, b) => (sharedInterests.has(a) ? 0 : 1) - (sharedInterests.has(b) ? 0 : 1))
+              .map((interest) => {
+                const isShared = sharedInterests.has(interest);
+                return (
+                  <span
+                    key={interest}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium ${
+                      isShared ? "bg-wine text-cream" : "bg-wine/8 text-ink border border-wine/10"
+                    }`}
+                  >
+                    {interest}{isShared ? " ✓" : ""}
+                  </span>
+                );
+              })}
           </div>
         )}
       </div>
