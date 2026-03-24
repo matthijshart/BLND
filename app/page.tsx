@@ -78,8 +78,8 @@ export default function LandingPage() {
         <div className="grid grid-cols-2 gap-[2px]">
           <div className="relative aspect-[3/4]">
             <Image
-              src="/images/sipping.png"
-              alt="Pouring coffee"
+              src="/images/Photos _ Drinks photography _ Restaurant _ Paris _ Coffee shop _ Cafe _ Latte Art.jpeg"
+              alt="Latte art"
               fill
               className="object-cover"
               priority
