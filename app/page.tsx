@@ -104,6 +104,45 @@ export default function LandingPage() {
         </p>
       </section>
 
+      {/* ─── DISCOVER: Horizontal scrollable mood gallery ─── */}
+      <section className="bg-cream py-16 sm:py-20 overflow-hidden">
+        <div className="px-6 mb-8">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray text-center">
+            The vibe
+          </p>
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto px-6 pb-4 snap-x snap-mandatory scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          {[
+            { src: "/images/coffe couple.jpeg", alt: "Coffee date", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/Photos _ Drinks photography _ Restaurant _ Paris _ Coffee shop _ Cafe _ Latte Art.jpeg", alt: "Latte art", aspect: "aspect-[4/5]", width: "w-48" },
+            { src: "/images/chess terrace.jpeg", alt: "Café terrace", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/_.jpeg", alt: "Coffee moment", aspect: "aspect-[4/5]", width: "w-48" },
+            { src: "/images/sipping.png", alt: "Sipping coffee", aspect: "aspect-[3/4]", width: "w-56" },
+          ].map((photo, i) => (
+            <div
+              key={i}
+              className={`${photo.width} shrink-0 snap-center`}
+            >
+              <div className={`relative ${photo.aspect} rounded-2xl overflow-hidden`}>
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          ))}
+          {/* Spacer for last item padding */}
+          <div className="w-3 shrink-0" />
+        </div>
+
+        <p className="text-center text-gray text-sm mt-6 px-6">
+          Real coffee. Real people. Real Amsterdam.
+        </p>
+      </section>
+
       {/* ─── MANIFESTO: The problem ─── */}
       <section className="bg-stripe-white py-24 sm:py-32 px-6">
         <div className="max-w-xl mx-auto">

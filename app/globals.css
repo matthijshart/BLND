@@ -35,3 +35,12 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), Georgia, serif;
 }
+
+/* Hide scrollbar for horizontal scroll galleries */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
