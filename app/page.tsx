@@ -302,9 +302,9 @@ export default function LandingPage() {
             <span className="text-wine">Cancel every month. No strings attached.</span>
           </p>
 
-          <p className="mt-10 text-xl sm:text-2xl font-display text-ink leading-snug">
-            Your matcha costs more.<br />
-            <span className="text-wine">And it never texts back.</span>
+          <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
+            &ldquo;Your matcha costs more.<br />
+            <span className="text-wine">And it never texts back.&rdquo;</span>
           </p>
 
           <div className="w-px h-12 bg-ink/8 mx-auto mt-12" />
