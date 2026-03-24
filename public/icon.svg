@@ -1,4 +1,27 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="96" fill="#6b1520"/>
-  <text x="256" y="280" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="120" font-weight="400" fill="#f0ebe3" letter-spacing="8">BLEND</text>
+  <!-- Background with rounded corners -->
+  <rect width="512" height="512" rx="112" fill="#6b1520"/>
+
+  <!-- Subtle gradient overlay -->
+  <defs>
+    <radialGradient id="glow" cx="0.3" cy="0.7" r="0.8">
+      <stop offset="0%" stop-color="#862028" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#6b1520" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+
+  <!-- Coffee cup body (rounded rectangle) -->
+  <rect x="120" y="140" width="220" height="250" rx="40" fill="none" stroke="#f0ebe3" stroke-width="18"/>
+
+  <!-- Cup handle -->
+  <path d="M340 200 C390 200, 410 240, 410 270 C410 300, 390 340, 340 340" fill="none" stroke="#f0ebe3" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- Letter B inside the cup -->
+  <text x="230" y="305" text-anchor="middle" font-family="Georgia, 'DM Serif Display', serif" font-size="160" font-weight="400" fill="#f0ebe3">B</text>
+
+  <!-- Small steam lines above cup -->
+  <path d="M190 120 C190 105, 200 100, 200 85" fill="none" stroke="#f0ebe3" stroke-width="8" stroke-linecap="round" opacity="0.4"/>
+  <path d="M230 110 C230 92, 240 87, 240 70" fill="none" stroke="#f0ebe3" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
+  <path d="M270 118 C270 103, 280 98, 280 82" fill="none" stroke="#f0ebe3" stroke-width="8" stroke-linecap="round" opacity="0.35"/>
 </svg>
