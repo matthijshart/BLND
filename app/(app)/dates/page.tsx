@@ -112,31 +112,14 @@ export default function DatesPage() {
   );
 }
 
-function downloadCalendar(title: string, start: Date, location: string, name: string) {
-  const end = new Date(start.getTime() + 60 * 60 * 1000); // 60 min
-  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//BLEND//EN",
-    "BEGIN:VEVENT",
-    `DTSTART:${fmt(start)}`,
-    `DTEND:${fmt(end)}`,
-    `SUMMARY:${title}`,
-    `LOCATION:${location}`,
-    `DESCRIPTION:Coffee meet via BLEND`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
+function openCalendar(title: string, start: Date, location: string) {
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "").replace("Z", "");
 
-  // Use data URI — more reliable on iOS Safari than blob URL
-  const dataUri = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
-  const a = document.createElement("a");
-  a.href = dataUri;
-  a.download = `blend-${name.toLowerCase()}.ics`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  // Google Calendar link — works on all devices, opens in browser
+  const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmt(start)}Z/${fmt(end)}Z&location=${encodeURIComponent(location)}&details=${encodeURIComponent("Coffee meet via BLEND ☕")}`;
+
+  window.open(gcalUrl, "_blank");
 }
 
 function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number] }) {
@@ -151,7 +134,7 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
     e.stopPropagation();
     const title = `BLEND - Coffee with ${date.otherUser.displayName}`;
     const location = caféName !== "TBD" ? caféName : "Amsterdam";
-    downloadCalendar(title, dateTime, location, date.otherUser.displayName);
+    openCalendar(title, dateTime, location);
   }
 
   return (
