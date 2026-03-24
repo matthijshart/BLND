@@ -409,7 +409,10 @@ export default function ProfilePage() {
       {profile.coffeeOrder && (
         <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-cream">
           <span className="text-xl">☕</span>
-          <p className="text-ink font-medium">{profile.coffeeOrder}</p>
+          <div>
+            <p className="text-[9px] text-gray uppercase tracking-[0.2em]">Go-to coffee</p>
+            <p className="text-ink font-medium">{profile.coffeeOrder}</p>
+          </div>
         </div>
       )}
 
@@ -420,13 +423,13 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Prompts — visual cards */}
+      {/* Prompts — compact, clean */}
       {profile.prompts && profile.prompts.length > 0 && (
-        <div className="px-4 space-y-3 pb-4">
+        <div className="px-5 pb-4 space-y-2.5">
           {profile.prompts.map((p, i) => (
-            <div key={i} className={`rounded-2xl p-5 ${i % 2 === 0 ? "bg-wine text-cream" : "bg-stripe-white text-ink"}`}>
-              <p className={`text-xs font-medium italic mb-2 ${i % 2 === 0 ? "text-cream/60" : "text-wine"}`}>{p.question}</p>
-              <p className={`text-lg font-display leading-snug ${i % 2 === 0 ? "text-cream" : "text-ink"}`}>{p.answer}</p>
+            <div key={i} className="bg-stripe-white rounded-xl px-4 py-3.5">
+              <p className="text-wine text-[10px] font-medium uppercase tracking-wider mb-1">{p.question}</p>
+              <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
             </div>
           ))}
         </div>
@@ -444,10 +447,11 @@ export default function ProfilePage() {
 
       {/* Interests */}
       {profile.interests && profile.interests.length > 0 && (
-        <div className="px-6 pb-5">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="px-5 pb-5">
+          <p className="text-[9px] text-gray uppercase tracking-[0.2em] mb-2.5">Interests</p>
+          <div className="flex flex-wrap gap-2">
             {profile.interests.map((interest) => (
-              <span key={interest} className="px-3 py-1 rounded-full bg-cream text-ink-mid text-xs">{interest}</span>
+              <span key={interest} className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-sm font-medium border border-wine/10">{interest}</span>
             ))}
           </div>
         </div>

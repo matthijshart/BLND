@@ -134,11 +134,14 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
 
         {/* Content below photo — always visible, scroll to see */}
         <div className="p-5 space-y-4">
-          {/* Name + coffee order as signature */}
+          {/* Coffee order as signature */}
           {profile.coffeeOrder && (
             <div className="flex items-center gap-3 -mt-1">
               <span className="text-lg">☕</span>
-              <p className="text-ink font-medium text-sm">{profile.coffeeOrder}</p>
+              <div>
+                <p className="text-[9px] text-gray uppercase tracking-[0.2em]">Go-to coffee</p>
+                <p className="text-ink font-medium text-sm">{profile.coffeeOrder}</p>
+              </div>
             </div>
           )}
 
@@ -147,28 +150,13 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
             <p className="text-ink-mid text-[15px] leading-relaxed">{profile.bio}</p>
           )}
 
-          {/* Prompts — alternating card styles */}
+          {/* Prompts — compact, clean */}
           {profile.prompts && profile.prompts.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {profile.prompts.map((p, i) => (
-                <div
-                  key={i}
-                  className={`rounded-2xl p-5 ${
-                    i % 2 === 0
-                      ? "bg-wine text-cream"
-                      : "bg-cream text-ink"
-                  }`}
-                >
-                  <p className={`text-xs font-medium italic mb-2 ${
-                    i % 2 === 0 ? "text-cream/60" : "text-wine"
-                  }`}>
-                    {p.question}
-                  </p>
-                  <p className={`text-lg font-display leading-snug ${
-                    i % 2 === 0 ? "text-cream" : "text-ink"
-                  }`}>
-                    {p.answer}
-                  </p>
+                <div key={i} className="bg-cream rounded-xl px-4 py-3.5">
+                  <p className="text-wine text-[10px] font-medium uppercase tracking-wider mb-1">{p.question}</p>
+                  <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
                 </div>
               ))}
             </div>
@@ -198,11 +186,11 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
 
           {/* Interests */}
           {profile.interests && profile.interests.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="flex flex-wrap gap-2 pt-1">
               {profile.interests.map((interest) => (
                 <span
                   key={interest}
-                  className="px-3 py-1 rounded-full bg-cream text-ink-mid text-xs"
+                  className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-xs font-medium border border-wine/10"
                 >
                   {interest}
                 </span>
