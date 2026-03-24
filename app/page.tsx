@@ -3,12 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import { addToWaitlist } from "@/lib/db";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,23 +29,51 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
-      {/* ─── NAV: Sticky minimal header ─── */}
-      <nav className="fixed top-0 inset-x-0 z-50 bg-wine/80 backdrop-blur-md border-b border-cream/5">
-        <div className="max-w-3xl mx-auto flex items-center justify-between px-6 py-3">
-          <span className="font-display text-cream text-lg">BLEND</span>
-          <div className="flex items-center gap-6">
-            <a href="#how" className="text-cream/50 text-xs font-mono tracking-wider hover:text-cream transition-colors hidden sm:block">
-              How it works
+      {/* ─── NAV: Subtle hamburger menu ─── */}
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="fixed top-5 right-5 z-50 w-10 h-10 rounded-full bg-ink/20 backdrop-blur-md flex flex-col items-center justify-center gap-[5px] transition-all hover:bg-ink/30"
+        aria-label="Menu"
+      >
+        <span className={`block w-4 h-[1.5px] bg-cream/80 transition-all ${menuOpen ? "rotate-45 translate-y-[3.25px]" : ""}`} />
+        <span className={`block w-4 h-[1.5px] bg-cream/80 transition-all ${menuOpen ? "-rotate-45 -translate-y-[3.25px]" : ""}`} />
+      </button>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-wine/95 backdrop-blur-lg flex flex-col items-center justify-center gap-8"
+          >
+            {[
+              { label: "How it works", href: "#how" },
+              { label: "Pricing", href: "#pricing" },
+              { label: "For everyone", href: "#everyone" },
+              { label: "A glimpse", href: "#glimpse" },
+            ].map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="text-3xl font-display text-cream/70 hover:text-cream transition-colors"
+              >
+                {item.label}
+              </a>
+            ))}
+            <div className="w-8 h-px bg-cream/20 mt-2 mb-2" />
+            <a
+              href="#waitlist"
+              onClick={() => setMenuOpen(false)}
+              className="px-8 py-3 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors"
+            >
+              Join the waitlist
             </a>
-            <a href="#pricing" className="text-cream/50 text-xs font-mono tracking-wider hover:text-cream transition-colors hidden sm:block">
-              Pricing
-            </a>
-            <a href="#waitlist" className="px-4 py-1.5 rounded-full bg-cream text-wine text-xs font-medium hover:bg-stripe-white transition-colors">
-              Join waitlist
-            </a>
-          </div>
-        </div>
-      </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── HERO: Full-screen crimson ─── */}
       <section className="relative min-h-dvh flex flex-col items-center justify-center bg-wine text-cream px-6 overflow-hidden">
@@ -202,7 +232,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── FOR EVERYONE: Inclusive positioning ─── */}
-      <section className="bg-cream py-24 sm:py-32 px-6">
+      <section id="everyone" className="bg-cream py-24 sm:py-32 px-6 scroll-mt-12">
         <div className="max-w-lg mx-auto text-center">
           <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
             For everyone
@@ -305,7 +335,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── DISCOVER: Horizontal scrollable mood gallery ─── */}
-      <section className="bg-cream py-16 sm:py-20 overflow-hidden">
+      <section id="glimpse" className="bg-cream py-16 sm:py-20 overflow-hidden scroll-mt-12">
         <div className="px-6 mb-8">
           <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray text-center">
             A glimpse
