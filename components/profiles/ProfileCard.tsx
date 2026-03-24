@@ -155,7 +155,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
                   <circle cx="12" cy="12" r="10" />
                   <polygon points="10 8 16 12 10 16 10 8" fill="#6b1520" />
                 </svg>
-                <p className="text-cream text-sm font-medium">Their date soundtrack</p>
+                <p className="text-cream text-sm font-medium">Their soundtrack</p>
               </div>
               <SpotifyPlayer trackUrl={profile.profileSong} autoplay />
             </div>
