@@ -105,7 +105,7 @@ export default function DatesPage() {
         )}
 
         <p className="text-gray-light text-xs mt-8 font-mono tracking-wide text-center">
-          Two people. One spot. No small talk beforehand.
+          Two people. One spot. Just coffee.
         </p>
       </div>
     </div>
