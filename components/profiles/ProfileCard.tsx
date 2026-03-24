@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { motion, type PanInfo } from "framer-motion";
+import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import Image from "next/image";
 import type { User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
+import { PhotoViewer } from "@/components/ui/PhotoViewer";
 
 interface ProfileCardProps {
   profile: User;
@@ -19,6 +20,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const [exitX, setExitX] = useState(0);
   const [swiped, setSwiped] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   const photos = profile.photos?.length > 0 ? profile.photos : ["/images/sipping.png"];
 
@@ -79,10 +81,11 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
             priority
           />
 
-          {/* Photo navigation — tap left/right */}
-          {photos.length > 1 && (
+          {/* Photo navigation — tap left/right, center to enlarge */}
+          {photos.length > 1 ? (
             <>
               <button onClick={prevPhoto} className="absolute inset-y-0 left-0 w-1/3 z-10" />
+              <button onClick={() => setViewerOpen(true)} className="absolute inset-y-0 left-1/3 w-1/3 z-10" />
               <button onClick={nextPhoto} className="absolute inset-y-0 right-0 w-1/3 z-10" />
               {/* Progress dots */}
               <div className="absolute top-3 inset-x-0 flex gap-1 px-3 z-20">
@@ -94,6 +97,8 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
                 ))}
               </div>
             </>
+          ) : (
+            <button onClick={() => setViewerOpen(true)} className="absolute inset-0 z-10" />
           )}
 
           {/* Drag indicator — large and clear */}
@@ -222,6 +227,17 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
           </button>
         </div>
       )}
+
+      {/* Fullscreen photo viewer */}
+      <AnimatePresence>
+        {viewerOpen && (
+          <PhotoViewer
+            photos={photos}
+            initialIndex={photoIndex}
+            onClose={() => setViewerOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
