@@ -1,12 +1,125 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { getUser } from "@/lib/db";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import type { User } from "@/types";
+
+function PhotoCarousel({
+  photos,
+  index,
+  onChangeIndex,
+  name,
+  age,
+  neighborhood,
+}: {
+  photos: string[];
+  index: number;
+  onChangeIndex: (i: number) => void;
+  name: string;
+  age: number;
+  neighborhood: string;
+}) {
+  const [direction, setDirection] = useState(0);
+
+  const goTo = useCallback(
+    (newIndex: number) => {
+      if (newIndex < 0 || newIndex >= photos.length) return;
+      setDirection(newIndex > index ? 1 : -1);
+      onChangeIndex(newIndex);
+    },
+    [index, photos.length, onChangeIndex]
+  );
+
+  function handleDragEnd(_: unknown, info: { offset: { x: number }; velocity: { x: number } }) {
+    if (info.offset.x < -50 || info.velocity.x < -300) {
+      goTo(index + 1);
+    } else if (info.offset.x > 50 || info.velocity.x > 300) {
+      goTo(index - 1);
+    }
+  }
+
+  const variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? "40%" : "-40%", opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? "-40%" : "40%", opacity: 0 }),
+  };
+
+  return (
+    <div className="relative aspect-[3/4] mx-4 rounded-2xl overflow-hidden shadow-lg">
+      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        <motion.div
+          key={index}
+          custom={direction}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ x: { type: "spring", stiffness: 500, damping: 40 }, opacity: { duration: 0.15 } }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.12}
+          onDragEnd={handleDragEnd}
+          className="absolute inset-0"
+        >
+          <Image
+            src={photos[index]}
+            alt={name}
+            fill
+            className="object-cover pointer-events-none select-none"
+            priority
+            draggable={false}
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Progress bars */}
+      {photos.length > 1 && (
+        <div className="absolute top-4 inset-x-0 flex gap-1 px-4 z-20">
+          {photos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/25"
+            >
+              <motion.div
+                className="h-full bg-white rounded-full"
+                initial={false}
+                animate={{ width: i <= index ? "100%" : "0%" }}
+                transition={{ duration: 0.3 }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Tap zones */}
+      {photos.length > 1 && (
+        <>
+          <button className="absolute left-0 top-0 w-1/3 h-full z-10" onClick={() => goTo(index - 1)} />
+          <button className="absolute right-0 top-0 w-1/3 h-full z-10" onClick={() => goTo(index + 1)} />
+        </>
+      )}
+
+      {/* Gradient + name */}
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 inset-x-0 p-6 z-10 pointer-events-none">
+        <h1 className="text-3xl font-display text-white">{name}, {age}</h1>
+        <div className="flex items-center gap-2 mt-1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span className="text-white/60 text-sm">{neighborhood}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PublicProfilePage() {
   const params = useParams();
@@ -65,61 +178,16 @@ export default function PublicProfilePage() {
       </div>
 
       <div className="max-w-sm mx-auto pb-12">
-        {/* Photo */}
+        {/* Photo carousel with swipe */}
         {validPhotos.length > 0 && (
-          <div className="relative aspect-[3/4] mx-4 rounded-2xl overflow-hidden shadow-lg">
-            <Image
-              src={validPhotos[photoIndex]}
-              alt={profile.displayName}
-              fill
-              className="object-cover"
-              priority
-            />
-
-            {/* Photo dots */}
-            {validPhotos.length > 1 && (
-              <div className="absolute top-4 inset-x-0 flex gap-1 px-4 z-10">
-                {validPhotos.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPhotoIndex(i)}
-                    className={`flex-1 h-[3px] rounded-full ${
-                      i === photoIndex ? "bg-white" : "bg-white/30"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Tap zones */}
-            {validPhotos.length > 1 && (
-              <>
-                <button
-                  className="absolute left-0 top-0 w-1/3 h-full z-10"
-                  onClick={() => setPhotoIndex(Math.max(0, photoIndex - 1))}
-                />
-                <button
-                  className="absolute right-0 top-0 w-1/3 h-full z-10"
-                  onClick={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))}
-                />
-              </>
-            )}
-
-            {/* Gradient + name */}
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/70 to-transparent z-5" />
-            <div className="absolute bottom-0 inset-x-0 p-6 z-10">
-              <h1 className="text-3xl font-display text-white">
-                {profile.displayName}, {profile.age}
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span className="text-white/60 text-sm">{profile.neighborhood}</span>
-              </div>
-            </div>
-          </div>
+          <PhotoCarousel
+            photos={validPhotos}
+            index={photoIndex}
+            onChangeIndex={setPhotoIndex}
+            name={profile.displayName}
+            age={profile.age}
+            neighborhood={profile.neighborhood}
+          />
         )}
 
         {/* Bio */}
