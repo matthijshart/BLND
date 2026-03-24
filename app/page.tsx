@@ -168,6 +168,76 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── EXAMPLE PROFILE: For the vibe ─── */}
+      <section className="bg-cream py-20 sm:py-24 px-6">
+        <div className="max-w-sm mx-auto">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-8 text-center">
+            A profile on BLEND
+          </p>
+
+          {/* Profile card */}
+          <div className="rounded-2xl overflow-hidden bg-white shadow-sm">
+            {/* Photo */}
+            <div className="relative aspect-[3/4]">
+              <Image
+                src="/images/mockup.jpeg"
+                alt="Example profile"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 p-5">
+                <h3 className="text-2xl font-display text-white">Thomas, 27</h3>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="text-white/60 text-sm">Jordaan</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-5 space-y-3">
+              {/* Coffee order */}
+              <div className="flex items-center gap-3 bg-cream rounded-xl px-4 py-3">
+                <span className="text-lg">☕</span>
+                <div>
+                  <p className="text-[10px] text-gray uppercase tracking-wider">Coffee order</p>
+                  <p className="text-ink text-sm font-medium">Oat flat white, extra shot</p>
+                </div>
+              </div>
+
+              {/* Prompts */}
+              <div className="bg-wine/5 rounded-xl p-4">
+                <p className="text-wine text-xs font-medium italic">Swapfiets or VanMoof?</p>
+                <p className="text-ink text-sm mt-1">VanMoof — I like living dangerously</p>
+              </div>
+
+              <div className="bg-wine/5 rounded-xl p-4">
+                <p className="text-wine text-xs font-medium italic">Noord or Zuid?</p>
+                <p className="text-ink text-sm mt-1">Noord. The ferry is half the charm</p>
+              </div>
+
+              {/* Spotify */}
+              <div className="bg-cream rounded-xl px-4 py-3">
+                <p className="text-[10px] text-gray uppercase tracking-wider mb-2">Date soundtrack</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-wine/10 flex items-center justify-center shrink-0">
+                    <span className="text-lg">🎵</span>
+                  </div>
+                  <div>
+                    <p className="text-ink text-sm font-medium">Smalltown Boy</p>
+                    <p className="text-gray text-xs">Bronski Beat</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── MANIFESTO: The problem ─── */}
       <section className="bg-stripe-white py-24 sm:py-32 px-6">
         <div className="max-w-xl mx-auto">
