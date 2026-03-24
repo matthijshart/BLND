@@ -17,21 +17,32 @@ interface ProfileCardProps {
 export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCardProps) {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
+  const [exitX, setExitX] = useState(0);
+  const [swiped, setSwiped] = useState(false);
 
   const photos = profile.photos?.length > 0 ? profile.photos : ["/images/sipping.png"];
 
   function handleDragEnd(_: unknown, info: PanInfo) {
-    if (info.offset.x > 100) {
-      onLike();
-    } else if (info.offset.x < -100) {
-      onPass();
+    const threshold = 150; // Higher threshold — need to really mean it
+    const velocityThreshold = 500;
+
+    if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
+      // Swipe right — like
+      setExitX(500);
+      setSwiped(true);
+      setTimeout(() => onLike(), 300);
+    } else if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
+      // Swipe left — pass
+      setExitX(-500);
+      setSwiped(true);
+      setTimeout(() => onPass(), 300);
     }
     setDragDirection(null);
   }
 
   function handleDrag(_: unknown, info: PanInfo) {
-    if (info.offset.x > 30) setDragDirection("right");
-    else if (info.offset.x < -30) setDragDirection("left");
+    if (info.offset.x > 50) setDragDirection("right");
+    else if (info.offset.x < -50) setDragDirection("left");
     else setDragDirection(null);
   }
 
@@ -47,11 +58,15 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
     <div className="relative">
       {/* Scrollable profile card */}
       <motion.div
-        drag={previewMode ? false : "x"}
+        drag={previewMode || swiped ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.15}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
-        whileDrag={{ scale: 1.01 }}
+        animate={swiped ? { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 } : { x: 0 }}
+        transition={swiped ? { duration: 0.3, ease: "easeOut" } : { type: "spring", stiffness: 500, damping: 30 }}
+        style={{ rotate: 0 }}
+        whileDrag={{ scale: 1.02 }}
         className="rounded-2xl overflow-hidden shadow-lg bg-white cursor-grab active:cursor-grabbing"
       >
         {/* Photo section */}
@@ -81,16 +96,24 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
             </>
           )}
 
-          {/* Drag indicator */}
+          {/* Drag indicator — large and clear */}
           {dragDirection === "right" && (
-            <div className="absolute top-8 left-6 px-4 py-2 rounded-full bg-wine text-cream font-medium text-sm rotate-[-12deg] z-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute top-12 left-6 px-6 py-3 rounded-2xl bg-wine/90 backdrop-blur-sm text-cream font-display text-xl rotate-[-12deg] z-20 shadow-lg border-2 border-cream/30"
+            >
               ☕ Interested
-            </div>
+            </motion.div>
           )}
           {dragDirection === "left" && (
-            <div className="absolute top-8 right-6 px-4 py-2 rounded-full bg-gray text-white font-medium text-sm rotate-[12deg] z-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute top-12 right-6 px-6 py-3 rounded-2xl bg-ink/70 backdrop-blur-sm text-white font-display text-xl rotate-[12deg] z-20 shadow-lg border-2 border-white/20"
+            >
               Pass
-            </div>
+            </motion.div>
           )}
 
           {/* Gradient + name overlay */}
