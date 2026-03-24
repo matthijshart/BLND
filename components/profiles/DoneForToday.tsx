@@ -44,9 +44,12 @@ function formatCountdown(ms: number) {
   };
 }
 
+// Keep slideshow position across re-mounts
+let globalSlideIndex = 0;
+
 export function DoneForToday() {
   const [timeLeft, setTimeLeft] = useState(getTimeUntil11());
-  const [slideIndex, setSlideIndex] = useState(0);
+  const [slideIndex, setSlideIndex] = useState(globalSlideIndex);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -55,10 +58,14 @@ export function DoneForToday() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-advance slideshow every 4 seconds
+  // Auto-advance slideshow every 4 seconds — persists across re-mounts
   useEffect(() => {
     const interval = setInterval(() => {
-      setSlideIndex((prev) => (prev + 1) % SLIDESHOW_PHOTOS.length);
+      setSlideIndex((prev) => {
+        const next = (prev + 1) % SLIDESHOW_PHOTOS.length;
+        globalSlideIndex = next;
+        return next;
+      });
     }, 4000);
     return () => clearInterval(interval);
   }, []);
