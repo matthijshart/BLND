@@ -12,6 +12,8 @@ import { useAuthContext } from "@/components/providers/AuthProvider";
 import { SlotPicker } from "@/components/match/SlotPicker";
 import type { Match, User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
+import { PhotoViewer } from "@/components/ui/PhotoViewer";
+import { AnimatePresence } from "framer-motion";
 // import { calculateVibeMatch, getCoffeeCompatibility } from "@/lib/compatibility";
 
 export default function MatchDetailPage() {
@@ -25,6 +27,7 @@ export default function MatchDetailPage() {
   const [confirming, setConfirming] = useState(false);
   const [showSlotPicker, setShowSlotPicker] = useState(false);
   const [noOverlap, setNoOverlap] = useState(false);
+  const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
 
   // Real-time match subscription
   useEffect(() => {
@@ -147,8 +150,11 @@ export default function MatchDetailPage() {
         </button>
       </div>
 
-      {/* Main photo */}
-      <div className="relative aspect-[3/4] mx-4 rounded-2xl overflow-hidden shadow-lg">
+      {/* Main photo — tap to open fullscreen viewer */}
+      <button
+        onClick={() => setPhotoViewerOpen(true)}
+        className="relative aspect-[3/4] mx-4 rounded-2xl overflow-hidden shadow-lg block w-[calc(100%-2rem)]"
+      >
         <Image
           src={otherUser.photos[0] || "/images/sipping.png"}
           alt={otherUser.displayName}
@@ -157,24 +163,30 @@ export default function MatchDetailPage() {
           priority
         />
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent" />
-        <div className="absolute bottom-0 inset-x-0 p-6">
+        <div className="absolute bottom-0 inset-x-0 p-6 text-left">
           <h2 className="text-3xl font-display text-white">
             {otherUser.displayName}, {otherUser.age}
           </h2>
           <p className="text-white/70 text-sm mt-1">{otherUser.neighborhood}</p>
         </div>
-      </div>
+        {/* Photo count badge */}
+        {otherUser.photos.length > 1 && (
+          <div className="absolute top-4 right-4 bg-ink/40 backdrop-blur-md text-white text-xs px-2.5 py-1 rounded-full">
+            1/{otherUser.photos.length}
+          </div>
+        )}
+      </button>
 
-      {/* More photos */}
-      {otherUser.photos.length > 1 && (
-        <div className="grid grid-cols-2 gap-2 mx-4 mt-2">
-          {otherUser.photos.slice(1, 5).map((photo, i) => (
-            <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
-              <Image src={photo} alt="" fill className="object-cover" />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Fullscreen photo viewer */}
+      <AnimatePresence>
+        {photoViewerOpen && (
+          <PhotoViewer
+            photos={otherUser.photos.length > 0 ? otherUser.photos : ["/images/sipping.png"]}
+            initialIndex={0}
+            onClose={() => setPhotoViewerOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Bio */}
       <div className="px-6 mt-6">
