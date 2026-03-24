@@ -300,7 +300,8 @@ export default function LandingPage() {
             { src: "/images/date.jpeg", alt: "Coffee date", aspect: "aspect-[4/5]", width: "w-48" },
             { src: "/images/Italian spot.jpeg", alt: "Italian spot", aspect: "aspect-[3/4]", width: "w-56" },
             { src: "/images/koffi3.jpeg", alt: "Coffee moment", aspect: "aspect-[4/5]", width: "w-48" },
-            { src: "/images/hip.jpeg", alt: "Hip café", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/datemen2.jpeg", alt: "Coffee date", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/hip.jpeg", alt: "Hip café", aspect: "aspect-[4/5]", width: "w-48" },
             { src: "/images/bike.jpeg", alt: "Amsterdam bike", aspect: "aspect-[4/5]", width: "w-48" },
           ].map((photo, i) => (
             <div
