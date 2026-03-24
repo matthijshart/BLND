@@ -204,6 +204,7 @@ export default function ProfilePage() {
   const [profileSong, setProfileSong] = useState("");
   const [coffeeOrder, setCoffeeOrder] = useState("");
   const [prompts, setPrompts] = useState<{ question: string; answer: string }[]>([]);
+  const [ageRange, setAgeRange] = useState<[number, number]>([18, 99]);
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -227,6 +228,7 @@ export default function ProfilePage() {
       setProfileSong(profile.profileSong || "");
       setCoffeeOrder(profile.coffeeOrder || "");
       setPrompts(profile.prompts || []);
+      setAgeRange(profile.ageRange || [18, 99]);
     }
   }, [profile]);
 
@@ -633,6 +635,7 @@ export default function ProfilePage() {
                 await saveField("neighborhood", neighborhood);
                 await saveField("lookingFor", lookingFor);
                 await saveField("genderPreference", genderPreference);
+                await saveField("ageRange", ageRange);
               }}
               className="text-xs font-medium text-wine"
             >
@@ -697,6 +700,34 @@ export default function ProfilePage() {
                 })}
               </div>
             </div>
+            <div>
+              <p className="text-[10px] text-gray uppercase tracking-wider mb-2">Age range</p>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <label className="text-[10px] text-gray-light">Min</label>
+                  <input
+                    type="range"
+                    min={18}
+                    max={ageRange[1]}
+                    value={ageRange[0]}
+                    onChange={(e) => setAgeRange([parseInt(e.target.value), ageRange[1]])}
+                    className="w-full accent-wine"
+                  />
+                </div>
+                <span className="text-ink text-sm font-medium w-16 text-center">{ageRange[0]} – {ageRange[1]}</span>
+                <div className="flex-1">
+                  <label className="text-[10px] text-gray-light">Max</label>
+                  <input
+                    type="range"
+                    min={ageRange[0]}
+                    max={99}
+                    value={ageRange[1]}
+                    onChange={(e) => setAgeRange([ageRange[0], parseInt(e.target.value)])}
+                    className="w-full accent-wine"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
@@ -728,6 +759,12 @@ export default function ProfilePage() {
                 <path d="M20 21a8 8 0 10-16 0" />
               </svg>
               <span className="text-ink text-sm capitalize">{profile.gender}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-light shrink-0">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+              <span className="text-ink text-sm">Age range: {(profile.ageRange || [18, 99])[0]} – {(profile.ageRange || [18, 99])[1]}</span>
             </div>
           </div>
         )}
