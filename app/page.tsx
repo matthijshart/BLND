@@ -69,7 +69,7 @@ export default function LandingPage() {
               onClick={() => setMenuOpen(false)}
               className="px-8 py-3 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors"
             >
-              Join the waitlist
+              Join — 2 months free
             </a>
           </motion.div>
         )}
@@ -336,7 +336,7 @@ export default function LandingPage() {
                 disabled={isSubmitting}
                 className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-all disabled:opacity-50"
               >
-                {isSubmitting ? "Joining..." : "Join the waitlist"}
+                {isSubmitting ? "Joining..." : "Join the waitlist — 2 months free"}
               </button>
               {error && (
                 <p className="text-coral text-sm mt-2">{error}</p>
