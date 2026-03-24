@@ -98,13 +98,13 @@ export function DoneForToday() {
           </p>
         </div>
 
-        {/* Slide dots */}
-        <div className="absolute bottom-2 right-4 flex gap-1 z-20">
+        {/* Slide indicators */}
+        <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 z-20">
           {SLIDESHOW_PHOTOS.map((_, i) => (
             <div
               key={i}
-              className={`w-1 h-1 rounded-full transition-colors duration-500 ${
-                i === slideIndex ? "bg-white" : "bg-white/30"
+              className={`rounded-full transition-all duration-500 ${
+                i === slideIndex ? "w-5 h-1.5 bg-wine" : "w-1.5 h-1.5 bg-white/40"
               }`}
             />
           ))}
