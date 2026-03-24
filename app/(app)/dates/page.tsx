@@ -64,36 +64,50 @@ export default function DatesPage() {
   }
 
   return (
-    <div className="px-4 pt-8 pb-24">
-      <h1 className="text-2xl font-display text-ink mb-6">Meets</h1>
-
-      {/* Upcoming */}
-      {upcoming.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-sm font-medium text-gray uppercase tracking-wider mb-3">
-            Upcoming
-          </h2>
-          <div className="space-y-3">
-            {upcoming.map((date) => (
-              <DateCard key={date.id} date={date} />
-            ))}
-          </div>
+    <div className="pb-24">
+      {/* Hero mood image — always visible */}
+      <div className="relative aspect-[21/9] overflow-hidden">
+        <Image
+          src="/images/chess terrace.jpeg"
+          alt="Café terrace vibes"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-cream via-cream/40 to-transparent" />
+        <div className="absolute bottom-0 inset-x-0 px-5 pb-4">
+          <h1 className="text-2xl font-display text-ink">Meets</h1>
         </div>
-      )}
+      </div>
 
-      {/* Past */}
-      {past.length > 0 && (
-        <div>
-          <h2 className="text-sm font-medium text-gray uppercase tracking-wider mb-3">
-            Past
-          </h2>
-          <div className="space-y-3">
-            {past.map((date) => (
-              <DateCard key={date.id} date={date} />
-            ))}
+      <div className="px-4 pt-4">
+        {/* Upcoming */}
+        {upcoming.length > 0 && (
+          <div className="mb-6">
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray mb-3">Coming up</p>
+            <div className="space-y-3">
+              {upcoming.map((date) => (
+                <DateCard key={date.id} date={date} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Past */}
+        {past.length > 0 && (
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray mb-3">Past</p>
+            <div className="space-y-3 opacity-60">
+              {past.map((date) => (
+                <DateCard key={date.id} date={date} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <p className="text-gray-light text-xs mt-8 font-mono tracking-wide text-center">
+          Two people. One spot. No small talk beforehand.
+        </p>
+      </div>
     </div>
   );
 }
