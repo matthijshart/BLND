@@ -147,10 +147,16 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
             </div>
           )}
 
-          {/* Profile song */}
+          {/* Profile song — prominent */}
           {profile.profileSong && (
-            <div>
-              <p className="text-xs text-gray uppercase tracking-wider font-medium mb-2">Their song</p>
+            <div className="bg-wine rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-cream">
+                  <circle cx="12" cy="12" r="10" />
+                  <polygon points="10 8 16 12 10 16 10 8" fill="#6b1520" />
+                </svg>
+                <p className="text-cream text-sm font-medium">Their date soundtrack</p>
+              </div>
               <SpotifyPlayer trackUrl={profile.profileSong} autoplay />
             </div>
           )}
