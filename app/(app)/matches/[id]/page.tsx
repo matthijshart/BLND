@@ -12,7 +12,7 @@ import { useAuthContext } from "@/components/providers/AuthProvider";
 import { SlotPicker } from "@/components/match/SlotPicker";
 import type { Match, User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
-import { calculateVibeMatch, getCoffeeCompatibility } from "@/lib/compatibility";
+// import { calculateVibeMatch, getCoffeeCompatibility } from "@/lib/compatibility";
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -106,11 +106,6 @@ export default function MatchDetailPage() {
       </div>
     );
   }
-
-  const vibeMatch = profile && otherUser ? calculateVibeMatch(profile, otherUser) : null;
-  const coffeeCompat = profile?.coffeeOrder && otherUser?.coffeeOrder
-    ? getCoffeeCompatibility(profile.coffeeOrder, otherUser.coffeeOrder)
-    : null;
 
   const myAvailability = firebaseUser
     ? match.availability?.[firebaseUser.uid]
@@ -212,44 +207,7 @@ export default function MatchDetailPage() {
         )}
       </div>
 
-      {/* Compatibility scores */}
-      {(vibeMatch || coffeeCompat) && (
-        <div className="px-6 mt-6 space-y-3">
-          {vibeMatch && (
-            <div className="bg-wine/5 rounded-xl p-4 flex items-center justify-between">
-              <div>
-                <p className="text-[10px] text-gray uppercase tracking-wider">Blend compatibility</p>
-                <p className="text-wine font-display text-2xl mt-0.5">{vibeMatch}%</p>
-              </div>
-              <div className="w-16 h-16 rounded-full border-3 border-wine/20 flex items-center justify-center relative">
-                <svg width="64" height="64" viewBox="0 0 64 64" className="absolute -rotate-90">
-                  <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="3" className="text-wine/10" />
-                  <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="3" className="text-wine"
-                    strokeDasharray={`${(vibeMatch / 100) * 176} 176`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <span className="text-wine text-xs font-medium">{vibeMatch}%</span>
-              </div>
-            </div>
-          )}
 
-          {coffeeCompat && coffeeCompat.score > 0 && (
-            <div className="bg-cream rounded-xl p-4">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">☕</span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-gray uppercase tracking-wider">Coffee compatibility</p>
-                    <p className="text-wine font-display text-sm">{coffeeCompat.score}%</p>
-                  </div>
-                  <p className="text-ink text-sm mt-1 italic">{coffeeCompat.message}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Date Planning Section */}
       <div className="px-4 mt-8">
