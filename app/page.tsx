@@ -301,12 +301,10 @@ export default function LandingPage() {
           <p className="mt-3 text-gray text-sm tracking-wide">
             <span className="text-wine">Cancel every month. No strings attached.</span>
           </p>
-          <p className="mt-6 text-gray text-sm italic">
-            Your matcha costs more. And it never texts back.
-          </p>
-          <p className="mt-6 text-ink-mid text-lg leading-relaxed">
-            Daily profiles. Real blends.<br />
-            Spot selected for you.
+
+          <p className="mt-10 text-xl sm:text-2xl font-display text-ink leading-snug">
+            Your matcha costs more.<br />
+            <span className="text-wine">And it never texts back.</span>
           </p>
 
           <div className="w-px h-12 bg-ink/8 mx-auto mt-12" />
