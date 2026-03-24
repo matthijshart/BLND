@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PROFILE_PROMPTS, type ProfilePromptConfig } from "@/lib/prompts";
 
 interface PromptPickerProps {
@@ -15,6 +15,12 @@ export function PromptPicker({ existingPrompts, onSave, saving, dark }: PromptPi
   const [answered, setAnswered] = useState<{ question: string; answer: string }[]>(
     existingPrompts || []
   );
+  // Sync from parent when existingPrompts changes (e.g. profile reload)
+  useEffect(() => {
+    if (existingPrompts && existingPrompts.length > 0) {
+      setAnswered(existingPrompts);
+    }
+  }, [existingPrompts]);
   const [browsing, setBrowsing] = useState(false);
   const [activePrompt, setActivePrompt] = useState<ProfilePromptConfig | null>(null);
   const [openAnswer, setOpenAnswer] = useState("");

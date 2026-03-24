@@ -128,10 +128,10 @@ function PhotoCarousel({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center z-20"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-wine/80 backdrop-blur-md flex items-center justify-center z-20"
                 onClick={() => goTo(activeIndex - 1)}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f0ebe3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </motion.button>
@@ -143,10 +143,10 @@ function PhotoCarousel({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center z-20"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-wine/80 backdrop-blur-md flex items-center justify-center z-20"
                 onClick={() => goTo(activeIndex + 1)}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f0ebe3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </motion.button>
@@ -449,18 +449,18 @@ export default function ProfilePage() {
       {showPreview && (
         <div className="fixed inset-0 z-50 bg-cream overflow-y-auto">
           <div className="max-w-sm mx-auto pb-8">
-            {/* Close bar */}
-            <div className="sticky top-0 z-10 bg-cream/90 backdrop-blur-sm px-5 py-4 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-ink">Profile preview</h2>
+            {/* Close bar — sticky, prominent */}
+            <div className="sticky top-0 z-10 bg-cream/95 backdrop-blur-md px-5 py-3 flex items-center justify-between border-b border-wine/10" style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}>
+              <h2 className="text-sm font-display text-ink">How others see you</h2>
               <button
                 onClick={() => setShowPreview(false)}
-                className="text-xs text-wine font-medium"
+                className="px-4 py-2 rounded-full bg-wine text-cream text-xs font-medium"
               >
-                Close
+                ← Back to edit
               </button>
             </div>
 
-            <div className="px-4">
+            <div className="px-4 mt-4">
               <ProfileCard
                 profile={profile}
                 onLike={() => setShowPreview(false)}
