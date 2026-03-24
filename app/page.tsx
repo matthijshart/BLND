@@ -152,6 +152,22 @@ export default function LandingPage() {
         </p>
       </section>
 
+      {/* ─── NO ALCOHOL: Subtle sneer ─── */}
+      <section className="bg-cream py-14 sm:py-16 px-6">
+        <div className="max-w-md mx-auto text-center">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray/60 mb-4">
+            A conscious choice
+          </p>
+          <h3 className="text-2xl sm:text-3xl font-display text-ink leading-snug">
+            No cocktails. No wine bars.<br />
+            <span className="text-wine">No liquid courage needed.</span>
+          </h3>
+          <p className="mt-5 text-ink-mid text-sm leading-relaxed max-w-sm mx-auto">
+            Other apps send you to a bar at 9pm. We think you&apos;re interesting enough without three glasses of Chardonnay. Daytime. Coffee. Just you.
+          </p>
+        </div>
+      </section>
+
       {/* ─── MANIFESTO: The problem ─── */}
       <section className="bg-stripe-white py-24 sm:py-32 px-6">
         <div className="max-w-xl mx-auto">
