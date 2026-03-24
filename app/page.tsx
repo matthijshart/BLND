@@ -34,7 +34,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
       {/* ─── TOP BANNER: Coming soon ─── */}
-      <div className="bg-ink text-cream/70 py-2 px-4 text-center text-[11px] font-mono tracking-wider">
+      <div className="bg-cream text-wine/60 py-2 px-4 text-center text-[11px] font-mono tracking-wider">
         Coming soon to the App Store
       </div>
 
