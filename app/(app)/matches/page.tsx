@@ -1,11 +1,31 @@
 "use client";
 
 import { useMatches } from "@/hooks/useMatches";
+import { useAuthContext } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 import Link from "next/link";
+import type { User } from "@/types";
+
+function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefined): string | null {
+  if (!myOrder || !theirOrder) return null;
+  const my = myOrder.toLowerCase();
+  const their = theirOrder.toLowerCase();
+  if (my === their) return "Perfect match — same order!";
+  if (my.includes("espresso") && their.includes("espresso")) return "Double espresso energy";
+  if ((my.includes("oat") && their.includes("oat")) || (my.includes("flat white") && their.includes("flat white"))) return "Oat milk soulmates";
+  if ((my.includes("chai") || their.includes("chai")) && (my.includes("espresso") || their.includes("espresso"))) return "Opposites attract";
+  if (my.includes("matcha") || their.includes("matcha")) return "One of you is the healthy one";
+  return null;
+}
+
+function getSharedCount(me: User | null, them: User): number {
+  if (!me) return 0;
+  return (me.interests || []).filter((i) => (them.interests || []).includes(i)).length;
+}
 
 export default function MatchesPage() {
   const { matches, loading } = useMatches();
+  const { profile } = useAuthContext();
 
   if (loading) {
     return (
@@ -66,41 +86,64 @@ export default function MatchesPage() {
           <Link
             key={match.id}
             href={`/matches/${match.id}`}
-            className="flex items-center gap-4 p-4 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow"
+            className="block p-4 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow"
           >
-            <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
-              <Image
-                src={match.otherUser.photos[0] || "/images/sipping.png"}
-                alt={match.otherUser.displayName}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-display text-lg text-ink">
-                {match.otherUser.displayName}, {match.otherUser.age}
-              </h3>
-              <p className="text-gray text-sm">{match.otherUser.neighborhood}</p>
-            </div>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${
-                match.status === "scheduling"
-                  ? "bg-wine/10 text-wine"
-                  : match.status === "date_confirmed"
-                  ? "bg-blue/10 text-blue"
+            <div className="flex items-center gap-4">
+              <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
+                <Image
+                  src={match.otherUser.photos[0] || "/images/sipping.png"}
+                  alt={match.otherUser.displayName}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-display text-lg text-ink">
+                  {match.otherUser.displayName}, {match.otherUser.age}
+                </h3>
+                <p className="text-gray text-sm">{match.otherUser.neighborhood}</p>
+              </div>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${
+                  match.status === "scheduling"
+                    ? "bg-wine/10 text-wine"
+                    : match.status === "date_confirmed"
+                    ? "bg-blue/10 text-blue"
+                    : match.status === "date_proposed"
+                    ? "bg-coral/10 text-coral"
+                    : "bg-stripe-white text-gray"
+                }`}
+              >
+                {match.status === "scheduling"
+                  ? "Plan meet"
                   : match.status === "date_proposed"
-                  ? "bg-coral/10 text-coral"
-                  : "bg-stripe-white text-gray"
-              }`}
-            >
-              {match.status === "scheduling"
-                ? "Plan date"
-                : match.status === "date_proposed"
-                ? "Confirm date"
-                : match.status === "date_confirmed"
-                ? "Date planned ✓"
-                : match.status}
-            </span>
+                  ? "Confirm meet"
+                  : match.status === "date_confirmed"
+                  ? "Meet planned ✓"
+                  : match.status}
+              </span>
+            </div>
+
+            {/* Coffee combo + shared interests */}
+            {(() => {
+              const combo = getCoffeeCombo(profile?.coffeeOrder, match.otherUser.coffeeOrder);
+              const shared = getSharedCount(profile, match.otherUser);
+              if (!combo && shared === 0) return null;
+              return (
+                <div className="mt-3 pt-3 border-t border-cream flex items-center gap-3 flex-wrap">
+                  {combo && (
+                    <span className="flex items-center gap-1.5 text-[11px] text-wine font-medium">
+                      <span>☕</span> {combo}
+                    </span>
+                  )}
+                  {shared > 0 && (
+                    <span className="text-[11px] text-gray">
+                      {shared} shared interest{shared > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
           </Link>
         ))}
       </div>
