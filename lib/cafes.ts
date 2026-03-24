@@ -1,170 +1,210 @@
 import type { Café } from "@/types";
 
-// Seed data: Amsterdam specialty coffee spots
+// Partner cafés in Amsterdam
 export const AMSTERDAM_CAFES: Omit<Café, "id">[] = [
   {
-    name: "Lot Sixty One",
+    name: "Luuk's Coffee – Vijzelgracht",
+    neighborhood: "Centrum",
+    address: "Vijzelgracht 49, 1017 HP Amsterdam",
+    coordinates: { lat: 52.3612, lng: 4.8909 },
+    vibe: "cozy",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Luuk's+Coffee+Vijzelgracht+Amsterdam",
+    partnered: true,
+    capacity: 4,
+  },
+  {
+    name: "Luuk's Coffee – Jordaan",
+    neighborhood: "Jordaan",
+    address: "Westerstraat 3, 1015 LT Amsterdam",
+    coordinates: { lat: 52.3794, lng: 4.8832 },
+    vibe: "cozy",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Luuk's+Coffee+Westerstraat+Amsterdam",
+    partnered: true,
+    capacity: 3,
+  },
+  {
+    name: "Coffee Concepts – Oud-Zuid",
+    neighborhood: "Oud-Zuid",
+    address: "Jacob Obrechtstraat 5, Amsterdam",
+    coordinates: { lat: 52.3516, lng: 4.8734 },
+    vibe: "specialty",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Coffee+Concepts+Jacob+Obrechtstraat+Amsterdam",
+    partnered: true,
+    capacity: 4,
+  },
+  {
+    name: "Coffee Concepts – Kinkerstraat",
     neighborhood: "West",
-    address: "Kinkerstraat 112, Amsterdam",
+    address: "Kinkerstraat 380, Amsterdam",
+    coordinates: { lat: 52.3655, lng: 4.8610 },
+    vibe: "specialty",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Coffee+Concepts+Kinkerstraat+Amsterdam",
+    partnered: true,
+    capacity: 4,
+  },
+  {
+    name: "BLCK. Coffee – Zuidas",
+    neighborhood: "Zuidas",
+    address: "Claude Debussylaan 269, 1082 MA Amsterdam",
+    coordinates: { lat: 52.3387, lng: 4.8730 },
+    vibe: "modern",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=BLCK+Coffee+Zuidas+Amsterdam",
+    partnered: true,
+    capacity: 5,
+  },
+  {
+    name: "LOT61 – Kinkerstraat",
+    neighborhood: "West",
+    address: "Kinkerstraat 112, 1053 ED Amsterdam",
     coordinates: { lat: 52.3638, lng: 4.8668 },
     vibe: "minimalist",
-    photo: "/cafes/lot-sixty-one.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Lot+Sixty+One+Amsterdam",
-    partnered: false,
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=LOT61+Kinkerstraat+Amsterdam",
+    partnered: true,
+    capacity: 3,
+  },
+  {
+    name: "LOT61 – Centraal",
+    neighborhood: "Centrum",
+    address: "Oosterdoksstraat 4, 1011 DK Amsterdam",
+    coordinates: { lat: 52.3790, lng: 4.9003 },
+    vibe: "modern",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=LOT61+Oosterdoksstraat+Amsterdam",
+    partnered: true,
+    capacity: 4,
+  },
+  {
+    name: "Back to Black – Weteringstraat",
+    neighborhood: "Centrum",
+    address: "Weteringstraat 48, 1017 SP Amsterdam",
+    coordinates: { lat: 52.3597, lng: 4.8891 },
+    vibe: "intimate",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Back+to+Black+Weteringstraat+Amsterdam",
+    partnered: true,
+    capacity: 2,
+  },
+  {
+    name: "Back to Black – Van Hallstraat",
+    neighborhood: "Westerpark",
+    address: "Van Hallstraat 268, 1051 HM Amsterdam",
+    coordinates: { lat: 52.3819, lng: 4.8701 },
+    vibe: "intimate",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Back+to+Black+Van+Hallstraat+Amsterdam",
+    partnered: true,
+    capacity: 2,
+  },
+  {
+    name: "Locals Coffee – De Pijp",
+    neighborhood: "De Pijp",
+    address: "Eerste Jacob van Campenstraat 47H, 1072 BD Amsterdam",
+    coordinates: { lat: 52.3536, lng: 4.8941 },
+    vibe: "neighborhood",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Locals+Coffee+De+Pijp+Amsterdam",
+    partnered: true,
+    capacity: 3,
+  },
+  {
+    name: "Five Ways – Oost",
+    neighborhood: "Oost",
+    address: "Boerhaaveplein 3, 1091 DH Amsterdam",
+    coordinates: { lat: 52.3599, lng: 4.9194 },
+    vibe: "specialty",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Five+Ways+Coffee+Roasters+Oost+Amsterdam",
+    partnered: true,
+    capacity: 3,
+  },
+  {
+    name: "Five Ways – West",
+    neighborhood: "West",
+    address: "Kinkerstraat 186, 1053 CG Amsterdam",
+    coordinates: { lat: 52.3647, lng: 4.8648 },
+    vibe: "specialty",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Five+Ways+Coffee+Roasters+West+Amsterdam",
+    partnered: true,
+    capacity: 3,
+  },
+  {
+    name: "Monks Coffee Roasters",
+    neighborhood: "West",
+    address: "Bilderdijkstraat 46, 1052 NB Amsterdam",
+    coordinates: { lat: 52.3688, lng: 4.8683 },
+    vibe: "specialty",
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Monks+Coffee+Roasters+Amsterdam",
+    partnered: true,
     capacity: 3,
   },
   {
     name: "Scandinavian Embassy",
     neighborhood: "De Pijp",
-    address: "Sarphatipark 34, Amsterdam",
+    address: "Sarphatipark 34, 1072 PB Amsterdam",
     coordinates: { lat: 52.3534, lng: 4.8935 },
-    vibe: "terrace",
-    photo: "/cafes/scandinavian-embassy.jpg",
+    vibe: "nordic",
+    photo: "",
     googleMapsUrl: "https://maps.google.com/?q=Scandinavian+Embassy+Amsterdam",
-    partnered: false,
+    partnered: true,
     capacity: 4,
   },
   {
-    name: "Toki",
-    neighborhood: "Centrum",
-    address: "Binnen Bantammerstraat 15, Amsterdam",
-    coordinates: { lat: 52.3748, lng: 4.9003 },
-    vibe: "cozy",
-    photo: "/cafes/toki.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Toki+Amsterdam",
-    partnered: false,
-    capacity: 2,
-  },
-  {
-    name: "Coffee Bru",
-    neighborhood: "Oost",
-    address: "Beukenplein 14, Amsterdam",
-    coordinates: { lat: 52.3555, lng: 4.9221 },
-    vibe: "terrace",
-    photo: "/cafes/coffee-bru.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Coffee+Bru+Amsterdam",
-    partnered: false,
-    capacity: 3,
-  },
-  {
-    name: "Back to Black",
-    neighborhood: "Centrum",
-    address: "Weteringstraat 48, Amsterdam",
-    coordinates: { lat: 52.3605, lng: 4.8883 },
-    vibe: "intimate",
-    photo: "/cafes/back-to-black.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Back+to+Black+Amsterdam",
-    partnered: false,
-    capacity: 2,
-  },
-  {
-    name: "Headfirst Coffee Roasters",
-    neighborhood: "West",
-    address: "1e Constantijn Huygensstraat 82, Amsterdam",
-    coordinates: { lat: 52.3612, lng: 4.8748 },
+    name: "Uncommon Coffee",
+    neighborhood: "Oud-West",
+    address: "Eerste Constantijn Huygensstraat 63H, 1054 BT Amsterdam",
+    coordinates: { lat: 52.3604, lng: 4.8735 },
     vibe: "specialty",
-    photo: "/cafes/headfirst.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Headfirst+Coffee+Roasters+Amsterdam",
-    partnered: false,
+    photo: "",
+    googleMapsUrl: "https://maps.google.com/?q=Uncommon+Coffee+Amsterdam",
+    partnered: true,
     capacity: 3,
-  },
-  {
-    name: "Sweet Cup",
-    neighborhood: "Centrum",
-    address: "Damstraat 26, Amsterdam",
-    coordinates: { lat: 52.3728, lng: 4.8969 },
-    vibe: "cozy",
-    photo: "/cafes/sweet-cup.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Sweet+Cup+Amsterdam",
-    partnered: false,
-    capacity: 2,
-  },
-  {
-    name: "Rum Baba",
-    neighborhood: "Oost",
-    address: "Czaar Peterstraat 90, Amsterdam",
-    coordinates: { lat: 52.3675, lng: 4.9268 },
-    vibe: "cozy",
-    photo: "/cafes/rum-baba.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Rum+Baba+Amsterdam",
-    partnered: false,
-    capacity: 3,
-  },
-  {
-    name: "CT Coffee & Coconuts",
-    neighborhood: "De Pijp",
-    address: "Ceintuurbaan 282-284, Amsterdam",
-    coordinates: { lat: 52.3508, lng: 4.8978 },
-    vibe: "spacious",
-    photo: "/cafes/ct-coffee.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=CT+Coffee+Coconuts+Amsterdam",
-    partnered: false,
-    capacity: 5,
-  },
-  {
-    name: "Monks Coffee Roasters",
-    neighborhood: "West",
-    address: "Bilderdijkstraat 46, Amsterdam",
-    coordinates: { lat: 52.3684, lng: 4.8725 },
-    vibe: "specialty",
-    photo: "/cafes/monks.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Monks+Coffee+Roasters+Amsterdam",
-    partnered: false,
-    capacity: 3,
-  },
-  {
-    name: "Two For Joy",
-    neighborhood: "Jordaan",
-    address: "Haarlemmerdijk 182, Amsterdam",
-    coordinates: { lat: 52.3818, lng: 4.8855 },
-    vibe: "specialty",
-    photo: "/cafes/two-for-joy.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Two+For+Joy+Amsterdam",
-    partnered: false,
-    capacity: 3,
-  },
-  {
-    name: "Bocca Coffee",
-    neighborhood: "Centrum",
-    address: "Kerkstraat 96, Amsterdam",
-    coordinates: { lat: 52.3635, lng: 4.8876 },
-    vibe: "specialty",
-    photo: "/cafes/bocca.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Bocca+Coffee+Amsterdam",
-    partnered: false,
-    capacity: 3,
-  },
-  {
-    name: "de Wasserette",
-    neighborhood: "Oost",
-    address: "Javaplein 25, Amsterdam",
-    coordinates: { lat: 52.3621, lng: 4.9365 },
-    vibe: "neighborhood",
-    photo: "/cafes/de-wasserette.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=de+Wasserette+Amsterdam",
-    partnered: false,
-    capacity: 4,
-  },
-  {
-    name: "Pluk",
-    neighborhood: "Centrum",
-    address: "Reestraat 19, Amsterdam",
-    coordinates: { lat: 52.3735, lng: 4.8836 },
-    vibe: "cozy",
-    photo: "/cafes/pluk.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=Pluk+Amsterdam",
-    partnered: false,
-    capacity: 3,
-  },
-  {
-    name: "The Lobby",
-    neighborhood: "Centrum",
-    address: "Westermarkt 2, Amsterdam",
-    coordinates: { lat: 52.3748, lng: 4.8836 },
-    vibe: "spacious",
-    photo: "/cafes/the-lobby.jpg",
-    googleMapsUrl: "https://maps.google.com/?q=The+Lobby+Fizeaustraat+Amsterdam",
-    partnered: false,
-    capacity: 4,
   },
 ];
+
+/**
+ * Find the closest café to the midpoint of two neighborhoods.
+ */
+export function findCaféForDate(
+  neighborhood1: string,
+  neighborhood2: string
+): Omit<Café, "id"> {
+  const n1 = AMSTERDAM_CAFES.find((c) => c.neighborhood === neighborhood1);
+  const n2 = AMSTERDAM_CAFES.find((c) => c.neighborhood === neighborhood2);
+
+  if (n1 && n1.neighborhood === n2?.neighborhood) {
+    return n1;
+  }
+
+  // Calculate midpoint
+  const lat1 = n1?.coordinates.lat ?? 52.3676;
+  const lng1 = n1?.coordinates.lng ?? 4.9041;
+  const lat2 = n2?.coordinates.lat ?? 52.3676;
+  const lng2 = n2?.coordinates.lng ?? 4.9041;
+  const midLat = (lat1 + lat2) / 2;
+  const midLng = (lng1 + lng2) / 2;
+
+  // Find closest café to midpoint
+  let closest = AMSTERDAM_CAFES[0];
+  let minDist = Infinity;
+
+  for (const café of AMSTERDAM_CAFES) {
+    const dist = Math.sqrt(
+      Math.pow(café.coordinates.lat - midLat, 2) +
+      Math.pow(café.coordinates.lng - midLng, 2)
+    );
+    if (dist < minDist) {
+      minDist = dist;
+      closest = café;
+    }
+  }
+
+  return closest;
+}
