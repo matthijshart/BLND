@@ -11,6 +11,7 @@ export default function LandingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showExample, setShowExample] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,6 +64,12 @@ export default function LandingPage() {
                 {item.label}
               </a>
             ))}
+            <button
+              onClick={() => { setMenuOpen(false); setShowExample(true); }}
+              className="text-3xl font-display text-cream/70 hover:text-cream transition-colors"
+            >
+              Example profile
+            </button>
             <div className="w-8 h-px bg-cream/20 mt-2 mb-2" />
             <a
               href="#waitlist"
@@ -165,68 +172,6 @@ export default function LandingPage() {
           <p className="mt-5 text-ink-mid text-sm leading-relaxed max-w-sm mx-auto">
             Other apps send you to a bar at 9pm. We think you&apos;re interesting enough without three glasses of Chardonnay. Daytime. Coffee. Just you.
           </p>
-        </div>
-      </section>
-
-      {/* ─── EXAMPLE PROFILE: Compact iPhone mockup ─── */}
-      <section className="bg-cream py-16 sm:py-20 px-6">
-        <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-8 text-center">
-          A profile on BLEND
-        </p>
-
-        <div className="flex justify-center">
-          {/* iPhone shell */}
-          <div className="w-[200px] rounded-[2rem] border-[5px] border-ink/10 bg-ink p-1 shadow-xl">
-            {/* Notch */}
-            <div className="flex justify-center">
-              <div className="w-16 h-4 bg-ink rounded-b-lg" />
-            </div>
-            {/* Screen */}
-            <div className="rounded-[1.6rem] overflow-hidden bg-cream mt-0.5">
-              {/* Photo */}
-              <div className="relative aspect-[3/4]">
-                <Image
-                  src="/images/mockup.jpeg"
-                  alt="Example profile"
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/70 to-transparent" />
-                <div className="absolute bottom-2 left-3">
-                  <p className="text-white font-display text-sm">Thomas, 27</p>
-                  <p className="text-white/60 text-[8px]">Jordaan</p>
-                </div>
-                {/* Photo dots */}
-                <div className="absolute top-2 inset-x-0 flex gap-0.5 px-2">
-                  <div className="flex-1 h-[1.5px] rounded-full bg-white/80" />
-                  <div className="flex-1 h-[1.5px] rounded-full bg-white/30" />
-                  <div className="flex-1 h-[1.5px] rounded-full bg-white/30" />
-                </div>
-              </div>
-              {/* Mini content */}
-              <div className="p-2 space-y-1.5">
-                <div className="flex items-center gap-1.5 bg-stripe-white rounded-lg px-2 py-1.5">
-                  <span className="text-[9px]">☕</span>
-                  <p className="text-ink text-[8px] font-medium">Oat flat white, extra shot</p>
-                </div>
-                <div className="bg-wine/5 rounded-lg px-2 py-1.5">
-                  <p className="text-wine text-[7px] font-medium italic">Swapfiets or VanMoof?</p>
-                  <p className="text-ink text-[8px]">VanMoof — living dangerously</p>
-                </div>
-                <div className="flex items-center gap-1.5 bg-stripe-white rounded-lg px-2 py-1.5">
-                  <span className="text-[9px]">🎵</span>
-                  <div>
-                    <p className="text-ink text-[8px] font-medium">Smalltown Boy</p>
-                    <p className="text-gray text-[7px]">Bronski Beat</p>
-                  </div>
-                </div>
-              </div>
-              {/* Bottom bar hint */}
-              <div className="flex justify-center pb-1.5">
-                <div className="w-10 h-1 rounded-full bg-ink/10" />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -461,6 +406,89 @@ export default function LandingPage() {
           </span>
         </div>
       </footer>
+      {/* ─── EXAMPLE PROFILE MODAL ─── */}
+      <AnimatePresence>
+        {showExample && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-ink/80 backdrop-blur-sm flex items-center justify-center px-6"
+            onClick={() => setShowExample(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="w-[240px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close */}
+              <button
+                onClick={() => setShowExample(false)}
+                className="mb-3 text-cream/60 text-xs font-mono tracking-wider hover:text-cream transition-colors"
+              >
+                ← close
+              </button>
+
+              {/* iPhone shell */}
+              <div className="rounded-[2.2rem] border-[5px] border-cream/10 bg-ink p-1 shadow-2xl">
+                <div className="flex justify-center">
+                  <div className="w-16 h-4 bg-ink rounded-b-lg" />
+                </div>
+                <div className="rounded-[1.8rem] overflow-hidden bg-cream mt-0.5">
+                  {/* Photo */}
+                  <div className="relative aspect-[3/4]">
+                    <Image
+                      src="/images/mockup.jpeg"
+                      alt="Example profile"
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/70 to-transparent" />
+                    <div className="absolute bottom-2.5 left-3.5">
+                      <p className="text-white font-display text-base">Thomas, 27</p>
+                      <p className="text-white/60 text-[9px]">Jordaan</p>
+                    </div>
+                    <div className="absolute top-2.5 inset-x-0 flex gap-0.5 px-2.5">
+                      <div className="flex-1 h-[1.5px] rounded-full bg-white/80" />
+                      <div className="flex-1 h-[1.5px] rounded-full bg-white/30" />
+                      <div className="flex-1 h-[1.5px] rounded-full bg-white/30" />
+                    </div>
+                  </div>
+                  {/* Content */}
+                  <div className="p-2.5 space-y-1.5">
+                    <div className="flex items-center gap-2 bg-stripe-white rounded-lg px-2.5 py-2">
+                      <span className="text-[10px]">☕</span>
+                      <p className="text-ink text-[9px] font-medium">Oat flat white, extra shot</p>
+                    </div>
+                    <div className="bg-wine/5 rounded-lg px-2.5 py-2">
+                      <p className="text-wine text-[8px] font-medium italic">Swapfiets or VanMoof?</p>
+                      <p className="text-ink text-[9px] mt-0.5">VanMoof — living dangerously</p>
+                    </div>
+                    <div className="bg-wine/5 rounded-lg px-2.5 py-2">
+                      <p className="text-wine text-[8px] font-medium italic">Noord or Zuid?</p>
+                      <p className="text-ink text-[9px] mt-0.5">Noord. The ferry is half the charm</p>
+                    </div>
+                    <div className="flex items-center gap-2 bg-stripe-white rounded-lg px-2.5 py-2">
+                      <span className="text-[10px]">🎵</span>
+                      <div>
+                        <p className="text-ink text-[9px] font-medium">Smalltown Boy</p>
+                        <p className="text-gray text-[8px]">Bronski Beat</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-center pb-2">
+                    <div className="w-10 h-1 rounded-full bg-ink/10" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
