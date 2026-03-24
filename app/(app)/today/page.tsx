@@ -5,8 +5,10 @@ import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { DoneForToday } from "@/components/profiles/DoneForToday";
 import { checkForMatch, createMatch } from "@/lib/matching";
 import { useAuthContext } from "@/components/providers/AuthProvider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CoffeeBeans } from "@/components/ui/CoffeeBeans";
+import { playBlendSound, triggerHaptic } from "@/lib/sounds";
 
 export default function TodayPage() {
   const { firebaseUser, profile: currentUser } = useAuthContext();
@@ -22,6 +24,8 @@ export default function TodayPage() {
       if (isMatch) {
         await createMatch(firebaseUser.uid, targetUid);
         setMatchedUid(targetUid);
+        playBlendSound();
+        triggerHaptic();
       }
     }
   }
@@ -85,27 +89,49 @@ export default function TodayPage() {
             exit={{ opacity: 0, scale: 0.8 }}
             className="fixed inset-0 z-50 bg-wine flex flex-col items-center justify-center px-6"
           >
-            <div className="flex items-center gap-3 mb-6">
+            <CoffeeBeans />
+
+            <motion.div
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 12 }}
+              className="flex items-center gap-3 mb-6"
+            >
               <div className="w-4 h-4 rounded-full bg-cream" />
               <div className="w-px h-8 bg-cream/30" />
               <div className="w-4 h-4 rounded-full bg-cream" />
-            </div>
+            </motion.div>
 
-            <h2 className="text-5xl font-display text-cream text-center">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-5xl font-display text-cream text-center"
+            >
               It&apos;s a blend!
-            </h2>
-            <p className="text-cream/60 mt-4 text-center max-w-xs">
-              Time to plan a coffee date. We&apos;ll pick the café.
-            </p>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="text-cream/60 mt-4 text-center max-w-xs"
+            >
+              Time to plan a coffee. We&apos;ll pick the spot.
+            </motion.p>
 
-            <div className="flex flex-col gap-3 w-full max-w-xs mt-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.0 }}
+              className="flex flex-col gap-3 w-full max-w-xs mt-10"
+            >
               <button
                 onClick={() => setMatchedUid(null)}
                 className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors"
               >
                 Keep browsing
               </button>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
