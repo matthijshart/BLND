@@ -399,7 +399,7 @@ export default function ProfilePage() {
         {/* Edit button — floating */}
         <button
           onClick={() => setIsEditMode(true)}
-          className="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-4 bg-ink/40 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-medium z-20"
+          className="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-4 bg-wine text-cream px-5 py-2.5 rounded-full text-sm font-medium z-20 shadow-lg"
         >
           Edit profile
         </button>
