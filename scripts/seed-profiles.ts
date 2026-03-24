@@ -49,11 +49,86 @@ const COFFEE_ORDERS = [
 ];
 
 const PROMPTS = [
-  { question: "Swapfiets or VanMoof?", answers: ["Swapfiets — reliable is underrated", "VanMoof — I like living dangerously", "Neither, I walk everywhere"] },
-  { question: "Noord or Zuid?", answers: ["Noord. The ferry is half the charm", "Zuid. Vondelpark on a Sunday", "Oost actually, but don't tell anyone"] },
-  { question: "IJhallen or Negen Straatjes?", answers: ["IJhallen — the hunt is the fun part", "Negen Straatjes — I know what I like", "Both, depending on my mood"] },
-  { question: "What's your ideal Sunday?", answers: ["Coffee, book, canal", "Long bike ride, market, terrace", "Sleep in, brunch, repeat"] },
-  { question: "First thing you'd do in Amsterdam on a free day?", answers: ["Sit by the canal with a flat white", "Bike to Noord for lunch", "Jordaan walk and vintage shopping"] },
+  { question: "Swapfiets or VanMoof?", answers: [
+    "Swapfiets — reliable is underrated",
+    "VanMoof, even though it's bankrupt now",
+    "My grandma's omafiets. Still going strong",
+    "I just take the tram honestly",
+  ]},
+  { question: "Noord or Zuid?", answers: [
+    "Noord. The ferry is half the charm",
+    "Zuid. Vondelpark sunsets > everything",
+    "Oost. Don't sleep on Oost",
+    "Wherever the best flat white is",
+  ]},
+  { question: "IJhallen or Negen Straatjes?", answers: [
+    "IJhallen — I found my favorite jacket there",
+    "Negen Straatjes on a quiet Tuesday morning",
+    "Both but I always spend too much at IJhallen",
+    "Negen Straatjes. I like small shops with attitude",
+  ]},
+  { question: "What's your ideal Sunday?", answers: [
+    "Coffee, book, canal. In that order",
+    "Long bike ride ending at a terrace",
+    "Sleep in, cook something elaborate, eat with friends",
+    "Farmers market, then doing absolutely nothing",
+    "Vondelpark with a podcast and an overpriced croissant",
+  ]},
+  { question: "Hot take about Amsterdam?", answers: [
+    "The Jordaan is overrated and I will die on this hill",
+    "Dutch pancakes > French crêpes. Fight me",
+    "Museumplein is only good when it's empty",
+    "Albert Cuyp markt has the best €3 lunch in the city",
+    "The best coffee in Amsterdam is in Oost, not Centrum",
+  ]},
+  { question: "The last thing that made me laugh?", answers: [
+    "My own joke that nobody else found funny",
+    "A dog wearing a raincoat on a cargo bike",
+    "Trying to explain 'gezellig' to a tourist",
+    "My friend's dating app horror story",
+    "A seagull stealing someone's broodje at Centraal",
+  ]},
+  { question: "I'm looking for someone who...", answers: [
+    "doesn't check their phone during dinner",
+    "can beat me at chess (or at least tries)",
+    "has a Spotify playlist for every mood",
+    "knows the difference between a cortado and a flat white",
+    "would bike through the rain with me and still have fun",
+  ]},
+  { question: "A hill I'll die on?", answers: [
+    "Oat milk is objectively the best milk alternative",
+    "Tipping culture should not be a thing in Amsterdam",
+    "Your Spotify Wrapped says more about you than your bio",
+    "Terraces should be open year-round. Yes, even in January",
+    "Everyone should own at least one houseplant",
+  ]},
+  { question: "My most controversial opinion?", answers: [
+    "I think stroopwafels are mid",
+    "Amsterdam is better in winter than summer",
+    "Going to bed at 10pm is a flex, not a weakness",
+    "Eating alone at a restaurant is elite behavior",
+    "Heineken is fine. There, I said it",
+  ]},
+  { question: "Electric bike or normal bike?", answers: [
+    "Normal. I have legs for a reason",
+    "Electric. Life's too short for headwind",
+    "Normal for summer, electric for everything else",
+    "I walk. Controversial, I know",
+  ]},
+  { question: "Best spot in Amsterdam nobody knows about?", answers: [
+    "That tiny café behind the Westerkerk with no sign",
+    "The rooftop of NEMO at sunset. Free entrance",
+    "Flevopark on a summer morning. It's just you and the ducks",
+    "The reading room at OBA Centraal. Silence is golden",
+    "The hidden garden behind the Begijnhof",
+  ]},
+  { question: "What I order on a first coffee?", answers: [
+    "Whatever they recommend. I trust the barista",
+    "Double espresso. Shows confidence, right?",
+    "Oat flat white. I'm basic and I own it",
+    "Whatever's longest to make so the conversation keeps going",
+    "Chai latte. I know it's not coffee. I don't care",
+  ]},
 ];
 
 const SPOTIFY_SONGS = [
