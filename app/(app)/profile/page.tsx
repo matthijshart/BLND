@@ -546,13 +546,39 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Preview your profile */}
-      <div className="px-5 py-4 bg-cream/50 border-b border-wine/5">
+      {/* Preview + Share */}
+      <div className="px-5 py-4 bg-cream/50 border-b border-wine/5 flex gap-3">
         <button
           onClick={() => setShowPreview(true)}
-          className="w-full py-3 rounded-full border border-wine/20 text-wine text-sm font-medium hover:bg-wine/5 transition-colors"
+          className="flex-1 py-3 rounded-full border border-wine/20 text-wine text-sm font-medium hover:bg-wine/5 transition-colors"
         >
-          Preview your profile
+          Preview
+        </button>
+        <button
+          onClick={() => {
+            const url = `https://bl-nd.nl/p/${firebaseUser?.uid}`;
+            if (navigator.share) {
+              navigator.share({
+                title: `${profile.displayName} on BLEND`,
+                text: "Check out my profile on BLEND — where dates begin over coffee ☕",
+                url,
+              });
+            } else {
+              navigator.clipboard.writeText(url);
+              setSaved(true);
+              setTimeout(() => setSaved(false), 2000);
+            }
+          }}
+          className="flex-1 py-3 rounded-full bg-wine text-cream text-sm font-medium hover:bg-burgundy transition-colors flex items-center justify-center gap-2"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+          Share profile
         </button>
       </div>
 
