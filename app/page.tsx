@@ -114,11 +114,14 @@ export default function LandingPage() {
 
         <div className="flex gap-3 overflow-x-auto px-6 pb-4 snap-x snap-mandatory scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {[
-            { src: "/images/coffe couple.jpeg", alt: "Coffee date", aspect: "aspect-[3/4]", width: "w-56" },
-            { src: "/images/Photos _ Drinks photography _ Restaurant _ Paris _ Coffee shop _ Cafe _ Latte Art.jpeg", alt: "Latte art", aspect: "aspect-[4/5]", width: "w-48" },
-            { src: "/images/chess terrace.jpeg", alt: "Café terrace", aspect: "aspect-[3/4]", width: "w-56" },
-            { src: "/images/_.jpeg", alt: "Coffee moment", aspect: "aspect-[4/5]", width: "w-48" },
-            { src: "/images/sipping.png", alt: "Sipping coffee", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/Surf coffee.jpeg", alt: "Surf coffee", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/date.jpeg", alt: "Coffee date", aspect: "aspect-[4/5]", width: "w-48" },
+            { src: "/images/Italian spot.jpeg", alt: "Italian spot", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/koffi3.jpeg", alt: "Coffee moment", aspect: "aspect-[4/5]", width: "w-48" },
+            { src: "/images/hip.jpeg", alt: "Hip café", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/bike.jpeg", alt: "Amsterdam bike", aspect: "aspect-[4/5]", width: "w-48" },
+            { src: "/images/coffe couple.jpeg", alt: "Coffee couple", aspect: "aspect-[3/4]", width: "w-56" },
+            { src: "/images/chess terrace.jpeg", alt: "Café terrace", aspect: "aspect-[4/5]", width: "w-48" },
           ].map((photo, i) => (
             <div
               key={i}
