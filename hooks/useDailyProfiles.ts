@@ -56,7 +56,8 @@ export function useDailyProfiles() {
         const candidates = await fetchCandidateProfiles(
           firebaseUser.uid,
           profile.genderPreference || [],
-          10
+          10,
+          profile
         );
 
         if (candidates.length === 0) {
