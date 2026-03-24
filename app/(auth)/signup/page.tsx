@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { signUp, signInWithGoogle } from "@/lib/auth";
 import { getUser } from "@/lib/db";
 
@@ -51,7 +52,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-wine flex items-center justify-center px-6 relative overflow-hidden">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="min-h-dvh bg-wine flex items-center justify-center px-6 relative overflow-hidden">
       <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-burgundy opacity-40" />
       <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-burgundy opacity-30" />
 
@@ -116,6 +117,6 @@ export default function SignupPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }

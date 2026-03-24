@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 function IconToday({ active }: { active: boolean }) {
   return (
@@ -104,7 +105,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col min-h-dvh bg-cream">
-      <main className="flex-1 pb-20">{children}</main>
+      <main className="flex-1 pb-20">
+          <PageTransition>{children}</PageTransition>
+        </main>
 
       <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-stripe-white pb-[env(safe-area-inset-bottom)]">
         <div className="flex justify-around items-center h-14 max-w-lg mx-auto">
