@@ -4,6 +4,9 @@ import {
   getDoc,
   addDoc,
   collection,
+  query,
+  where,
+  getDocs,
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
@@ -152,6 +155,19 @@ export async function confirmDate(
   const newConfirmed = [...confirmedBy, uid];
 
   if (newConfirmed.length >= 2 && match.proposedSlot) {
+    // Check if a date already exists for this match
+    const existingDates = await getDocs(
+      query(collection(db, "dates"), where("matchId", "==", matchId))
+    );
+    if (!existingDates.empty) {
+      // Date already exists — just update match status
+      await updateDoc(matchRef, {
+        confirmedBy: newConfirmed,
+        status: "date_confirmed",
+      });
+      return { fullyConfirmed: true, dateId: existingDates.docs[0].id };
+    }
+
     // Both confirmed — create DateRecord
     const café = pickCafé(neighborhoodA, neighborhoodB);
     const dateTime = match.proposedSlot;
