@@ -66,7 +66,7 @@ export function DoneForToday() {
         globalSlideIndex = next;
         return next;
       });
-    }, 4000);
+    }, 2800);
     return () => clearInterval(interval);
   }, []);
 
@@ -105,17 +105,6 @@ export function DoneForToday() {
           </p>
         </div>
 
-        {/* Slide indicators */}
-        <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5 z-20">
-          {SLIDESHOW_PHOTOS.map((_, i) => (
-            <div
-              key={i}
-              className={`rounded-full transition-all duration-500 ${
-                i === slideIndex ? "w-5 h-1.5 bg-wine" : "w-1.5 h-1.5 bg-white/40"
-              }`}
-            />
-          ))}
-        </div>
       </div>
 
       {/* Countdown */}
