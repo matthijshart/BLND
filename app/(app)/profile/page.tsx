@@ -505,8 +505,25 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* Sign out — subtle */}
-      <div className="px-4 pb-6">
+      {/* About + Sign out */}
+      <div className="px-5 pb-6 pt-2 space-y-3">
+        <a
+          href="https://bl-nd.nl"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between py-3 px-4 rounded-xl bg-stripe-white"
+        >
+          <div className="flex items-center gap-3">
+            <svg width="18" height="14" viewBox="0 0 80 60">
+              <circle cx="28" cy="30" r="22" fill="#722F37" opacity="0.6" />
+              <circle cx="52" cy="30" r="22" fill="#722F37" opacity="0.6" />
+            </svg>
+            <span className="text-ink text-sm font-medium">About BLEND</span>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-light">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </a>
         <button onClick={handleSignOut} className="w-full py-3 text-gray-light text-xs">Sign out</button>
       </div>
 

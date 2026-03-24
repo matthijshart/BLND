@@ -8,6 +8,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { WelcomeScreen } from "@/components/ui/WelcomeScreen";
 
 function IconToday({ active }: { active: boolean }) {
   return (
@@ -137,6 +138,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </nav>
 
       <AddToHomescreen />
+      <WelcomeScreen />
     </div>
   );
 }

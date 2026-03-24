@@ -55,6 +55,10 @@ export default function DatesPage() {
         >
           Check your blends
         </Link>
+
+        <p className="text-gray-light text-xs mt-6 font-mono tracking-wide text-center">
+          No cocktail bars. No pressure. Just coffee.
+        </p>
       </div>
     );
   }
