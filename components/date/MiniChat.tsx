@@ -31,6 +31,21 @@ export function MiniChat({ dateId, otherName }: MiniChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Handle keyboard resize on iOS
+  useEffect(() => {
+    function handleResize() {
+      // Scroll input into view when keyboard opens
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 100);
+    }
+
+    if (typeof visualViewport !== "undefined" && visualViewport) {
+      visualViewport.addEventListener("resize", handleResize);
+      return () => visualViewport?.removeEventListener("resize", handleResize);
+    }
+  }, []);
+
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!firebaseUser || !text.trim() || sending) return;
@@ -43,7 +58,7 @@ export function MiniChat({ dateId, otherName }: MiniChatProps) {
       await sendMessage(dateId, firebaseUser.uid, msg);
     } catch (err) {
       console.error("Send error:", err);
-      setText(msg); // restore on error
+      setText(msg);
     }
     setSending(false);
     inputRef.current?.focus();
@@ -62,12 +77,9 @@ export function MiniChat({ dateId, otherName }: MiniChatProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-stripe-white bg-white/80 backdrop-blur-sm">
-        <p className="font-medium text-ink text-sm text-center">
-          Chat with {otherName}
-        </p>
-        <p className="text-gray text-xs text-center mt-0.5">
+      {/* Subtitle */}
+      <div className="px-4 py-2 bg-cream/50">
+        <p className="text-gray text-[10px] text-center font-mono uppercase tracking-wider">
           For logistics only — save the good stuff for coffee
         </p>
       </div>
@@ -112,10 +124,11 @@ export function MiniChat({ dateId, otherName }: MiniChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
+      {/* Input — sticky at bottom, respects safe area */}
       <form
         onSubmit={handleSend}
-        className="px-4 py-3 border-t border-stripe-white bg-white/80 backdrop-blur-sm"
+        className="px-4 py-3 border-t border-stripe-white bg-white"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         <div className="flex gap-2">
           <input
@@ -125,6 +138,7 @@ export function MiniChat({ dateId, otherName }: MiniChatProps) {
             onChange={(e) => setText(e.target.value)}
             placeholder="Type a message..."
             maxLength={500}
+            autoFocus
             className="flex-1 px-4 py-3 rounded-full bg-cream border border-cream text-ink text-sm placeholder:text-gray-light focus:outline-none focus:border-wine/20"
           />
           <button

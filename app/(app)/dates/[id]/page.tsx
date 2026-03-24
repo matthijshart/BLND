@@ -253,20 +253,24 @@ export default function DateDetailPage() {
       {isChatOpen && !isPast && chatOpen ? (
         /* Full chat view */
         <div className="fixed inset-0 z-50 bg-cream flex flex-col">
-          {/* Chat header with back */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-stripe-white">
-            <button
-              onClick={() => setChatOpen(false)}
-              className="text-gray text-sm shrink-0"
-            >
-              ← Back
-            </button>
-            <div className="flex-1 text-center">
-              <p className="font-display text-ink text-sm">
-                {otherUser.displayName}
-              </p>
+          {/* Chat header with back — safe area respected */}
+          <div className="bg-white border-b border-stripe-white" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+            <div className="flex items-center gap-3 px-4 py-3">
+              <button
+                onClick={() => setChatOpen(false)}
+                className="w-10 h-10 rounded-full bg-cream flex items-center justify-center shrink-0"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-ink">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <div className="flex-1 text-center">
+                <p className="font-display text-ink text-sm">
+                  {otherUser.displayName}
+                </p>
+              </div>
+              <div className="w-10" />
             </div>
-            <div className="w-12" /> {/* spacer for centering */}
           </div>
 
           {/* Chat body */}
