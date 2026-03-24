@@ -35,7 +35,7 @@ export default function LandingPage() {
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
       {/* ─── TOP BANNER: Coming soon ─── */}
       <div className="bg-ink text-cream/70 py-2 px-4 text-center text-[11px] font-mono tracking-wider">
-        Coming soon to the App Store &amp; Google Play
+        Coming soon to the App Store
       </div>
 
       {/* ─── NAV: Subtle hamburger menu ─── */}
@@ -295,10 +295,10 @@ export default function LandingPage() {
           </p>
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-7xl sm:text-8xl font-display text-ink">€8,99</span>
-            <span className="text-xl text-gray font-light">/month</span>
+            <span className="text-xl text-wine font-light">/month</span>
           </div>
           <p className="mt-3 text-gray text-sm tracking-wide">
-            Cancel every month. No strings attached.
+            <span className="text-wine">Cancel every month. No strings attached.</span>
           </p>
           <p className="mt-8 text-ink-mid text-lg leading-relaxed">
             Daily profiles. Real blends.<br />
