@@ -84,44 +84,46 @@ export function MiniChat({ dateId, otherName }: MiniChatProps) {
         </p>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray text-sm">No messages yet.</p>
-            <p className="text-gray-light text-xs mt-1">
-              Say hi! Keep it short — you&apos;ll meet soon.
-            </p>
-          </div>
-        )}
+      {/* Messages — flex-col-reverse so they stick to bottom like iMessage/Instagram */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col-reverse">
+        <div className="space-y-3">
+          {messages.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray text-sm">No messages yet.</p>
+              <p className="text-gray-light text-xs mt-1">
+                Say hi! Keep it short — you&apos;ll meet soon.
+              </p>
+            </div>
+          )}
 
-        {messages.map((msg) => {
-          const isMine = msg.senderId === firebaseUser?.uid;
-          return (
-            <div
-              key={msg.id}
-              className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-            >
+          {messages.map((msg) => {
+            const isMine = msg.senderId === firebaseUser?.uid;
+            return (
               <div
-                className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
-                  isMine
-                    ? "bg-wine text-cream rounded-br-md"
-                    : "bg-white text-ink shadow-sm rounded-bl-md"
-                }`}
+                key={msg.id}
+                className={`flex ${isMine ? "justify-end" : "justify-start"}`}
               >
-                <p className="text-sm leading-relaxed">{msg.text}</p>
-                <p
-                  className={`text-[10px] mt-1 ${
-                    isMine ? "text-cream/50" : "text-gray-light"
+                <div
+                  className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
+                    isMine
+                      ? "bg-wine text-cream rounded-br-md"
+                      : "bg-white text-ink shadow-sm rounded-bl-md"
                   }`}
                 >
-                  {formatTime(msg)}
-                </p>
+                  <p className="text-sm leading-relaxed">{msg.text}</p>
+                  <p
+                    className={`text-[10px] mt-1 ${
+                      isMine ? "text-cream/50" : "text-gray-light"
+                    }`}
+                  >
+                    {formatTime(msg)}
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
+            );
+          })}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* Input — sticky at bottom, respects safe area */}
