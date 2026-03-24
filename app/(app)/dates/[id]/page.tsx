@@ -95,12 +95,12 @@ export default function DateDetailPage() {
   if (!dateData || !otherUser) {
     return (
       <div className="px-4 pt-8 text-center">
-        <p className="text-gray">Date not found.</p>
+        <p className="text-gray">Meet not found.</p>
         <button
           onClick={() => router.push("/dates")}
           className="mt-4 text-wine font-medium"
         >
-          Back to dates
+          Back to meets
         </button>
       </div>
     );

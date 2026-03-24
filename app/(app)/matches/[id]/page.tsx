@@ -321,15 +321,15 @@ export default function MatchDetailPage() {
             <div className="w-12 h-12 rounded-full bg-wine/10 mx-auto mb-4 flex items-center justify-center">
               <span className="text-2xl">☕</span>
             </div>
-            <h3 className="font-display text-xl text-ink mb-2">Date confirmed!</h3>
+            <h3 className="font-display text-xl text-ink mb-2">Meet confirmed!</h3>
             <p className="text-gray text-sm mb-4">
-              Check the Dates tab for details and your café.
+              Check the Meets tab for details and your spot.
             </p>
             <button
               onClick={() => router.push("/dates")}
               className="text-wine font-medium"
             >
-              View your dates →
+              View your meets →
             </button>
           </div>
         )}

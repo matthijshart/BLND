@@ -17,7 +17,7 @@ export default function DatesPage() {
   if (loading) {
     return (
       <div className="px-4 pt-8">
-        <h1 className="text-2xl font-display text-ink mb-6">Dates</h1>
+        <h1 className="text-2xl font-display text-ink mb-6">Meets</h1>
         <div className="space-y-3">
           {[1, 2].map((i) => (
             <div key={i} className="rounded-2xl bg-stripe-white animate-pulse h-32" />
@@ -30,7 +30,7 @@ export default function DatesPage() {
   if (dates.length === 0) {
     return (
       <div className="px-4 pt-8">
-        <h1 className="text-2xl font-display text-ink mb-6">Dates</h1>
+        <h1 className="text-2xl font-display text-ink mb-6">Meets</h1>
 
         {/* Mood image */}
         <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
@@ -42,9 +42,9 @@ export default function DatesPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-ink/20 to-transparent" />
           <div className="absolute bottom-0 inset-x-0 p-6">
-            <h2 className="text-2xl font-display text-white">No dates yet</h2>
+            <h2 className="text-2xl font-display text-white">No meets yet</h2>
             <p className="text-white/70 text-sm mt-2 max-w-[260px] leading-relaxed">
-              Your first coffee date is one blend away. We pick the spot, you bring the charm.
+              Your first coffee meet is one blend away. We pick the spot, you bring the charm.
             </p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function DatesPage() {
 
   return (
     <div className="px-4 pt-8 pb-24">
-      <h1 className="text-2xl font-display text-ink mb-6">Dates</h1>
+      <h1 className="text-2xl font-display text-ink mb-6">Meets</h1>
 
       {/* Upcoming */}
       {upcoming.length > 0 && (
