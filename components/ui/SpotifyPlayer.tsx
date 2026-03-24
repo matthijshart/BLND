@@ -120,15 +120,16 @@ export function SpotifyPlayer({ trackUrl, autoplay = false }: SpotifyPlayerProps
 
   if (!trackId) return null;
 
-  // Fallback: regular iframe embed
+  // Fallback: regular iframe embed — always use this for reliability
   if (useFallback) {
     return (
-      <div>
+      <div className="rounded-xl overflow-hidden">
         <iframe
           src={`https://open.spotify.com/embed/track/${trackId}?theme=0&autoplay=${autoplay ? 1 : 0}`}
           width="100%"
-          height="80"
-          allow="autoplay; encrypted-media"
+          height="152"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
           className="rounded-xl border-0"
         />
       </div>
