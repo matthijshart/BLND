@@ -138,13 +138,40 @@ export default function DateDetailPage() {
         </p>
       </div>
 
-      {/* Date & Time */}
-      <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm mb-4">
+      {/* Date & Time — tap to add to calendar */}
+      <button
+        onClick={() => {
+          const end = new Date(dateTime.getTime() + 60 * 60 * 1000);
+          const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+          const ics = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//BLEND//EN",
+            "BEGIN:VEVENT",
+            `DTSTART:${fmt(dateTime)}`,
+            `DTEND:${fmt(end)}`,
+            `SUMMARY:BLEND - Coffee with ${otherUser.displayName}`,
+            `LOCATION:${dateData.caféName || "Amsterdam"}`,
+            `DESCRIPTION:Coffee meet via BLEND`,
+            "STATUS:CONFIRMED",
+            "END:VEVENT",
+            "END:VCALENDAR",
+          ].join("\r\n");
+          const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+          window.location.href = URL.createObjectURL(blob);
+        }}
+        className="mx-4 bg-white rounded-2xl p-5 shadow-sm mb-4 w-[calc(100%-2rem)] text-left"
+      >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-stripe-white flex items-center justify-center shrink-0">
-            <span className="text-xl">📅</span>
+          <div className="w-12 h-12 rounded-full bg-wine/10 flex items-center justify-center shrink-0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#722F37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <p className="font-display text-lg text-ink">
               {dateTime.toLocaleDateString("en-US", {
                 weekday: "long",
@@ -159,14 +186,15 @@ export default function DateDetailPage() {
                 hour12: false,
               })}
               {" — "}
-              {new Date(dateTime.getTime() + 45 * 60 * 1000).toLocaleTimeString(
+              {new Date(dateTime.getTime() + 60 * 60 * 1000).toLocaleTimeString(
                 "en-US",
                 { hour: "numeric", minute: "2-digit", hour12: false }
               )}
             </p>
           </div>
+          <span className="text-wine text-xs font-medium shrink-0">+ Agenda</span>
         </div>
-      </div>
+      </button>
 
       {/* Café info */}
       <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm mb-4">

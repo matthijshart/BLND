@@ -145,14 +145,6 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
   const isChatOpen = date.status === "chat_open";
   const isPast = dateTime < new Date();
 
-  function addToCalendar(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    const title = `BLEND - Coffee with ${date.otherUser.displayName}`;
-    const location = caféName !== "TBD" ? caféName : "Amsterdam";
-    openAppleCalendar(title, dateTime, location);
-  }
-
   return (
     <Link
       href={`/dates/${date.id}`}
@@ -175,31 +167,19 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
             Coffee with {date.otherUser.displayName}
           </h3>
 
-          <button
-            onClick={addToCalendar}
-            className="flex items-center gap-1.5 mt-1 group"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-wine">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-            <span className="text-ink-mid text-sm group-hover:text-wine transition-colors">
-              {dateTime.toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-              })}
-              {" at "}
-              {dateTime.toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: false,
-              })}
-            </span>
-            <span className="text-[9px] text-wine font-medium opacity-0 group-hover:opacity-100 transition-opacity">+ Add</span>
-          </button>
+          <p className="text-ink-mid text-sm mt-1">
+            {dateTime.toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+            })}
+            {" at "}
+            {dateTime.toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: false,
+            })}
+          </p>
 
           <p className="text-gray text-sm mt-0.5">
             {caféName}
