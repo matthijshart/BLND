@@ -27,6 +27,24 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
+      {/* ─── NAV: Sticky minimal header ─── */}
+      <nav className="fixed top-0 inset-x-0 z-50 bg-wine/80 backdrop-blur-md border-b border-cream/5">
+        <div className="max-w-3xl mx-auto flex items-center justify-between px-6 py-3">
+          <span className="font-display text-cream text-lg">BLEND</span>
+          <div className="flex items-center gap-6">
+            <a href="#how" className="text-cream/50 text-xs font-mono tracking-wider hover:text-cream transition-colors hidden sm:block">
+              How it works
+            </a>
+            <a href="#pricing" className="text-cream/50 text-xs font-mono tracking-wider hover:text-cream transition-colors hidden sm:block">
+              Pricing
+            </a>
+            <a href="#waitlist" className="px-4 py-1.5 rounded-full bg-cream text-wine text-xs font-medium hover:bg-stripe-white transition-colors">
+              Join waitlist
+            </a>
+          </div>
+        </div>
+      </nav>
+
       {/* ─── HERO: Full-screen crimson ─── */}
       <section className="relative min-h-dvh flex flex-col items-center justify-center bg-wine text-cream px-6 overflow-hidden">
         <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-burgundy opacity-30" />
@@ -130,7 +148,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── HOW IT WORKS: Numbered steps on deep red ─── */}
-      <section className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden">
+      <section id="how" className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden scroll-mt-12">
         <div className="absolute top-1/2 right-0 w-[500px] h-[500px] rounded-full bg-burgundy opacity-15 translate-x-1/2 -translate-y-1/2" />
 
         <div className="max-w-xl mx-auto relative z-10">
@@ -210,7 +228,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── PRICING: Clean and bold ─── */}
-      <section className="bg-stripe-white py-24 sm:py-32 px-6">
+      <section id="pricing" className="bg-stripe-white py-24 sm:py-32 px-6 scroll-mt-12">
         <div className="max-w-md mx-auto text-center">
           <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
             Simple pricing
@@ -237,7 +255,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── WAITLIST: Deep red CTA ─── */}
-      <section className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden">
+      <section id="waitlist" className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden scroll-mt-12">
         <div className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full bg-burgundy opacity-20" />
         <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-burgundy opacity-15" />
 
