@@ -30,23 +30,30 @@ export default function MatchesPage() {
     return (
       <div className="px-4 pt-8">
         <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
-        <div className="flex flex-col items-center justify-center text-center py-16 px-6">
-          <div className="w-20 h-20 rounded-full bg-wine/10 flex items-center justify-center mb-6">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-wine">
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-            </svg>
+
+        {/* Mood image */}
+        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
+          <Image
+            src="/images/coffe couple.jpeg"
+            alt="Coffee date"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-ink/20 to-transparent" />
+          <div className="absolute bottom-0 inset-x-0 p-6">
+            <h2 className="text-2xl font-display text-white">No blends yet</h2>
+            <p className="text-white/70 text-sm mt-2 max-w-[260px] leading-relaxed">
+              Your daily profiles drop at 11:00. Like someone, they like you back, and this could be you.
+            </p>
           </div>
-          <h2 className="text-2xl font-display text-ink">No blends yet</h2>
-          <p className="text-gray mt-3 max-w-[260px] leading-relaxed">
-            Your daily profiles drop at 11:00. Like someone, they like you back, and we&apos;ll set up a coffee meet-up. Simple as that.
-          </p>
-          <Link
-            href="/today"
-            className="mt-6 px-6 py-3 rounded-full bg-wine text-cream font-medium text-sm hover:bg-burgundy transition-colors"
-          >
-            Browse today&apos;s profiles
-          </Link>
         </div>
+
+        <Link
+          href="/today"
+          className="block text-center w-full py-4 rounded-full bg-wine text-cream font-medium hover:bg-burgundy transition-colors"
+        >
+          Browse today&apos;s profiles
+        </Link>
       </div>
     );
   }

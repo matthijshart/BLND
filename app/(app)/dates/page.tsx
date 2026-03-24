@@ -31,26 +31,30 @@ export default function DatesPage() {
     return (
       <div className="px-4 pt-8">
         <h1 className="text-2xl font-display text-ink mb-6">Dates</h1>
-        <div className="flex flex-col items-center justify-center text-center py-16 px-6">
-          <div className="w-20 h-20 rounded-full bg-wine/10 flex items-center justify-center mb-6">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-wine">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
+
+        {/* Mood image */}
+        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
+          <Image
+            src="/images/chess terrace.jpeg"
+            alt="Café terrace"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-ink/20 to-transparent" />
+          <div className="absolute bottom-0 inset-x-0 p-6">
+            <h2 className="text-2xl font-display text-white">No dates yet</h2>
+            <p className="text-white/70 text-sm mt-2 max-w-[260px] leading-relaxed">
+              Your first coffee date is one blend away. We pick the spot, you bring the charm.
+            </p>
           </div>
-          <h2 className="text-2xl font-display text-ink">No dates planned</h2>
-          <p className="text-gray mt-3 max-w-[260px] leading-relaxed">
-            Your first coffee date is one match away. We pick the spot, you bring the charm.
-          </p>
-          <Link
-            href="/matches"
-            className="mt-6 px-6 py-3 rounded-full bg-wine text-cream font-medium text-sm hover:bg-burgundy transition-colors"
-          >
-            Check your blends
-          </Link>
         </div>
+
+        <Link
+          href="/matches"
+          className="block text-center w-full py-4 rounded-full bg-wine text-cream font-medium hover:bg-burgundy transition-colors"
+        >
+          Check your blends
+        </Link>
       </div>
     );
   }
