@@ -193,56 +193,52 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS: Numbered steps on deep red ─── */}
-      <section id="how" className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden scroll-mt-12">
+      {/* ─── HOW IT WORKS: Compact timeline ─── */}
+      <section id="how" className="bg-wine text-cream py-20 sm:py-24 px-6 relative overflow-hidden scroll-mt-12">
         <div className="absolute top-1/2 right-0 w-[500px] h-[500px] rounded-full bg-burgundy opacity-15 translate-x-1/2 -translate-y-1/2" />
 
-        <div className="max-w-xl mx-auto relative z-10">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-12">
+        <div className="max-w-lg mx-auto relative z-10">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-10 text-center">
             How it works
           </p>
-          <div className="space-y-14">
-            {[
-              {
-                num: "01",
-                title: "Daily profiles at 11:00",
-                desc: "Not 7pm. This is coffee, not cocktails. 8–12 curated profiles every morning.",
-              },
-              {
-                num: "02",
-                title: "Like or pass",
-                desc: "No infinite swiping. Today's selection is today's selection.",
-              },
-              {
-                num: "03",
-                title: "Blend → We plan",
-                desc: "Mutual like? No chat opens. You both pick time slots, we find the overlap.",
-              },
-              {
-                num: "04",
-                title: "We pick the spot",
-                desc: "Based on both your neighborhoods. Specialty coffee, obviously.",
-              },
-              {
-                num: "05",
-                title: "Show up",
-                desc: "60 minutes. One coffee. See if there's a vibe. Done.",
-              },
-            ].map((step) => (
-              <div key={step.num} className="flex gap-8 items-baseline">
-                <span className="font-mono text-sm text-cream/25 shrink-0 w-6">
-                  {step.num}
-                </span>
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-display leading-snug">
-                    {step.title}
-                  </h3>
-                  <p className="text-cream/50 mt-2.5 leading-relaxed">
-                    {step.desc}
-                  </p>
+
+          {/* Timeline */}
+          <div className="relative">
+            {/* Connecting line */}
+            <div className="absolute left-[11px] top-3 bottom-3 w-px bg-cream/15" />
+
+            <div className="space-y-6">
+              {[
+                { label: "11:00", title: "Profiles drop", desc: "8–12 curated people. Every morning." },
+                { label: "Like", title: "Like or pass", desc: "No infinite scroll. Today is today." },
+                { label: "Blend", title: "Mutual? We plan", desc: "Pick your slots, we find the overlap." },
+                { label: "Spot", title: "We pick the café", desc: "Based on your neighborhoods." },
+                { label: "Date", title: "Show up", desc: "60 min. One coffee. That\u0027s it." },
+              ].map((step, i) => (
+                <div key={i} className="flex items-start gap-5">
+                  {/* Dot */}
+                  <div className="relative shrink-0">
+                    <div className={`w-[23px] h-[23px] rounded-full border-2 flex items-center justify-center ${
+                      i === 4 ? "border-cream bg-cream" : "border-cream/30 bg-wine"
+                    }`}>
+                      {i === 4 && (
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                  {/* Content */}
+                  <div className="pt-0.5">
+                    <div className="flex items-baseline gap-3">
+                      <span className="font-mono text-[10px] tracking-wider text-cream/30 uppercase">{step.label}</span>
+                      <h3 className="text-lg font-display">{step.title}</h3>
+                    </div>
+                    <p className="text-cream/45 text-sm mt-0.5">{step.desc}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
