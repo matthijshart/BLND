@@ -187,13 +187,15 @@ export default function ProfilePage() {
     if (!firebaseUser) return;
     setSaving(true);
     try {
-      await updateUser(firebaseUser.uid, {
-        displayName, age: parseInt(age), bio, neighborhood, interests,
-        lookingFor: lookingFor as "dating" | "friends" | "open", gender, genderPreference, coffeeOrder,
-        profileSong: profileSong || undefined,
-        prompts: prompts.length > 0 ? prompts : undefined,
+      const updates: Record<string, unknown> = {
+        displayName, age: parseInt(age) || 25, bio: bio || "", neighborhood, interests,
+        lookingFor: lookingFor as "dating" | "friends" | "open", gender, genderPreference,
+        coffeeOrder: coffeeOrder || "",
         ageRange,
-      });
+      };
+      if (profileSong) updates.profileSong = profileSong;
+      if (prompts.length > 0) updates.prompts = prompts;
+      await updateUser(firebaseUser.uid, updates);
       await refreshProfile();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);

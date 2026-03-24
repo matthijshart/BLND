@@ -7,43 +7,52 @@ import { storage } from "./firebase";
  */
 async function compressImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
+    // Skip compression for non-image files
+    if (!file.type.startsWith("image/")) {
+      return reject(new Error("Not an image"));
+    }
+
     const img = document.createElement("img");
-    img.crossOrigin = "anonymous";
     img.onload = () => {
       URL.revokeObjectURL(img.src);
-      const canvas = document.createElement("canvas");
-      const MAX_SIZE = 1200;
+      try {
+        const canvas = document.createElement("canvas");
+        const MAX_SIZE = 1200;
 
-      let { width, height } = img;
-      if (width > MAX_SIZE || height > MAX_SIZE) {
-        if (width > height) {
-          height = (height / width) * MAX_SIZE;
-          width = MAX_SIZE;
-        } else {
-          width = (width / height) * MAX_SIZE;
-          height = MAX_SIZE;
+        let { width, height } = img;
+        if (width > MAX_SIZE || height > MAX_SIZE) {
+          if (width > height) {
+            height = (height / width) * MAX_SIZE;
+            width = MAX_SIZE;
+          } else {
+            width = (width / height) * MAX_SIZE;
+            height = MAX_SIZE;
+          }
         }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas not supported"));
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Compression failed"));
+          },
+          "image/jpeg",
+          0.8
+        );
+      } catch (err) {
+        reject(err);
       }
-
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Canvas not supported"));
-      ctx.drawImage(img, 0, 0, width, height);
-
-      canvas.toBlob(
-        (blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("Compression failed"));
-        },
-        "image/jpeg",
-        0.8
-      );
     };
     img.onerror = () => {
       URL.revokeObjectURL(img.src);
       reject(new Error("Failed to load image"));
     };
+    // Don't set crossOrigin for local blob URLs
     img.src = URL.createObjectURL(file);
   });
 }
@@ -56,16 +65,14 @@ export async function uploadUserPhoto(
   const storageRef = ref(storage, `users/${uid}/photos/${index}.jpg`);
 
   try {
-    // Try compressed upload first
     const compressed = await compressImage(file);
     await uploadBytes(storageRef, compressed, {
       contentType: "image/jpeg",
     });
-  } catch (compressErr) {
-    console.warn("Compression failed, uploading original:", compressErr);
-    // Fallback: upload original file
+  } catch {
+    // Fallback: upload original file without compression
     await uploadBytes(storageRef, file, {
-      contentType: file.type,
+      contentType: file.type || "image/jpeg",
     });
   }
 

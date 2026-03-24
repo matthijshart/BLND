@@ -126,20 +126,24 @@ export default function OnboardingPage() {
       }
       setUploading(null);
 
-      await createUser(firebaseUser.uid, {
+      const userData: Record<string, unknown> = {
         displayName,
         age: parseInt(age),
         gender,
         genderPreference,
         lookingFor: lookingFor as "dating" | "friends" | "open",
-        profilePrompt: profilePrompt || undefined,
-        profileSong: profileSong || undefined,
-        coffeeOrder: coffeeOrder || undefined,
-        prompts: prompts.length > 0 ? prompts : undefined,
         bio,
         neighborhood,
         interests,
         photos: photoUrls,
+      };
+      if (profilePrompt) userData.profilePrompt = profilePrompt;
+      if (profileSong) userData.profileSong = profileSong;
+      if (coffeeOrder) userData.coffeeOrder = coffeeOrder;
+      if (prompts.length > 0) userData.prompts = prompts;
+
+      await createUser(firebaseUser.uid, {
+        ...userData,
         ageRange: [18, 99],
       });
 
