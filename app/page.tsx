@@ -41,7 +41,8 @@ export default function LandingPage() {
       {/* ─── NAV: Subtle hamburger menu ─── */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="fixed top-5 right-5 z-50 w-10 h-10 rounded-full bg-ink/20 backdrop-blur-md flex flex-col items-center justify-center gap-[5px] transition-all hover:bg-ink/30"
+        className="fixed right-5 z-50 w-10 h-10 rounded-full bg-ink/20 backdrop-blur-md flex flex-col items-center justify-center gap-[5px] transition-all hover:bg-ink/30"
+        style={{ top: "max(1.25rem, env(safe-area-inset-top, 1.25rem))" }}
         aria-label="Menu"
       >
         <span className={`block w-4 h-[1.5px] bg-cream/80 transition-all ${menuOpen ? "rotate-45 translate-y-[3.25px]" : ""}`} />
