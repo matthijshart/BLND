@@ -127,7 +127,7 @@ export function ProfileCard({ profile, currentUser, onLike, onPass, previewMode 
             {profile.profilePrompt && !profile.prompts?.length && (
               <div className="mt-5 bg-wine/5 rounded-xl p-4">
                 <p className="text-wine text-xs font-medium italic mb-1">
-                  The last thing that made me laugh out loud was...
+                  Fun fact
                 </p>
                 <p className="text-ink text-[15px]">{profile.profilePrompt}</p>
               </div>

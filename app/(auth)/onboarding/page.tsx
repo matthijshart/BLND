@@ -332,7 +332,7 @@ export default function OnboardingPage() {
             {/* Profile prompt */}
             <div>
               <p className="text-cream/60 text-sm mb-2">
-                The last thing that made you laugh out loud was...
+                A fun fact about you (optional)
               </p>
               <input
                 type="text"
