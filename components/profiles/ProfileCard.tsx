@@ -69,8 +69,8 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
         whileDrag={{ scale: 1.02 }}
         className="rounded-2xl overflow-hidden shadow-lg bg-white cursor-grab active:cursor-grabbing"
       >
-        {/* Photo section */}
-        <div className="relative aspect-[3/4]">
+        {/* Photo section — shorter to show content below */}
+        <div className="relative aspect-[4/5]">
           <Image
             src={photos[photoIndex]}
             alt={profile.displayName}
@@ -132,31 +132,43 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
           </div>
         </div>
 
-        {/* Content below photo — always visible, no click needed */}
-        <div className="p-5 space-y-3">
-          {/* Bio */}
-          {profile.bio && (
-            <p className="text-ink text-[15px] leading-relaxed">{profile.bio}</p>
-          )}
-
-          {/* Coffee order */}
+        {/* Content below photo — always visible, scroll to see */}
+        <div className="p-5 space-y-4">
+          {/* Name + coffee order as signature */}
           {profile.coffeeOrder && (
-            <div className="flex items-center gap-3 bg-cream rounded-xl px-4 py-3">
+            <div className="flex items-center gap-3 -mt-1">
               <span className="text-lg">☕</span>
-              <div>
-                <p className="text-[10px] text-gray uppercase tracking-wider">Their order</p>
-                <p className="text-ink text-sm font-medium">{profile.coffeeOrder}</p>
-              </div>
+              <p className="text-ink font-medium text-sm">{profile.coffeeOrder}</p>
             </div>
           )}
 
-          {/* Prompts */}
+          {/* Bio */}
+          {profile.bio && (
+            <p className="text-ink-mid text-[15px] leading-relaxed">{profile.bio}</p>
+          )}
+
+          {/* Prompts — alternating card styles */}
           {profile.prompts && profile.prompts.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {profile.prompts.map((p, i) => (
-                <div key={i} className="bg-wine/5 rounded-xl p-4">
-                  <p className="text-wine text-xs font-medium italic mb-1">{p.question}</p>
-                  <p className="text-ink text-[15px]">{p.answer}</p>
+                <div
+                  key={i}
+                  className={`rounded-2xl p-5 ${
+                    i % 2 === 0
+                      ? "bg-wine text-cream"
+                      : "bg-cream text-ink"
+                  }`}
+                >
+                  <p className={`text-xs font-medium italic mb-2 ${
+                    i % 2 === 0 ? "text-cream/60" : "text-wine"
+                  }`}>
+                    {p.question}
+                  </p>
+                  <p className={`text-lg font-display leading-snug ${
+                    i % 2 === 0 ? "text-cream" : "text-ink"
+                  }`}>
+                    {p.answer}
+                  </p>
                 </div>
               ))}
             </div>

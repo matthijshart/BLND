@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthContext } from "@/components/providers/AuthProvider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
 
 function IconToday({ active }: { active: boolean }) {
@@ -58,6 +60,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { firebaseUser, hasProfile, loading } = useAuthContext();
+  const [newBlends, setNewBlends] = useState(0);
 
   useEffect(() => {
     if (loading) return;
@@ -67,6 +70,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       router.push("/onboarding");
     }
   }, [firebaseUser, hasProfile, loading, router]);
+
+  // Listen for new blends — show badge
+  useEffect(() => {
+    if (!firebaseUser) return;
+    const q = query(
+      collection(db, "matches"),
+      where("users", "array-contains", firebaseUser.uid),
+      where("status", "==", "scheduling")
+    );
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setNewBlends(snap.size);
+    }, () => {});
+    return unsubscribe;
+  }, [firebaseUser]);
+
+  // Reset badge when visiting blends page
+  useEffect(() => {
+    if (pathname.startsWith("/matches")) {
+      setNewBlends(0);
+    }
+  }, [pathname]);
 
   if (loading) {
     return (
@@ -90,11 +114,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 text-[10px] font-medium tracking-wide uppercase transition-colors ${
+                className={`flex flex-col items-center gap-1 text-[10px] font-medium tracking-wide uppercase transition-colors relative ${
                   isActive ? "text-wine" : "text-gray-light"
                 }`}
               >
-                <item.Icon active={isActive} />
+                <div className="relative">
+                  <item.Icon active={isActive} />
+                  {item.href === "/matches" && newBlends > 0 && !isActive && (
+                    <span className="absolute -top-1 -right-1.5 w-4 h-4 bg-wine text-cream text-[9px] font-bold rounded-full flex items-center justify-center">
+                      {newBlends > 9 ? "9+" : newBlends}
+                    </span>
+                  )}
+                </div>
                 {item.label}
               </Link>
             );
