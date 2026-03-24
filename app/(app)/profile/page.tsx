@@ -11,6 +11,145 @@ import Image from "next/image";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+/* ─── Sortable Photo Item ─── */
+function SortablePhoto({
+  id,
+  url,
+  uploading,
+  onRemove,
+}: {
+  id: string;
+  url: string;
+  uploading: boolean;
+  onRemove: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 0,
+    opacity: isDragging ? 0.7 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="aspect-square rounded-xl overflow-hidden relative"
+    >
+      <div {...attributes} {...listeners} className="absolute inset-0 z-10 cursor-grab active:cursor-grabbing" />
+      <Image src={url} alt="" fill className="object-cover pointer-events-none" />
+      {uploading && (
+        <div className="absolute inset-0 bg-wine/60 flex items-center justify-center z-20">
+          <div className="w-5 h-5 rounded-full border-2 border-cream border-t-transparent animate-spin" />
+        </div>
+      )}
+      <button
+        onClick={(e) => { e.stopPropagation(); onRemove(); }}
+        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-ink/50 backdrop-blur-sm text-white flex items-center justify-center z-20"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      {isDragging && (
+        <div className="absolute inset-0 border-2 border-wine rounded-xl z-30 pointer-events-none" />
+      )}
+    </div>
+  );
+}
+
+/* ─── Photo Grid Editor with drag & drop ─── */
+function PhotoGridEditor({
+  photos,
+  uploading,
+  onRemove,
+  onReorder,
+  onAddClick,
+}: {
+  photos: string[];
+  uploading: number | null;
+  onRemove: (index: number) => void;
+  onReorder: (newPhotos: string[]) => void;
+  onAddClick: (slot: number) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } })
+  );
+
+  const filledPhotos = photos.filter(Boolean);
+  const photoIds = filledPhotos.map((_, i) => `photo-${i}`);
+  const emptySlots = 6 - filledPhotos.length;
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = photoIds.indexOf(active.id as string);
+    const newIndex = photoIds.indexOf(over.id as string);
+
+    const newPhotos = [...filledPhotos];
+    const [moved] = newPhotos.splice(oldIndex, 1);
+    newPhotos.splice(newIndex, 0, moved);
+    onReorder(newPhotos);
+  }
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={photoIds} strategy={rectSortingStrategy}>
+        <div className="grid grid-cols-3 gap-2">
+          {filledPhotos.map((url, index) => (
+            <SortablePhoto
+              key={photoIds[index]}
+              id={photoIds[index]}
+              url={url}
+              uploading={uploading === index}
+              onRemove={() => onRemove(index)}
+            />
+          ))}
+          {Array.from({ length: emptySlots }).map((_, i) => (
+            <button
+              key={`empty-${i}`}
+              onClick={() => onAddClick(filledPhotos.length + i)}
+              className="aspect-square rounded-xl border border-dashed border-ink/15 bg-cream flex items-center justify-center"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-ink/20">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
 
 /* ─── Photo Carousel with swipe gestures ─── */
 function PhotoCarousel({
@@ -358,7 +497,7 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* Photo grid editor */}
+      {/* Photo grid editor with drag & drop */}
       {editing === "photos" && (
         <div className="px-4 py-4 bg-white">
           <input
@@ -369,54 +508,23 @@ export default function ProfilePage() {
             onChange={handlePhotoSelect}
             className="hidden"
           />
-          <div className="grid grid-cols-3 gap-2">
-            {[0, 1, 2, 3, 4, 5].map((index) => {
-              const photoUrl = photos[index];
-              return (
-                <button
-                  key={index}
-                  onClick={() => {
-                    if (photoUrl) {
-                      removePhoto(index);
-                    } else {
-                      setActiveSlot(index);
-                      fileInputRef.current?.click();
-                    }
-                  }}
-                  className={`aspect-square rounded-xl overflow-hidden relative ${
-                    photoUrl
-                      ? ""
-                      : "border border-dashed border-ink/15 bg-cream"
-                  }`}
-                >
-                  {photoUrl ? (
-                    <>
-                      <Image src={photoUrl} alt="" fill className="object-cover" />
-                      {uploading === index && (
-                        <div className="absolute inset-0 bg-wine/60 flex items-center justify-center">
-                          <div className="w-5 h-5 rounded-full border-2 border-cream border-t-transparent animate-spin" />
-                        </div>
-                      )}
-                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-ink/50 backdrop-blur-sm text-white flex items-center justify-center">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-ink/20">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-[10px] text-gray-light text-center mt-2">Tap a photo to remove, tap + to add</p>
+          <PhotoGridEditor
+            photos={photos}
+            uploading={uploading}
+            onRemove={removePhoto}
+            onReorder={async (newPhotos: string[]) => {
+              setPhotos(newPhotos);
+              if (firebaseUser) {
+                await updateUser(firebaseUser.uid, { photos: newPhotos.filter(Boolean) });
+                await refreshProfile();
+              }
+            }}
+            onAddClick={(slot: number) => {
+              setActiveSlot(slot);
+              fileInputRef.current?.click();
+            }}
+          />
+          <p className="text-[10px] text-gray-light text-center mt-2">Drag to reorder · tap ✕ to remove · tap + to add</p>
         </div>
       )}
 
