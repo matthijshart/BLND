@@ -15,7 +15,35 @@ interface ProfileCardProps {
   previewMode?: boolean;
 }
 
-export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCardProps) {
+function getOverlaps(currentUser: User | undefined, profile: User) {
+  if (!currentUser) return { interests: new Set<string>(), promptQuestions: new Set<string>(), sameAnswer: new Set<string>(), sameCoffee: false };
+
+  const sharedInterests = new Set(
+    (currentUser.interests || []).filter((i) => (profile.interests || []).includes(i))
+  );
+
+  const myPromptMap = new Map(
+    (currentUser.prompts || []).map((p) => [p.question, p.answer])
+  );
+  const sharedQuestions = new Set<string>();
+  const sameAnswers = new Set<string>();
+
+  for (const p of profile.prompts || []) {
+    if (myPromptMap.has(p.question)) {
+      sharedQuestions.add(p.question);
+      if (myPromptMap.get(p.question) === p.answer) {
+        sameAnswers.add(p.question);
+      }
+    }
+  }
+
+  const sameCoffee = !!(currentUser.coffeeOrder && profile.coffeeOrder &&
+    currentUser.coffeeOrder.toLowerCase() === profile.coffeeOrder.toLowerCase());
+
+  return { interests: sharedInterests, promptQuestions: sharedQuestions, sameAnswer: sameAnswers, sameCoffee };
+}
+
+export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser }: ProfileCardProps) {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const [exitX, setExitX] = useState(0);
@@ -23,6 +51,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
   const [viewerOpen, setViewerOpen] = useState(false);
 
   const photos = profile.photos?.length > 0 ? profile.photos : ["/images/sipping.png"];
+  const overlaps = getOverlaps(currentUser, profile);
 
   function handleDragEnd(_: unknown, info: PanInfo) {
     const threshold = 150; // Higher threshold — need to really mean it
@@ -141,12 +170,15 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
         <div className="p-5 space-y-4">
           {/* Coffee order as signature */}
           {profile.coffeeOrder && (
-            <div className="flex items-center gap-3 -mt-1">
+            <div className={`flex items-center gap-3 -mt-1 ${overlaps.sameCoffee ? "bg-wine/8 -mx-5 px-5 py-2.5 rounded-xl" : ""}`}>
               <span className="text-lg">☕</span>
-              <div>
+              <div className="flex-1">
                 <p className="text-[9px] text-gray uppercase tracking-[0.2em]">Go-to coffee</p>
                 <p className="text-ink font-medium text-sm">{profile.coffeeOrder}</p>
               </div>
+              {overlaps.sameCoffee && (
+                <span className="text-[10px] text-wine font-medium bg-wine/10 px-2 py-0.5 rounded-full">Same!</span>
+              )}
             </div>
           )}
 
@@ -155,15 +187,27 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
             <p className="text-ink-mid text-[15px] leading-relaxed">{profile.bio}</p>
           )}
 
-          {/* Prompts — compact, clean */}
+          {/* Prompts — compact, with overlap highlights */}
           {profile.prompts && profile.prompts.length > 0 && (
             <div className="space-y-2.5">
-              {profile.prompts.map((p, i) => (
-                <div key={i} className="bg-cream rounded-xl px-4 py-3.5">
-                  <p className="text-wine text-[10px] font-medium uppercase tracking-wider mb-1">{p.question}</p>
-                  <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
-                </div>
-              ))}
+              {profile.prompts.map((p, i) => {
+                const isSameQuestion = overlaps.promptQuestions.has(p.question);
+                const isSameAnswer = overlaps.sameAnswer.has(p.question);
+                return (
+                  <div key={i} className={`rounded-xl px-4 py-3.5 ${isSameAnswer ? "bg-wine/10 border border-wine/20" : isSameQuestion ? "bg-wine/5 border border-wine/10" : "bg-cream"}`}>
+                    <div className="flex items-center justify-between">
+                      <p className="text-wine text-[10px] font-medium uppercase tracking-wider mb-1">{p.question}</p>
+                      {isSameAnswer && (
+                        <span className="text-[9px] text-wine font-medium bg-wine/15 px-2 py-0.5 rounded-full">Same answer!</span>
+                      )}
+                      {isSameQuestion && !isSameAnswer && (
+                        <span className="text-[9px] text-wine/70 font-medium">You too</span>
+                      )}
+                    </div>
+                    <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -189,17 +233,31 @@ export function ProfileCard({ profile, onLike, onPass, previewMode }: ProfileCar
             </div>
           )}
 
-          {/* Interests */}
+          {/* Interests — shared ones highlighted */}
           {profile.interests && profile.interests.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-1">
-              {profile.interests.map((interest) => (
-                <span
-                  key={interest}
-                  className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-xs font-medium border border-wine/10"
-                >
-                  {interest}
-                </span>
-              ))}
+              {/* Shared interests first */}
+              {profile.interests
+                .sort((a, b) => {
+                  const aShared = overlaps.interests.has(a) ? 0 : 1;
+                  const bShared = overlaps.interests.has(b) ? 0 : 1;
+                  return aShared - bShared;
+                })
+                .map((interest) => {
+                  const isShared = overlaps.interests.has(interest);
+                  return (
+                    <span
+                      key={interest}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium ${
+                        isShared
+                          ? "bg-wine text-cream"
+                          : "bg-wine/8 text-ink border border-wine/10"
+                      }`}
+                    >
+                      {interest}{isShared ? " ✓" : ""}
+                    </span>
+                  );
+                })}
             </div>
           )}
         </div>
