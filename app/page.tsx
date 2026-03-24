@@ -168,70 +168,62 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── EXAMPLE PROFILE: For the vibe ─── */}
-      <section className="bg-cream py-20 sm:py-24 px-6">
-        <div className="max-w-sm mx-auto">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-8 text-center">
-            A profile on BLEND
-          </p>
+      {/* ─── EXAMPLE PROFILE: Compact iPhone mockup ─── */}
+      <section className="bg-cream py-16 sm:py-20 px-6">
+        <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-8 text-center">
+          A profile on BLEND
+        </p>
 
-          {/* Profile card */}
-          <div className="rounded-2xl overflow-hidden bg-white shadow-sm">
-            {/* Photo */}
-            <div className="relative aspect-[3/4]">
-              <Image
-                src="/images/mockup.jpeg"
-                alt="Example profile"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent" />
-              <div className="absolute bottom-0 inset-x-0 p-5">
-                <h3 className="text-2xl font-display text-white">Thomas, 27</h3>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span className="text-white/60 text-sm">Jordaan</span>
-                </div>
-              </div>
+        <div className="flex justify-center">
+          {/* iPhone shell */}
+          <div className="w-[200px] rounded-[2rem] border-[5px] border-ink/10 bg-ink p-1 shadow-xl">
+            {/* Notch */}
+            <div className="flex justify-center">
+              <div className="w-16 h-4 bg-ink rounded-b-lg" />
             </div>
-
-            {/* Content */}
-            <div className="p-5 space-y-3">
-              {/* Coffee order */}
-              <div className="flex items-center gap-3 bg-cream rounded-xl px-4 py-3">
-                <span className="text-lg">☕</span>
-                <div>
-                  <p className="text-[10px] text-gray uppercase tracking-wider">Coffee order</p>
-                  <p className="text-ink text-sm font-medium">Oat flat white, extra shot</p>
+            {/* Screen */}
+            <div className="rounded-[1.6rem] overflow-hidden bg-cream mt-0.5">
+              {/* Photo */}
+              <div className="relative aspect-[3/4]">
+                <Image
+                  src="/images/mockup.jpeg"
+                  alt="Example profile"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/70 to-transparent" />
+                <div className="absolute bottom-2 left-3">
+                  <p className="text-white font-display text-sm">Thomas, 27</p>
+                  <p className="text-white/60 text-[8px]">Jordaan</p>
+                </div>
+                {/* Photo dots */}
+                <div className="absolute top-2 inset-x-0 flex gap-0.5 px-2">
+                  <div className="flex-1 h-[1.5px] rounded-full bg-white/80" />
+                  <div className="flex-1 h-[1.5px] rounded-full bg-white/30" />
+                  <div className="flex-1 h-[1.5px] rounded-full bg-white/30" />
                 </div>
               </div>
-
-              {/* Prompts */}
-              <div className="bg-wine/5 rounded-xl p-4">
-                <p className="text-wine text-xs font-medium italic">Swapfiets or VanMoof?</p>
-                <p className="text-ink text-sm mt-1">VanMoof — I like living dangerously</p>
-              </div>
-
-              <div className="bg-wine/5 rounded-xl p-4">
-                <p className="text-wine text-xs font-medium italic">Noord or Zuid?</p>
-                <p className="text-ink text-sm mt-1">Noord. The ferry is half the charm</p>
-              </div>
-
-              {/* Spotify */}
-              <div className="bg-cream rounded-xl px-4 py-3">
-                <p className="text-[10px] text-gray uppercase tracking-wider mb-2">Date soundtrack</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-wine/10 flex items-center justify-center shrink-0">
-                    <span className="text-lg">🎵</span>
-                  </div>
+              {/* Mini content */}
+              <div className="p-2 space-y-1.5">
+                <div className="flex items-center gap-1.5 bg-stripe-white rounded-lg px-2 py-1.5">
+                  <span className="text-[9px]">☕</span>
+                  <p className="text-ink text-[8px] font-medium">Oat flat white, extra shot</p>
+                </div>
+                <div className="bg-wine/5 rounded-lg px-2 py-1.5">
+                  <p className="text-wine text-[7px] font-medium italic">Swapfiets or VanMoof?</p>
+                  <p className="text-ink text-[8px]">VanMoof — living dangerously</p>
+                </div>
+                <div className="flex items-center gap-1.5 bg-stripe-white rounded-lg px-2 py-1.5">
+                  <span className="text-[9px]">🎵</span>
                   <div>
-                    <p className="text-ink text-sm font-medium">Smalltown Boy</p>
-                    <p className="text-gray text-xs">Bronski Beat</p>
+                    <p className="text-ink text-[8px] font-medium">Smalltown Boy</p>
+                    <p className="text-gray text-[7px]">Bronski Beat</p>
                   </div>
                 </div>
+              </div>
+              {/* Bottom bar hint */}
+              <div className="flex justify-center pb-1.5">
+                <div className="w-10 h-1 rounded-full bg-ink/10" />
               </div>
             </div>
           </div>
