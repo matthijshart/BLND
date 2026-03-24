@@ -182,6 +182,7 @@ const INTERESTS = [
   "specialty coffee", "cycling", "art", "vinyl", "reading", "yoga",
   "cooking", "live music", "running", "photography", "design", "travel",
   "natural wine", "cinema", "museums", "climbing", "festivals", "podcasts",
+  "sports", "tennis", "padel", "football", "surfing", "skating",
 ];
 
 export default function ProfilePage() {
