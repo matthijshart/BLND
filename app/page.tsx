@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { addToWaitlist } from "@/lib/db";
 
 export default function LandingPage() {
@@ -28,112 +27,117 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
-      {/* ─── HERO: Full-screen crimson with big typography ─── */}
+      {/* ─── HERO: Full-screen crimson ─── */}
       <section className="relative min-h-dvh flex flex-col items-center justify-center bg-wine text-cream px-6 overflow-hidden">
-        {/* Decorative circle — inspired by the red circle on cream photo, inverted */}
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-burgundy opacity-40" />
-        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-burgundy opacity-30" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-burgundy opacity-30" />
+        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-burgundy opacity-20" />
 
         <div className="relative z-10 text-center max-w-2xl">
-          <p className="font-mono text-sm tracking-[0.3em] uppercase text-cream/60 mb-6">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-8">
             Amsterdam
           </p>
-          <h1 className="text-7xl sm:text-8xl md:text-9xl font-display tracking-tight leading-[0.85]">
+          <h1 className="text-8xl sm:text-9xl md:text-[10rem] font-display tracking-tight leading-[0.82]">
             BLEND
           </h1>
-          <p className="mt-6 text-xl sm:text-2xl text-cream/80 max-w-md mx-auto leading-relaxed">
+          <div className="w-16 h-px bg-cream/20 mx-auto mt-8 mb-8" />
+          <p className="text-xl sm:text-2xl text-cream/70 max-w-sm mx-auto leading-relaxed font-light">
             Skip the chat.<br />
             Meet for real.
           </p>
 
           {/* Two dots — like the two espresso cups seen from above */}
-          <div className="flex items-center justify-center gap-4 mt-10">
-            <div className="w-3 h-3 rounded-full bg-cream/90" />
-            <div className="w-px h-6 bg-cream/30" />
-            <div className="w-3 h-3 rounded-full bg-cream/90" />
+          <div className="flex items-center justify-center gap-4 mt-12">
+            <div className="w-2.5 h-2.5 rounded-full bg-cream/80" />
+            <div className="w-px h-5 bg-cream/20" />
+            <div className="w-2.5 h-2.5 rounded-full bg-cream/80" />
           </div>
-
-          <p className="mt-6 text-cream/50 text-sm max-w-xs mx-auto">
-            Every day we pick a few people for you. Mutual like? We book the café. You just show up.
-          </p>
-
         </div>
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-cream/40 text-xs font-mono tracking-wider">scroll</span>
-          <div className="w-px h-8 bg-cream/20" />
+          <span className="text-cream/30 text-[10px] font-mono tracking-[0.3em]">scroll</span>
+          <div className="w-px h-8 bg-cream/15" />
         </div>
       </section>
 
-      {/* ─── STATEMENT: Big typographic hook with coffee cups ─── */}
-      <section className="bg-cream py-20 sm:py-28 px-6">
+      {/* ─── STATEMENT: Big typographic hook ─── */}
+      <section className="bg-cream py-24 sm:py-32 px-6">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-ink leading-[0.95] text-center">
+          <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-ink leading-[0.92] text-center">
             Less swiping.
           </h2>
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-wine leading-[0.95] mt-2 text-center">
+          <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-wine leading-[0.92] mt-3 text-center">
             More sipping.
           </h2>
+          <div className="w-12 h-px bg-wine/30 mx-auto mt-10" />
         </div>
       </section>
 
-      {/* ─── PHOTOS: Editorial spread ─── */}
+      {/* ─── PHOTOS: Editorial spread — full bleed ─── */}
       <section className="bg-cream">
-        <div className="grid grid-cols-2 gap-0">
+        <div className="grid grid-cols-2 gap-[2px]">
           <div className="relative aspect-[3/4]">
             <Image
               src="/images/sipping.png"
               alt="Pouring coffee"
               fill
               className="object-cover"
+              priority
             />
           </div>
           <div className="relative aspect-[3/4]">
             <Image
               src="/images/_.jpeg"
-              alt="Couple at a café"
+              alt="Coffee date"
               fill
               className="object-cover"
+              priority
             />
           </div>
         </div>
       </section>
 
+      {/* ─── QUOTE: One liner ─── */}
+      <section className="bg-wine py-16 sm:py-20 px-6">
+        <p className="max-w-lg mx-auto text-center text-2xl sm:text-3xl font-display text-cream leading-snug">
+          &ldquo;Dating the way it should be: face to face.&rdquo;
+        </p>
+      </section>
+
       {/* ─── MANIFESTO: The problem ─── */}
       <section className="bg-stripe-white py-24 sm:py-32 px-6">
         <div className="max-w-xl mx-auto">
-          <p className="font-mono text-xs tracking-[0.3em] uppercase text-gray mb-8">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
             The problem
           </p>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-display text-ink leading-tight">
             Your grandmother didn&apos;t need an algorithm.
           </h2>
-          <p className="mt-4 text-3xl sm:text-4xl md:text-5xl font-display text-gray-light leading-tight">
+          <p className="mt-3 text-3xl sm:text-4xl md:text-5xl font-display text-gray-light leading-tight">
             But here we are.
           </p>
-          <div className="mt-10 space-y-5 text-ink-mid text-lg leading-relaxed">
+          <div className="mt-12 space-y-6 text-ink-mid text-lg leading-relaxed">
             <p>
               Weeks of chatting that go nowhere. Infinite swiping that leads to decision fatigue.
               Alcohol-fueled evenings where nobody is really themselves.
             </p>
             <p>
               BLEND does one thing: gets two people to sit down for coffee.
-              60 minutes, daytime, at a café we pick. That&apos;s it.
+              60 minutes, daytime, at a spot we pick. That&apos;s it.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS: Deep red section with steps ─── */}
+      {/* ─── HOW IT WORKS: Numbered steps on deep red ─── */}
       <section className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden">
-        <div className="absolute top-1/2 right-0 w-96 h-96 rounded-full bg-burgundy opacity-20 translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-1/2 right-0 w-[500px] h-[500px] rounded-full bg-burgundy opacity-15 translate-x-1/2 -translate-y-1/2" />
 
         <div className="max-w-xl mx-auto relative z-10">
-          <p className="font-mono text-xs tracking-[0.3em] uppercase text-cream/50 mb-8">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-12">
             How it works
           </p>
-          <div className="space-y-12">
+          <div className="space-y-14">
             {[
               {
                 num: "01",
@@ -147,12 +151,12 @@ export default function LandingPage() {
               },
               {
                 num: "03",
-                title: "Match → We plan",
+                title: "Blend → We plan",
                 desc: "Mutual like? No chat opens. You both pick time slots, we find the overlap.",
               },
               {
                 num: "04",
-                title: "We pick the café",
+                title: "We pick the spot",
                 desc: "Based on both your neighborhoods. Specialty coffee, obviously.",
               },
               {
@@ -161,15 +165,15 @@ export default function LandingPage() {
                 desc: "60 minutes. One coffee. See if there's a vibe. Done.",
               },
             ].map((step) => (
-              <div key={step.num} className="flex gap-6 items-baseline">
-                <span className="font-mono text-sm text-cream/40 shrink-0">
+              <div key={step.num} className="flex gap-8 items-baseline">
+                <span className="font-mono text-sm text-cream/25 shrink-0 w-6">
                   {step.num}
                 </span>
                 <div>
-                  <h3 className="text-xl sm:text-2xl font-display">
+                  <h3 className="text-xl sm:text-2xl font-display leading-snug">
                     {step.title}
                   </h3>
-                  <p className="text-cream/60 mt-2 leading-relaxed">
+                  <p className="text-cream/50 mt-2.5 leading-relaxed">
                     {step.desc}
                   </p>
                 </div>
@@ -179,48 +183,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── PRICING: Simple, bold ─── */}
-      <section className="bg-cream py-24 sm:py-32 px-6">
-        <div className="max-w-md mx-auto text-center">
-          <p className="font-mono text-xs tracking-[0.3em] uppercase text-gray mb-8">
-            Simple pricing
-          </p>
-          <div className="flex items-baseline justify-center gap-1">
-            <span className="text-6xl sm:text-7xl font-display text-ink">€8,99</span>
-            <span className="text-xl text-gray">/month</span>
-          </div>
-          <p className="mt-6 text-ink-mid text-lg leading-relaxed">
-            Daily profiles. Real blends.<br />
-            Spot selected for you.
-          </p>
-
-          <div className="w-px h-10 bg-ink/10 mx-auto mt-10" />
-
-          <p className="mt-10 text-2xl sm:text-3xl font-display text-ink leading-snug">
-            Join the waitlist.<br />
-            <span className="text-wine">First 2 months free.</span>
-          </p>
-          <p className="mt-3 text-gray text-sm tracking-wide">
-            No commitment. Cancel anytime.
-          </p>
-        </div>
-      </section>
-
       {/* ─── FOR EVERYONE: Inclusive positioning ─── */}
-      <section className="bg-stripe-white py-24 sm:py-32 px-6">
+      <section className="bg-cream py-24 sm:py-32 px-6">
         <div className="max-w-lg mx-auto text-center">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
+            For everyone
+          </p>
           <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug">
-            Whether you&apos;re looking for love, friendship, or just someone to grab coffee with.
+            Looking for love, friendship, or just someone to grab coffee with.
           </h2>
           <p className="mt-6 text-ink-mid text-lg leading-relaxed max-w-md mx-auto">
-            BLEND isn&apos;t just for dating. New to Amsterdam? Looking for your people? We get two humans to sit down, face to face, over good coffee. That&apos;s it.
+            New to Amsterdam? Looking for your people? We get two humans to sit down, face to face, over good coffee.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-3 mt-10">
+          <div className="flex flex-wrap justify-center gap-2.5 mt-10">
             {["Dating", "Friendship", "New in town", "Expats", "Coffee people"].map((tag) => (
               <span
                 key={tag}
-                className="px-5 py-2 rounded-full bg-wine/10 text-wine text-sm font-medium"
+                className="px-5 py-2 rounded-full bg-wine/8 text-wine text-sm font-medium border border-wine/10"
               >
                 {tag}
               </span>
@@ -229,42 +209,74 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── WAITLIST: Deep red, big CTA ─── */}
+      {/* ─── PRICING: Clean and bold ─── */}
+      <section className="bg-stripe-white py-24 sm:py-32 px-6">
+        <div className="max-w-md mx-auto text-center">
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
+            Simple pricing
+          </p>
+          <div className="flex items-baseline justify-center gap-2">
+            <span className="text-7xl sm:text-8xl font-display text-ink">€8,99</span>
+            <span className="text-xl text-gray font-light">/month</span>
+          </div>
+          <p className="mt-8 text-ink-mid text-lg leading-relaxed">
+            Daily profiles. Real blends.<br />
+            Spot selected for you.
+          </p>
+
+          <div className="w-px h-12 bg-ink/8 mx-auto mt-12" />
+
+          <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
+            Join the waitlist.<br />
+            <span className="text-wine">First 2 months free.</span>
+          </p>
+          <p className="mt-4 text-gray text-sm tracking-wide">
+            No commitment. Cancel anytime.
+          </p>
+        </div>
+      </section>
+
+      {/* ─── WAITLIST: Deep red CTA ─── */}
       <section className="bg-wine text-cream py-24 sm:py-32 px-6 relative overflow-hidden">
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-burgundy opacity-25" />
+        <div className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full bg-burgundy opacity-20" />
+        <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-burgundy opacity-15" />
 
         <div className="max-w-md mx-auto text-center relative z-10">
           <h2 className="text-4xl sm:text-5xl font-display leading-tight">
             Where dates<br />begin.
           </h2>
-          <p className="mt-4 text-cream/60">
+          <p className="mt-5 text-cream/50 max-w-xs mx-auto">
             Launching in Amsterdam. Join the waitlist and get 2 months free.
           </p>
 
           {submitted ? (
-            <div className="mt-10">
-              <div className="w-4 h-4 rounded-full bg-cream mx-auto mb-4" />
-              <p className="text-xl font-display">You&apos;re in.</p>
-              <p className="text-cream/60 text-sm mt-2">
+            <div className="mt-12">
+              <div className="w-12 h-12 rounded-full border-2 border-cream/40 mx-auto mb-5 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-cream">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <p className="text-2xl font-display">You&apos;re in.</p>
+              <p className="text-cream/50 text-sm mt-3 max-w-xs mx-auto">
                 Your first 2 months are on us. We&apos;ll reach out when it&apos;s your turn.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-10 space-y-3">
+            <form onSubmit={handleSubmit} className="mt-12 space-y-3">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="w-full px-6 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 text-center text-lg transition-colors"
+                className="w-full px-6 py-4 rounded-full bg-cream/8 text-cream border border-cream/15 placeholder:text-cream/25 focus:outline-none focus:border-cream/40 text-center text-lg transition-colors"
               />
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
+                className="w-full px-6 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-all disabled:opacity-50"
               >
-                {isSubmitting ? "Joining..." : "Join the waitlist — 2 months free"}
+                {isSubmitting ? "Joining..." : "Join the waitlist"}
               </button>
               {error && (
                 <p className="text-coral text-sm mt-2">{error}</p>
@@ -275,10 +287,10 @@ export default function LandingPage() {
       </section>
 
       {/* ─── FOOTER: Minimal ─── */}
-      <footer className="bg-ink py-8 px-6">
+      <footer className="bg-ink py-10 px-6">
         <div className="max-w-xl mx-auto flex items-center justify-between">
-          <span className="font-display text-cream/80 text-lg">BLEND</span>
-          <span className="text-cream/30 text-xs font-mono">
+          <span className="font-display text-cream/60 text-lg">BLEND</span>
+          <span className="text-cream/20 text-[10px] font-mono tracking-wider">
             Amsterdam, 2026
           </span>
         </div>
