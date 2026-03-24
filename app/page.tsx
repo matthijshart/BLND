@@ -345,10 +345,16 @@ export default function LandingPage() {
           <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
             Simple pricing
           </p>
+          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine mb-3">
+            Only
+          </p>
           <div className="flex items-baseline justify-center gap-2">
             <span className="text-7xl sm:text-8xl font-display text-ink">€8,99</span>
             <span className="text-xl text-gray font-light">/month</span>
           </div>
+          <p className="mt-3 text-gray text-sm tracking-wide">
+            Cancel every month. No strings attached.
+          </p>
           <p className="mt-8 text-ink-mid text-lg leading-relaxed">
             Daily profiles. Real blends.<br />
             Spot selected for you.
@@ -359,9 +365,6 @@ export default function LandingPage() {
           <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
             Join the waitlist.<br />
             <span className="text-wine">First 2 months free.</span>
-          </p>
-          <p className="mt-4 text-gray text-sm tracking-wide">
-            No commitment. Cancel anytime.
           </p>
         </div>
       </section>
