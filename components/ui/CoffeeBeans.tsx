@@ -2,14 +2,14 @@
 
 import { motion } from "framer-motion";
 
-const BEANS = Array.from({ length: 20 }, (_, i) => ({
+const BEANS = Array.from({ length: 30 }, (_, i) => ({
   id: i,
-  x: Math.random() * 100, // % from left
-  delay: Math.random() * 0.6,
-  duration: 1.5 + Math.random() * 1.5,
-  rotation: Math.random() * 720 - 360,
-  size: 14 + Math.random() * 10,
-  drift: (Math.random() - 0.5) * 60,
+  x: Math.random() * 100,
+  delay: Math.random() * 1.2,
+  duration: 3 + Math.random() * 2.5,
+  rotation: Math.random() * 540 - 270,
+  size: 24 + Math.random() * 18,
+  drift: (Math.random() - 0.5) * 50,
 }));
 
 /**
@@ -23,23 +23,23 @@ export function CoffeeBeans() {
         <motion.div
           key={bean.id}
           initial={{
-            top: "-5%",
+            top: "-8%",
             left: `${bean.x}%`,
-            opacity: 1,
+            opacity: 0,
             rotate: 0,
-            scale: 0.5,
+            scale: 0.3,
           }}
           animate={{
-            top: "105%",
+            top: "110%",
             left: `${bean.x + bean.drift}%`,
-            opacity: [1, 1, 0.8, 0],
+            opacity: [0, 1, 1, 1, 0.6, 0],
             rotate: bean.rotation,
-            scale: [0.5, 1, 1, 0.8],
+            scale: [0.3, 1.1, 1, 1, 0.9],
           }}
           transition={{
             duration: bean.duration,
             delay: bean.delay,
-            ease: [0.25, 0.46, 0.45, 0.94],
+            ease: [0.15, 0.6, 0.4, 0.95],
           }}
           className="absolute"
           style={{ fontSize: bean.size }}
@@ -50,7 +50,6 @@ export function CoffeeBeans() {
             viewBox="0 0 24 24"
             fill="none"
           >
-            {/* Coffee bean shape */}
             <ellipse
               cx="12"
               cy="12"
@@ -59,7 +58,6 @@ export function CoffeeBeans() {
               fill="#5C3D2E"
               opacity="0.9"
             />
-            {/* Bean line */}
             <path
               d="M12 3C10 7 10 17 12 21"
               stroke="#3E2417"
@@ -67,7 +65,6 @@ export function CoffeeBeans() {
               fill="none"
               strokeLinecap="round"
             />
-            {/* Highlight */}
             <ellipse
               cx="9.5"
               cy="9"
