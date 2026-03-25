@@ -198,12 +198,10 @@ export default function LandingPage() {
           </p>
           <div className="mt-12 space-y-6 text-ink-mid text-lg leading-relaxed">
             <p>
-              Weeks of chatting that go nowhere. Infinite swiping that leads to decision fatigue.
-              Alcohol-fueled evenings where nobody is really themselves.
+              Dating apps promised connection but gave you a screen to hide behind. BLEND removes everything that gets in the way — the endless texting, the choosing where to go, the overthinking what to say first.
             </p>
             <p>
-              BLEND does one thing: gets two people to sit down for coffee.
-              60 minutes, daytime, at a spot we pick. That&apos;s it.
+              We pick the spot. We pick the time. Just coffee, during the day, low-key. The only thing left is you, someone worth talking to, and a flat white getting cold.
             </p>
           </div>
         </div>

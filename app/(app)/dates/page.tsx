@@ -8,10 +8,10 @@ export default function DatesPage() {
   const { dates, loading } = useDates();
 
   const upcoming = dates.filter((d) =>
-    ["upcoming", "chat_open"].includes(d.status)
+    ["upcoming", "chat_open", "second_cup"].includes(d.status)
   );
   const past = dates.filter((d) =>
-    ["completed", "cancelled", "no_show"].includes(d.status)
+    ["completed", "cancelled", "no_show"].includes(d.status) && d.status !== "second_cup"
   );
 
   if (loading) {
@@ -142,8 +142,9 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
   const dateTime = date.dateTime?.toDate?.() || new Date(date.dateTime as unknown as string);
   const caféName = (date as unknown as Record<string, string>).caféName || "TBD";
   const caféVibe = (date as unknown as Record<string, string>).caféVibe || "";
-  const isChatOpen = date.status === "chat_open";
-  const isPast = dateTime < new Date();
+  const isChatOpen = date.status === "chat_open" || date.status === "second_cup";
+  const isSecondCup = date.status === "second_cup";
+  const isPast = dateTime < new Date() && !isSecondCup;
 
   return (
     <Link
@@ -164,7 +165,7 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
 
         <div className="flex-1 min-w-0">
           <h3 className="font-display text-lg text-ink">
-            Coffee with {date.otherUser.displayName}
+            {isSecondCup ? "Second cup" : "Coffee"} with {date.otherUser.displayName}
           </h3>
 
           <p className="text-ink-mid text-sm mt-1">
@@ -189,7 +190,12 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
           </p>
         </div>
 
-        {isChatOpen && (
+        {isSecondCup && (
+          <span className="px-2.5 py-1 rounded-full bg-wine/10 text-wine text-xs font-medium shrink-0">
+            ☕☕ Second cup
+          </span>
+        )}
+        {isChatOpen && !isSecondCup && (
           <span className="px-2.5 py-1 rounded-full bg-coral/10 text-coral text-xs font-medium shrink-0">
             Chat open
           </span>

@@ -114,8 +114,9 @@ export default function DateDetailPage() {
     || new Date(dateData.dateTime as unknown as string);
   const chatOpenAt = dateData.chatOpenAt?.toDate?.()
     || new Date(dateData.chatOpenAt as unknown as string);
-  const isChatOpen = new Date() >= chatOpenAt;
-  const isPast = dateTime < new Date();
+  const isSecondCup = dateData.status === "second_cup";
+  const isChatOpen = isSecondCup || new Date() >= chatOpenAt;
+  const isPast = dateTime < new Date() && !isSecondCup;
 
   // Pre-meet calmer message
   const calmerMessage = (() => {
@@ -147,15 +148,29 @@ export default function DateDetailPage() {
 
       {/* Countdown hero */}
       <div className="mx-4 bg-wine rounded-2xl p-8 text-center mb-6">
-        <p className="text-cream/60 text-sm">
-          {isPast ? "Date was" : "Date in"}
-        </p>
-        <p className="text-5xl font-display text-cream mt-2 mb-3">
-          {isPast ? "Done" : countdown}
-        </p>
-        <p className="text-cream/80 text-sm">
-          Coffee with {otherUser.displayName}
-        </p>
+        {isSecondCup ? (
+          <>
+            <p className="text-cream/60 text-sm">You both want a</p>
+            <p className="text-5xl font-display text-cream mt-2 mb-3">☕☕</p>
+            <p className="text-cream/60 text-sm">Second cup</p>
+            <p className="text-cream/80 text-sm mt-2">
+              with {otherUser.displayName}
+            </p>
+            <p className="text-cream/50 text-xs mt-3">Chat is open — plan your next coffee!</p>
+          </>
+        ) : (
+          <>
+            <p className="text-cream/60 text-sm">
+              {isPast ? "Date was" : "Date in"}
+            </p>
+            <p className="text-5xl font-display text-cream mt-2 mb-3">
+              {isPast ? "Done" : countdown}
+            </p>
+            <p className="text-cream/80 text-sm">
+              Coffee with {otherUser.displayName}
+            </p>
+          </>
+        )}
       </div>
 
       {/* Date & Time — tap to add to calendar */}

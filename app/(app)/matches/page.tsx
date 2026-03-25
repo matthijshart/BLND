@@ -111,6 +111,8 @@ export default function MatchesPage() {
                     ? "bg-blue/10 text-blue"
                     : match.status === "date_proposed"
                     ? "bg-coral/10 text-coral"
+                    : match.status === "second_cup"
+                    ? "bg-wine/15 text-wine"
                     : "bg-stripe-white text-gray"
                 }`}
               >
@@ -120,6 +122,8 @@ export default function MatchesPage() {
                   ? "Confirm meet"
                   : match.status === "date_confirmed"
                   ? "Meet planned ✓"
+                  : match.status === "second_cup"
+                  ? "☕☕ Second cup"
                   : match.status}
               </span>
             </div>

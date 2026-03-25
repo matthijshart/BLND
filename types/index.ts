@@ -48,7 +48,8 @@ export interface Match {
     | "date_confirmed"
     | "completed"
     | "expired"
-    | "cancelled";
+    | "cancelled"
+    | "second_cup";
   availability: {
     [uid: string]: string[]; // array of ISO datetime slots
   };
@@ -73,7 +74,7 @@ export interface DateRecord {
   users: [string, string];
   caféId: string;
   dateTime: Timestamp;
-  status: "upcoming" | "chat_open" | "completed" | "cancelled" | "no_show";
+  status: "upcoming" | "chat_open" | "completed" | "cancelled" | "no_show" | "second_cup";
   chatOpenAt: Timestamp; // 2 hours before dateTime
   messages: Message[];
   ratings?: {
