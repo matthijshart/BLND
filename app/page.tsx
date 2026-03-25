@@ -227,9 +227,9 @@ export default function LandingPage() {
               {[
                 { label: "11:00", title: "Profiles drop", desc: "8–12 curated people. Every morning." },
                 { label: "Like", title: "Like or pass", desc: "No infinite scroll. Today is today." },
-                { label: "Blend", title: "Mutual? We plan", desc: "Pick your slots, we find the overlap." },
-                { label: "Spot", title: "We pick the coffee spot", desc: "Based on your neighborhoods." },
-                { label: "Date", title: "Show up", desc: "60 min. One coffee. That\u0027s it." },
+                { label: "Blend", title: "It\u0027s a blend", desc: "You both liked each other. Now pick your free slots — Fri to Sun, daytime." },
+                { label: "Spot", title: "We handle the rest", desc: "We match your times, pick a coffee spot between your neighborhoods." },
+                { label: "Meet", title: "Show up", desc: "60 min. One coffee. No small talk beforehand. That\u0027s it." },
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-5">
                   {/* Dot */}
