@@ -8,9 +8,10 @@ import type { Message } from "@/types";
 interface MiniChatProps {
   dateId: string;
   otherName: string;
+  calmerMessage?: string;
 }
 
-export function MiniChat({ dateId, otherName }: MiniChatProps) {
+export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
   const { firebaseUser } = useAuthContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -87,7 +88,23 @@ export function MiniChat({ dateId, otherName }: MiniChatProps) {
       {/* Messages — flex-col-reverse so they stick to bottom like iMessage/Instagram */}
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col-reverse">
         <div className="space-y-3">
-          {messages.length === 0 && (
+          {/* BLEND pre-meet calmer message */}
+          {calmerMessage && (
+            <div className="flex justify-center mb-4">
+              <div className="max-w-[85%] bg-wine/5 border border-wine/10 rounded-2xl px-4 py-3 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                  <svg width="12" height="12" viewBox="0 0 80 60">
+                    <circle cx="28" cy="30" r="18" fill="#722F37" opacity="0.5" />
+                    <circle cx="52" cy="30" r="18" fill="#722F37" opacity="0.5" />
+                  </svg>
+                  <span className="text-wine text-[10px] font-medium uppercase tracking-wider">BLEND</span>
+                </div>
+                <p className="text-ink text-sm leading-relaxed">{calmerMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {messages.length === 0 && !calmerMessage && (
             <div className="text-center py-12">
               <p className="text-gray text-sm">No messages yet.</p>
               <p className="text-gray-light text-xs mt-1">

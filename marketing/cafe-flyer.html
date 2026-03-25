@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLEND Café Flyer — A6 Print Ready</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #e8e4dc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 50px;
+      padding: 40px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: #6b6660;
+      margin-bottom: 12px;
+    }
+
+    /* A6: 105mm x 148mm — displayed at ~60% */
+    .flyer {
+      width: 380px;
+      height: 535px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    }
+
+    /* ─── FRONT ─── */
+    .front {
+      background: #722F37;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 44px 36px;
+      position: relative;
+    }
+
+    .front::before {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      right: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(240, 235, 227, 0.05);
+    }
+
+    .front::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      left: -40px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(240, 235, 227, 0.04);
+    }
+
+    .front .top-logo {
+      font-family: 'DM Serif Display', serif;
+      color: #f0ebe3;
+      font-size: 18px;
+      letter-spacing: 0.2em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .front .main-quote {
+      font-family: 'DM Serif Display', serif;
+      color: #f0ebe3;
+      font-size: 28px;
+      line-height: 1.3;
+      position: relative;
+      z-index: 1;
+    }
+
+    .front .main-quote .dim {
+      color: rgba(240, 235, 227, 0.45);
+    }
+
+    .front .bottom-section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .front .divider {
+      width: 32px;
+      height: 1px;
+      background: rgba(240, 235, 227, 0.2);
+      margin-bottom: 16px;
+    }
+
+    .front .sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: rgba(240, 235, 227, 0.4);
+      line-height: 1.8;
+    }
+
+    /* ─── BACK ─── */
+    .back {
+      background: #f0ebe3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 44px 36px;
+      text-align: center;
+      position: relative;
+    }
+
+    .back .top {
+      width: 100%;
+    }
+
+    .back .logo-back {
+      font-family: 'DM Serif Display', serif;
+      color: #722F37;
+      font-size: 32px;
+      letter-spacing: 0.12em;
+    }
+
+    .back .tagline-back {
+      font-family: 'DM Serif Display', serif;
+      color: #1a1817;
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    .back .middle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .back .how-it-works {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.35em;
+      color: #6b6660;
+      margin-bottom: 20px;
+    }
+
+    .back .steps {
+      text-align: left;
+      width: 100%;
+    }
+
+    .back .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .back .step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #722F37;
+      opacity: 0.5;
+      padding-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .back .step-text {
+      font-size: 13px;
+      color: #1a1817;
+      line-height: 1.4;
+    }
+
+    .back .bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .back .qr-box {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .back .qr-box span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: #6b6660;
+    }
+
+    .back .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #722F37;
+      letter-spacing: 0.05em;
+    }
+
+    .back .fine-print {
+      font-size: 9px;
+      color: #a39e96;
+      margin-top: 6px;
+    }
+
+    @media print {
+      body { background: white; padding: 10mm; }
+      .label { display: none; }
+      .flyer {
+        box-shadow: none;
+        border: 0.5px solid #ddd;
+        width: 105mm;
+        height: 148mm;
+        border-radius: 3mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <p class="label">Front — A6 Flyer</p>
+    <div class="flyer front">
+      <span class="top-logo">BLEND</span>
+
+      <div class="main-quote">
+        "If you'd rather meet someone over coffee than on an app<span class="dim">...</span><br><br>
+        <span class="dim">here's an app for that."</span>
+      </div>
+
+      <div class="bottom-section">
+        <div class="divider"></div>
+        <p class="sub">
+          No swiping. No chatting.<br>
+          Just coffee. Just you two.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label">Back — A6 Flyer</p>
+    <div class="flyer back">
+      <div class="top">
+        <div class="logo-back">BLEND</div>
+        <div class="tagline-back">Where dates begin.</div>
+      </div>
+
+      <div class="middle">
+        <p class="how-it-works">How it works</p>
+        <div class="steps">
+          <div class="step">
+            <span class="step-num">01</span>
+            <span class="step-text">Every day at 11:00, you get fresh profiles.</span>
+          </div>
+          <div class="step">
+            <span class="step-num">02</span>
+            <span class="step-text">Like someone. If they like you back — it's a blend.</span>
+          </div>
+          <div class="step">
+            <span class="step-num">03</span>
+            <span class="step-text">We pick the coffee spot. You show up. 60 minutes.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="qr-box">
+          <span>QR → bl-nd.nl</span>
+        </div>
+        <p class="url">bl-nd.nl</p>
+        <p class="fine-print">Skip the chat. Meet for real.</p>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6b6660; max-width: 400px; text-align: center; line-height: 1.6;">
+    Print at A6 (105 × 148 mm).<br>
+    350gsm matte cardstock. Double-sided.<br>
+    Replace QR placeholder with actual QR → bl-nd.nl
+  </p>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLEND Café Card — Print Ready</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #e8e4dc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 40px;
+      padding: 40px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: #6b6660;
+      margin-bottom: 12px;
+    }
+
+    /* Card dimensions: 85mm x 55mm at 300dpi ≈ 1004px x 650px */
+    /* Displayed at 50% for screen */
+    .card {
+      width: 502px;
+      height: 325px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    }
+
+    /* ─── FRONT ─── */
+    .front {
+      background: #722F37;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 36px 40px;
+      position: relative;
+    }
+
+    .front::before {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      right: -60px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(240, 235, 227, 0.06);
+    }
+
+    .front .quote {
+      font-family: 'DM Serif Display', serif;
+      color: #f0ebe3;
+      font-size: 22px;
+      line-height: 1.35;
+      max-width: 380px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .front .quote .accent {
+      color: rgba(240, 235, 227, 0.5);
+    }
+
+    .front .bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+
+    .front .logo {
+      font-family: 'DM Serif Display', serif;
+      color: #f0ebe3;
+      font-size: 14px;
+      letter-spacing: 0.15em;
+    }
+
+    .front .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(240, 235, 227, 0.4);
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    /* ─── BACK ─── */
+    .back {
+      background: #f0ebe3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .back .logo-back {
+      font-family: 'DM Serif Display', serif;
+      color: #722F37;
+      font-size: 28px;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+    }
+
+    .back .qr-placeholder {
+      width: 120px;
+      height: 120px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .back .qr-placeholder img {
+      width: 104px;
+      height: 104px;
+    }
+
+    .back .qr-placeholder span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: #6b6660;
+    }
+
+    .back .url {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #722F37;
+      letter-spacing: 0.05em;
+    }
+
+    .back .subtitle {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: #6b6660;
+      margin-top: 8px;
+    }
+
+    /* ─── PRINT STYLES ─── */
+    @media print {
+      body {
+        background: white;
+        padding: 10mm;
+      }
+      .label { display: none; }
+      .card {
+        box-shadow: none;
+        border: 0.5px solid #ddd;
+        /* Actual size at 96dpi screen: */
+        width: 85mm;
+        height: 55mm;
+        border-radius: 3mm;
+      }
+      .front { padding: 7mm 8mm; }
+      .front .quote { font-size: 14pt; }
+      .front .logo { font-size: 9pt; }
+      .back { padding: 7mm 8mm; }
+      .back .logo-back { font-size: 18pt; }
+      .back .qr-placeholder { width: 22mm; height: 22mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <p class="label">Front</p>
+    <div class="card front">
+      <div class="quote">
+        "If you'd rather meet someone over coffee than on an app<span class="accent">...</span><br><br>
+        <span class="accent">here's an app for that."</span>
+      </div>
+      <div class="bottom-row">
+        <span class="logo">BLEND</span>
+        <span class="tagline">Where dates begin</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label">Back</p>
+    <div class="card back">
+      <div class="logo-back">BLEND</div>
+      <div class="qr-placeholder">
+        <!-- Replace with actual QR code image pointing to bl-nd.nl -->
+        <span>QR → bl-nd.nl</span>
+      </div>
+      <p class="url">bl-nd.nl</p>
+      <p class="subtitle">Skip the chat. Meet for real.</p>
+    </div>
+  </div>
+
+  <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6b6660; max-width: 400px; text-align: center; line-height: 1.6;">
+    Print at 85 × 55 mm (standard business card).<br>
+    Replace QR placeholder with actual QR code → bl-nd.nl<br>
+    Use 350gsm matte cardstock for premium feel.
+  </p>
+
+</body>
+</html>

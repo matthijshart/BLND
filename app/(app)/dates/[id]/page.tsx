@@ -8,6 +8,8 @@ import { db } from "@/lib/firebase";
 import { getUser } from "@/lib/db";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { MiniChat } from "@/components/date/MiniChat";
+import { updateDoc } from "firebase/firestore";
+import { motion, AnimatePresence } from "framer-motion";
 import type { DateRecord, User } from "@/types";
 
 interface DateData extends DateRecord {
@@ -20,12 +22,14 @@ interface DateData extends DateRecord {
 export default function DateDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { firebaseUser } = useAuthContext();
+  const { firebaseUser, profile: profileData } = useAuthContext();
   const [dateData, setDateData] = useState<DateData | null>(null);
   const [otherUser, setOtherUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [secondCupSubmitted, setSecondCupSubmitted] = useState(false);
+  const [showSecondCupResult, setShowSecondCupResult] = useState(false);
 
   // Real-time date subscription
   useEffect(() => {
@@ -112,6 +116,22 @@ export default function DateDetailPage() {
     || new Date(dateData.chatOpenAt as unknown as string);
   const isChatOpen = new Date() >= chatOpenAt;
   const isPast = dateTime < new Date();
+
+  // Pre-meet calmer message
+  const calmerMessage = (() => {
+    if (!otherUser || !dateData) return undefined;
+    const sharedInterests = (otherUser.interests || [])
+      .filter((i: string) => (profileData?.interests || []).includes(i));
+    const timeStr = dateTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: false });
+    const café = dateData.caféName || "your spot";
+
+    let shared = "";
+    if (sharedInterests.length > 0) {
+      shared = ` Here's what you have in common: you both love ${sharedInterests.slice(0, 3).join(" and ")}.`;
+    }
+
+    return `You're meeting ${otherUser.displayName} at ${café} at ${timeStr}.${shared} Enjoy — just be yourself. ☕`;
+  })();
 
   return (
     <div className="max-w-sm mx-auto pb-24">
@@ -278,6 +298,7 @@ export default function DateDetailPage() {
             <MiniChat
               dateId={dateData.id}
               otherName={otherUser.displayName}
+              calmerMessage={calmerMessage}
             />
           </div>
         </div>
@@ -298,11 +319,34 @@ export default function DateDetailPage() {
               </button>
             </div>
           ) : isPast ? (
-            <div className="text-center">
-              <p className="text-gray text-sm">
-                Hope it went well! Rating coming soon.
-              </p>
-            </div>
+            <SecondCup
+              dateData={dateData}
+              otherUser={otherUser}
+              firebaseUser={firebaseUser}
+              submitted={secondCupSubmitted}
+              showResult={showSecondCupResult}
+              onSubmit={async (wantSecondCup: boolean) => {
+                if (!firebaseUser || !dateData) return;
+                const ratings = dateData.ratings || {};
+                ratings[firebaseUser.uid] = {
+                  ...ratings[firebaseUser.uid],
+                  rating: wantSecondCup ? 5 : 3,
+                  shareContact: wantSecondCup,
+                  secondCup: wantSecondCup,
+                } as typeof ratings[string];
+                await updateDoc(doc(db, "dates", dateData.id), { ratings, status: "completed" });
+                setSecondCupSubmitted(true);
+
+                // Check if both submitted and both want second cup
+                const otherUid = dateData.users.find((u) => u !== firebaseUser.uid);
+                const otherRating = otherUid ? ratings[otherUid] : null;
+                if (otherRating && (otherRating as Record<string, unknown>).secondCup && wantSecondCup) {
+                  setShowSecondCupResult(true);
+                } else if (otherRating && (!(otherRating as Record<string, unknown>).secondCup || !wantSecondCup)) {
+                  // One said no — show nothing, no rejection visible
+                }
+              }}
+            />
           ) : (
             <div className="text-center">
               <p className="text-gray text-sm">
@@ -326,6 +370,98 @@ export default function DateDetailPage() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Second Cup Component ─── */
+function SecondCup({
+  dateData,
+  otherUser,
+  firebaseUser,
+  submitted,
+  showResult,
+  onSubmit,
+}: {
+  dateData: DateData;
+  otherUser: User;
+  firebaseUser: { uid: string } | null;
+  submitted: boolean;
+  showResult: boolean;
+  onSubmit: (wantSecondCup: boolean) => Promise<void>;
+}) {
+  const myRating = firebaseUser ? (dateData.ratings?.[firebaseUser.uid] as Record<string, unknown> | undefined) : null;
+  const alreadySubmitted = submitted || !!myRating;
+
+  // Check if both want second cup
+  const otherUid = firebaseUser ? dateData.users.find((u) => u !== firebaseUser.uid) : null;
+  const otherRating = otherUid ? (dateData.ratings?.[otherUid] as Record<string, unknown> | undefined) : null;
+  const bothWantSecondCup = showResult || (myRating?.secondCup && otherRating?.secondCup);
+
+  if (bothWantSecondCup) {
+    return (
+      <div className="text-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
+          <div className="w-20 h-20 rounded-full bg-wine/10 mx-auto mb-4 flex items-center justify-center">
+            <span className="text-4xl">☕☕</span>
+          </div>
+          <h3 className="font-display text-2xl text-ink mb-2">You both want a second cup!</h3>
+          <p className="text-gray text-sm mb-5 max-w-[260px] mx-auto">
+            Looks like there&apos;s something brewing. The chat is now permanently open.
+          </p>
+          <p className="text-wine text-xs font-mono tracking-wider uppercase">
+            The best things start with coffee.
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (alreadySubmitted) {
+    return (
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-full bg-stripe-white mx-auto mb-3 flex items-center justify-center">
+          <span className="text-xl">✓</span>
+        </div>
+        <p className="text-ink font-medium mb-1">Thanks!</p>
+        <p className="text-gray text-sm">
+          {myRating?.secondCup
+            ? `We'll let you know if ${otherUser.displayName} feels the same.`
+            : "No worries. New profiles drop tomorrow at 11:00."}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="text-center">
+      <h3 className="font-display text-xl text-ink mb-2">How was it?</h3>
+      <p className="text-gray text-sm mb-6">
+        Would you grab coffee with {otherUser.displayName} again?
+      </p>
+
+      <div className="flex gap-3">
+        <button
+          onClick={() => onSubmit(true)}
+          className="flex-1 py-4 rounded-full bg-wine text-cream font-medium text-lg hover:bg-burgundy transition-colors"
+        >
+          ☕ Second cup
+        </button>
+        <button
+          onClick={() => onSubmit(false)}
+          className="flex-1 py-4 rounded-full border border-ink/10 text-gray font-medium hover:bg-stripe-white transition-colors"
+        >
+          Not this time
+        </button>
+      </div>
+
+      <p className="text-gray-light text-[10px] mt-4">
+        Your answer is always private. {otherUser.displayName} will never know if you said no.
+      </p>
     </div>
   );
 }

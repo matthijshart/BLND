@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLEND Café Flyers — 3 Variants</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #d5d0c8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+      gap: 80px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .variant-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.4em;
+      color: #6b6660;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .pair {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* A6: 105mm x 148mm — screen ~60% */
+    .flyer {
+      width: 380px;
+      height: 535px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    }
+
+    /* ─── FRONT BASE ─── */
+    .front {
+      background: #722F37;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 44px 36px;
+      position: relative;
+    }
+
+    .front::before {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      right: -80px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: rgba(240, 235, 227, 0.04);
+    }
+
+    .front .top-logo {
+      font-family: 'DM Serif Display', serif;
+      color: rgba(240, 235, 227, 0.3);
+      font-size: 16px;
+      letter-spacing: 0.25em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .front .quote {
+      font-family: 'DM Serif Display', serif;
+      color: #f0ebe3;
+      line-height: 1.3;
+      position: relative;
+      z-index: 1;
+    }
+
+    .front .quote .accent {
+      color: rgba(240, 235, 227, 0.4);
+    }
+
+    .front .bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid rgba(240, 235, 227, 0.1);
+      padding-top: 16px;
+    }
+
+    .front .blend-logo {
+      font-family: 'DM Serif Display', serif;
+      color: #f0ebe3;
+      font-size: 15px;
+      letter-spacing: 0.15em;
+    }
+
+    .front .url-small {
+      font-family: 'JetBrains Mono', monospace;
+      color: rgba(240, 235, 227, 0.35);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+    }
+
+    /* Quote size variations */
+    .front .quote.large { font-size: 26px; }
+    .front .quote.medium { font-size: 21px; }
+    .front .quote.small { font-size: 19px; }
+
+    /* ─── BACK ─── */
+    .back-side {
+      background: #f0ebe3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 44px 32px;
+      text-align: center;
+    }
+
+    .back-side .top-section {
+      width: 100%;
+    }
+
+    .back-side .logo-big {
+      font-family: 'DM Serif Display', serif;
+      color: #722F37;
+      font-size: 36px;
+      letter-spacing: 0.12em;
+    }
+
+    .back-side .tagline {
+      font-family: 'DM Serif Display', serif;
+      color: #1a1817;
+      font-size: 15px;
+      margin-top: 6px;
+    }
+
+    .back-side .middle-section {
+      width: 100%;
+    }
+
+    .back-side .how-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.35em;
+      color: #6b6660;
+      margin-bottom: 18px;
+    }
+
+    .back-side .steps {
+      text-align: left;
+    }
+
+    .back-side .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .back-side .step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #722F37;
+      opacity: 0.4;
+      padding-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .back-side .step-text {
+      font-size: 12.5px;
+      color: #1a1817;
+      line-height: 1.45;
+    }
+
+    .back-side .bottom-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .back-side .qr-box {
+      width: 90px;
+      height: 90px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .back-side .qr-box span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      color: #a39e96;
+    }
+
+    .back-side .url-big {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #722F37;
+      letter-spacing: 0.05em;
+    }
+
+    .back-side .get-app {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: #6b6660;
+      margin-top: 5px;
+    }
+
+    .back-side .matcha {
+      font-family: 'DM Serif Display', serif;
+      font-size: 12px;
+      color: #4a4540;
+      margin-top: 20px;
+      font-style: italic;
+    }
+
+    .back-side .matcha .wine {
+      color: #722F37;
+    }
+
+    @media print {
+      body { background: white; gap: 20mm; padding: 10mm; }
+      .variant-label { display: none; }
+      .flyer {
+        box-shadow: none;
+        border: 0.5px solid #ccc;
+        width: 105mm;
+        height: 148mm;
+        border-radius: 3mm;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════ FLYER 1 ═══════════════════════════════════ -->
+  <div>
+    <p class="variant-label">Flyer 1 — "Sexting"</p>
+    <div class="pair">
+      <div class="flyer front">
+        <span class="top-logo">BLEND</span>
+        <div class="quote medium">
+          "You've been sexting someone you'll never meet<span class="accent"> while the love of your life is ordering a flat white two streets away."</span>
+        </div>
+        <div class="bottom-bar">
+          <span class="blend-logo">BLEND</span>
+          <span class="url-small">bl-nd.nl</span>
+        </div>
+      </div>
+
+      <div class="flyer back-side">
+        <div class="top-section">
+          <div class="logo-big">BLEND</div>
+          <div class="tagline">Where dates begin.</div>
+        </div>
+        <div class="middle-section">
+          <p class="how-label">How it works</p>
+          <div class="steps">
+            <div class="step">
+              <span class="step-num">01</span>
+              <span class="step-text">Every day at 11:00, you get fresh profiles.</span>
+            </div>
+            <div class="step">
+              <span class="step-num">02</span>
+              <span class="step-text">Like someone. If they like you back — it's a blend.</span>
+            </div>
+            <div class="step">
+              <span class="step-num">03</span>
+              <span class="step-text">We pick the coffee spot. You show up. 60 minutes.</span>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-section">
+          <div class="qr-box"><span>QR → bl-nd.nl</span></div>
+          <p class="url-big">bl-nd.nl</p>
+          <p class="get-app">Get the app</p>
+          <p class="matcha">"Your matcha costs more. <span class="wine">And it never texts back."</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ FLYER 2 ═══════════════════════════════════ -->
+  <div>
+    <p class="variant-label">Flyer 2 — "Single city"</p>
+    <div class="pair">
+      <div class="flyer front">
+        <span class="top-logo">BLEND</span>
+        <div class="quote small">
+          "This city has more single people per square meter than anywhere in Europe.<span class="accent"> And you're all just... texting each other.</span><br><br>
+          Sit down. Have coffee. It's not that deep."
+        </div>
+        <div class="bottom-bar">
+          <span class="blend-logo">BLEND</span>
+          <span class="url-small">bl-nd.nl</span>
+        </div>
+      </div>
+
+      <div class="flyer back-side">
+        <div class="top-section">
+          <div class="logo-big">BLEND</div>
+          <div class="tagline">Where dates begin.</div>
+        </div>
+        <div class="middle-section">
+          <p class="how-label">How it works</p>
+          <div class="steps">
+            <div class="step">
+              <span class="step-num">01</span>
+              <span class="step-text">Every day at 11:00, you get fresh profiles.</span>
+            </div>
+            <div class="step">
+              <span class="step-num">02</span>
+              <span class="step-text">Like someone. If they like you back — it's a blend.</span>
+            </div>
+            <div class="step">
+              <span class="step-num">03</span>
+              <span class="step-text">We pick the coffee spot. You show up. 60 minutes.</span>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-section">
+          <div class="qr-box"><span>QR → bl-nd.nl</span></div>
+          <p class="url-big">bl-nd.nl</p>
+          <p class="get-app">Get the app</p>
+          <p class="matcha">"Your matcha costs more. <span class="wine">And it never texts back."</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ FLYER 3 ═══════════════════════════════════ -->
+  <div>
+    <p class="variant-label">Flyer 3 — "Everyone is hot"</p>
+    <div class="pair">
+      <div class="flyer front">
+        <span class="top-logo">BLEND</span>
+        <div class="quote large">
+          "Amsterdam: everyone is hot, everyone is single, <span class="accent">nobody actually meets.</span><br><br>
+          BLEND fixes that. One coffee at a time."
+        </div>
+        <div class="bottom-bar">
+          <span class="blend-logo">BLEND</span>
+          <span class="url-small">bl-nd.nl</span>
+        </div>
+      </div>
+
+      <div class="flyer back-side">
+        <div class="top-section">
+          <div class="logo-big">BLEND</div>
+          <div class="tagline">Where dates begin.</div>
+        </div>
+        <div class="middle-section">
+          <p class="how-label">How it works</p>
+          <div class="steps">
+            <div class="step">
+              <span class="step-num">01</span>
+              <span class="step-text">Every day at 11:00, you get fresh profiles.</span>
+            </div>
+            <div class="step">
+              <span class="step-num">02</span>
+              <span class="step-text">Like someone. If they like you back — it's a blend.</span>
+            </div>
+            <div class="step">
+              <span class="step-num">03</span>
+              <span class="step-text">We pick the coffee spot. You show up. 60 minutes.</span>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-section">
+          <div class="qr-box"><span>QR → bl-nd.nl</span></div>
+          <p class="url-big">bl-nd.nl</p>
+          <p class="get-app">Get the app</p>
+          <p class="matcha">"Your matcha costs more. <span class="wine">And it never texts back."</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6b6660; max-width: 500px; text-align: center; line-height: 1.7; margin-top: 20px;">
+    Print A6 (105 × 148 mm) · 350gsm matte cardstock · Double-sided<br>
+    Replace QR placeholder with actual QR code → bl-nd.nl<br>
+    Recommended: Drukwerkdeal.nl or Printenbind.nl
+  </p>
+
+</body>
+</html>
