@@ -407,11 +407,18 @@ export default function LandingPage() {
 
       {/* ─── FOOTER: Minimal ─── */}
       <footer className="bg-ink py-10 px-6">
-        <div className="max-w-xl mx-auto flex items-center justify-between">
-          <span className="font-display text-cream/60 text-lg">BLEND</span>
-          <span className="text-cream/20 text-[10px] font-mono tracking-wider">
-            Amsterdam, 2026
-          </span>
+        <div className="max-w-xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <span className="font-display text-cream/60 text-lg">BLEND</span>
+            <span className="text-cream/20 text-[10px] font-mono tracking-wider">
+              Amsterdam, 2026
+            </span>
+          </div>
+          <div className="flex gap-6 text-cream/30 text-xs">
+            <a href="/privacy" className="hover:text-cream/60 transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-cream/60 transition-colors">Terms of Service</a>
+            <a href="mailto:privacy@bl-nd.nl" className="hover:text-cream/60 transition-colors">Contact</a>
+          </div>
         </div>
       </footer>
       {/* ─── EXAMPLE PROFILE MODAL ─── */}
