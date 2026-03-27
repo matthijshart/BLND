@@ -10,6 +10,7 @@ import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
+import { PhotoViewer, SwipeHintArrows } from "@/components/ui/PhotoViewer";
 import {
   DndContext,
   closestCenter,
@@ -132,6 +133,15 @@ export default function ProfilePage() {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
+
+  // Reset swipe hint when photo changes
+  useEffect(() => {
+    setShowSwipeHint(true);
+    const t = setTimeout(() => setShowSwipeHint(false), 2000);
+    return () => clearTimeout(t);
+  }, [photoIndex]);
 
   useEffect(() => {
     if (profile) {
@@ -393,12 +403,26 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Tap zones */}
-            {validPhotos.length > 1 && (
+            {/* Tap zones: sides for nav, center for fullscreen */}
+            {validPhotos.length > 1 ? (
               <>
-                <button className="absolute left-0 top-0 w-1/3 h-full z-10" onClick={() => setPhotoIndex(Math.max(0, photoIndex - 1))} />
-                <button className="absolute right-0 top-0 w-1/3 h-full z-10" onClick={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))} />
+                <button className="absolute left-0 top-0 w-1/4 h-full z-10" onClick={() => setPhotoIndex(Math.max(0, photoIndex - 1))} />
+                <button className="absolute left-1/4 top-0 w-1/2 h-full z-10" onClick={() => setPhotoViewerOpen(true)} />
+                <button className="absolute right-0 top-0 w-1/4 h-full z-10" onClick={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))} />
               </>
+            ) : (
+              <button className="absolute inset-0 z-10" onClick={() => validPhotos.length > 0 && setPhotoViewerOpen(true)} />
+            )}
+
+            {/* Swipe hint arrows */}
+            {validPhotos.length > 1 && (
+              <SwipeHintArrows
+                show={showSwipeHint}
+                canGoLeft={photoIndex > 0}
+                canGoRight={photoIndex < validPhotos.length - 1}
+                onLeft={() => setPhotoIndex(Math.max(0, photoIndex - 1))}
+                onRight={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))}
+              />
             )}
 
             {/* Gradient */}
@@ -430,6 +454,17 @@ export default function ProfilePage() {
           Edit profile
         </button>
       </div>
+
+      {/* Fullscreen photo viewer */}
+      <AnimatePresence>
+        {photoViewerOpen && validPhotos.length > 0 && (
+          <PhotoViewer
+            photos={validPhotos}
+            initialIndex={photoIndex}
+            onClose={() => setPhotoViewerOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Coffee order — signature element */}
       {profile.coffeeOrder && (
