@@ -130,6 +130,8 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState<number | null>(null);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -546,7 +548,61 @@ export default function ProfilePage() {
           </svg>
         </button>
         <button onClick={handleSignOut} className="w-full py-3 text-gray-light text-xs mt-2">Sign out</button>
+        <button onClick={() => setShowDeleteConfirm(true)} className="w-full py-3 text-red/50 text-xs mt-1">Delete account</button>
       </div>
+
+      {/* Delete confirmation modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-ink/60 backdrop-blur-sm flex items-center justify-center px-6"
+            onClick={() => !deleting && setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl"
+            >
+              <h3 className="font-display text-xl text-ink mb-2">Delete your account?</h3>
+              <p className="text-gray text-sm leading-relaxed mb-6">
+                This will permanently delete your profile, photos, blends, meets, and all messages. This cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                  className="flex-1 py-3 rounded-full border border-ink/10 text-ink text-sm font-medium"
+                >
+                  Keep account
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!firebaseUser) return;
+                    setDeleting(true);
+                    try {
+                      const { deleteAccount } = await import("@/lib/deleteAccount");
+                      await deleteAccount(firebaseUser.uid);
+                      router.push("/");
+                    } catch (err) {
+                      console.error("Delete error:", err);
+                      setDeleting(false);
+                    }
+                  }}
+                  disabled={deleting}
+                  className="flex-1 py-3 rounded-full bg-red text-white text-sm font-medium disabled:opacity-50"
+                >
+                  {deleting ? "Deleting..." : "Delete forever"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Saved toast */}
       <AnimatePresence>
