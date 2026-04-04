@@ -13,6 +13,8 @@ export function PullToRefresh({ children }: PullToRefreshProps) {
   const startY = useRef(0);
   const pulling = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastUpdate = useRef(0);
+  const animFrameRef = useRef<number>(0);
 
   const THRESHOLD = 80;
 
@@ -31,15 +33,25 @@ export function PullToRefresh({ children }: PullToRefreshProps) {
     const diff = currentY - startY.current;
 
     if (diff > 0) {
-      // Resistance effect — gets harder to pull the further you go
-      const distance = Math.min(diff * 0.4, 120);
-      setPullDistance(distance);
+      // Throttle updates to ~60fps using rAF
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+      animFrameRef.current = requestAnimationFrame(() => {
+        // Resistance effect — gets harder to pull the further you go
+        const distance = Math.min(diff * 0.4, 120);
+        setPullDistance(distance);
+      });
     }
   }, [refreshing]);
 
   const handleTouchEnd = useCallback(() => {
     if (!pulling.current) return;
     pulling.current = false;
+
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+    }
 
     if (pullDistance >= THRESHOLD && !refreshing) {
       setRefreshing(true);
@@ -66,8 +78,11 @@ export function PullToRefresh({ children }: PullToRefreshProps) {
     >
       {/* Pull indicator */}
       <div
-        className="flex justify-center overflow-hidden transition-[height] duration-100"
-        style={{ height: pullDistance > 5 ? pullDistance : 0 }}
+        className="flex justify-center overflow-hidden will-change-[height]"
+        style={{
+          height: pullDistance > 5 ? pullDistance : 0,
+          transition: pulling.current ? "none" : "height 200ms ease-out",
+        }}
       >
         <div className="flex items-center justify-center py-2">
           {refreshing ? (

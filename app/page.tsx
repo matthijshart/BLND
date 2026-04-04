@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { addToWaitlist } from "@/lib/db";
 import { AnimatePresence, motion } from "framer-motion";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ui/ScrollReveal";
 
 export default function LandingPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  // scroll-restoration: manual in globals.css handles scroll reset
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +31,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col overflow-x-hidden">
+    <div className="min-h-dvh flex flex-col overflow-x-hidden scroll-smooth">
       {/* ─── TOP BANNER: Coming soon ─── */}
       <div className="bg-cream text-wine/60 py-2 px-4 text-center text-[11px] font-mono tracking-wider">
         Coming soon to the App Store
@@ -97,50 +96,90 @@ export default function LandingPage() {
         <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-burgundy opacity-20" />
 
         <div className="relative z-10 text-center max-w-2xl">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-8">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-8"
+          >
             Amsterdam
-          </p>
-          <h1 className="text-8xl sm:text-9xl md:text-[10rem] font-display tracking-tight leading-[0.82]">
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            className="text-8xl sm:text-9xl md:text-[10rem] font-display tracking-tight leading-[0.82]"
+          >
             BLEND
-          </h1>
-          <div className="w-16 h-px bg-cream/20 mx-auto mt-8 mb-8" />
-          <p className="text-xl sm:text-2xl text-cream/70 max-w-sm mx-auto leading-relaxed font-light">
+          </motion.h1>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+            className="w-16 h-px bg-cream/20 mx-auto mt-8 mb-8 origin-center"
+          />
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.1, ease: [0.25, 0.1, 0.25, 1] }}
+            className="text-xl sm:text-2xl text-cream/70 max-w-sm mx-auto leading-relaxed font-light"
+          >
             Skip the chat.<br />
             Meet for real.
-          </p>
+          </motion.p>
 
           {/* Two dots — like the two espresso cups seen from above */}
-          <div className="flex items-center justify-center gap-4 mt-12">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.4 }}
+            className="flex items-center justify-center gap-4 mt-12"
+          >
             <div className="w-2.5 h-2.5 rounded-full bg-cream/80" />
             <div className="w-px h-5 bg-cream/20" />
             <div className="w-2.5 h-2.5 rounded-full bg-cream/80" />
-          </div>
+          </motion.div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        {/* Scroll indicator — animated bounce */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.8, duration: 0.6 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        >
           <span className="text-cream/30 text-[10px] font-mono tracking-[0.3em]">scroll</span>
-          <div className="w-px h-8 bg-cream/15" />
-        </div>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-px h-8 bg-cream/15"
+          />
+        </motion.div>
       </section>
 
       {/* ─── STATEMENT: Big typographic hook ─── */}
       <section className="bg-cream py-24 sm:py-32 px-6">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-ink leading-[0.92] text-center">
-            Less swiping.
-          </h2>
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-wine leading-[0.92] mt-3 text-center">
-            More sipping.
-          </h2>
-          <div className="w-12 h-px bg-wine/30 mx-auto mt-10" />
+          <ScrollReveal variant="blur" duration={0.9}>
+            <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-ink leading-[0.92] text-center">
+              Less swiping.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal variant="blur" delay={0.15} duration={0.9}>
+            <h2 className="text-5xl sm:text-6xl md:text-7xl font-display text-wine leading-[0.92] mt-3 text-center">
+              More sipping.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.3}>
+            <div className="w-12 h-px bg-wine/30 mx-auto mt-10" />
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ─── PHOTOS: Editorial spread — full bleed ─── */}
       <section className="bg-cream">
         <div className="grid grid-cols-2 gap-[2px]">
-          <div className="relative aspect-[3/4]">
+          <ScrollReveal variant="scale" duration={1} className="relative aspect-[3/4] overflow-hidden">
             <Image
               src="/images/Photos _ Drinks photography _ Restaurant _ Paris _ Coffee shop _ Cafe _ Latte Art.jpeg"
               alt="Latte art"
@@ -148,8 +187,8 @@ export default function LandingPage() {
               className="object-cover"
               priority
             />
-          </div>
-          <div className="relative aspect-[3/4]">
+          </ScrollReveal>
+          <ScrollReveal variant="scale" delay={0.15} duration={1} className="relative aspect-[3/4] overflow-hidden">
             <Image
               src="/images/_.jpeg"
               alt="Coffee date"
@@ -157,53 +196,69 @@ export default function LandingPage() {
               className="object-cover"
               priority
             />
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ─── QUOTE: One liner ─── */}
       <section className="bg-wine py-16 sm:py-20 px-6">
-        <p className="max-w-lg mx-auto text-center text-2xl sm:text-3xl font-display text-cream leading-snug">
-          &ldquo;Dating the way it should be: face to face.&rdquo;
-        </p>
+        <ScrollReveal variant="fade" duration={1.2}>
+          <p className="max-w-lg mx-auto text-center text-2xl sm:text-3xl font-display text-cream leading-snug">
+            &ldquo;Dating the way it should be: face to face.&rdquo;
+          </p>
+        </ScrollReveal>
       </section>
 
       {/* ─── NO ALCOHOL: Subtle sneer ─── */}
       <section className="bg-cream py-14 sm:py-16 px-6">
         <div className="max-w-md mx-auto text-center">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray/60 mb-4">
-            A conscious choice
-          </p>
-          <h3 className="text-2xl sm:text-3xl font-display text-ink leading-snug">
-            No cocktails. No wine bars.<br />
-            <span className="text-wine">No liquid courage needed.</span>
-          </h3>
-          <p className="mt-5 text-ink-mid text-sm leading-relaxed max-w-sm mx-auto">
-            Other apps send you to a bar at 9pm. We think you&apos;re interesting enough without three glasses of Chardonnay. Daytime. Coffee. Just you.
-          </p>
+          <ScrollReveal variant="fade-up">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray/60 mb-4">
+              A conscious choice
+            </p>
+            <h3 className="text-2xl sm:text-3xl font-display text-ink leading-snug">
+              No cocktails. No wine bars.<br />
+              <span className="text-wine">No liquid courage needed.</span>
+            </h3>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.2}>
+            <p className="mt-5 text-ink-mid text-sm leading-relaxed max-w-sm mx-auto">
+              Other apps send you to a bar at 9pm. We think you&apos;re interesting enough without three glasses of Chardonnay. Daytime. Coffee. Just you.
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ─── MANIFESTO: The problem ─── */}
       <section className="bg-stripe-white py-24 sm:py-32 px-6">
         <div className="max-w-xl mx-auto">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
-            The problem
-          </p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display text-ink leading-tight">
-            Your grandmother didn&apos;t need an algorithm.
-          </h2>
-          <p className="mt-3 text-3xl sm:text-4xl md:text-5xl font-display text-gray-light leading-tight">
-            But here we are.
-          </p>
-          <div className="mt-12 space-y-6 text-ink-mid text-lg leading-relaxed">
-            <p>
-              Dating apps promised connection but gave you a screen to hide behind. BLEND removes everything that gets in the way — the endless texting, the choosing where to go, the overthinking what to say first.
+          <ScrollReveal variant="fade-left">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
+              The problem
             </p>
-            <p>
-              We pick the spot. We pick the time. Just coffee, during the day, low-key. The only thing left is you, someone worth talking to, and a flat white getting cold.
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.1}>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display text-ink leading-tight">
+              Your grandmother didn&apos;t need an algorithm.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.25}>
+            <p className="mt-3 text-3xl sm:text-4xl md:text-5xl font-display text-gray-light leading-tight">
+              But here we are.
             </p>
-          </div>
+          </ScrollReveal>
+          <StaggerContainer className="mt-12 space-y-6 text-ink-mid text-lg leading-relaxed" staggerDelay={0.15}>
+            <StaggerItem>
+              <p>
+                Dating apps promised connection but gave you a screen to hide behind. BLEND removes everything that gets in the way — the endless texting, the choosing where to go, the overthinking what to say first.
+              </p>
+            </StaggerItem>
+            <StaggerItem>
+              <p>
+                We pick the spot. We pick the time. Just coffee, during the day, low-key. The only thing left is you, someone worth talking to, and a flat white getting cold.
+              </p>
+            </StaggerItem>
+          </StaggerContainer>
         </div>
       </section>
 
@@ -212,16 +267,18 @@ export default function LandingPage() {
         <div className="absolute top-1/2 right-0 w-[500px] h-[500px] rounded-full bg-burgundy opacity-15 translate-x-1/2 -translate-y-1/2" />
 
         <div className="max-w-lg mx-auto relative z-10">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-10 text-center">
-            How it works
-          </p>
+          <ScrollReveal variant="fade">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-cream/40 mb-10 text-center">
+              How it works
+            </p>
+          </ScrollReveal>
 
           {/* Timeline */}
           <div className="relative">
             {/* Connecting line */}
             <div className="absolute left-[11px] top-3 bottom-3 w-px bg-cream/15" />
 
-            <div className="space-y-6">
+            <StaggerContainer className="space-y-6" staggerDelay={0.12}>
               {[
                 { label: "11:00", title: "Profiles drop", desc: "8–12 curated people. Every morning." },
                 { label: "Like", title: "Like or pass", desc: "No infinite scroll. Today is today." },
@@ -229,30 +286,32 @@ export default function LandingPage() {
                 { label: "Spot", title: "We handle the rest", desc: "We match your times, pick a coffee spot between your neighborhoods." },
                 { label: "Meet", title: "Show up", desc: "60 min. One coffee. No small talk beforehand. That\u0027s it." },
               ].map((step, i) => (
-                <div key={i} className="flex items-start gap-5">
-                  {/* Dot */}
-                  <div className="relative shrink-0">
-                    <div className={`w-[23px] h-[23px] rounded-full border-2 flex items-center justify-center ${
-                      i === 4 ? "border-cream bg-cream" : "border-cream/30 bg-wine"
-                    }`}>
-                      {i === 4 && (
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      )}
+                <StaggerItem key={i}>
+                  <div className="flex items-start gap-5">
+                    {/* Dot */}
+                    <div className="relative shrink-0">
+                      <div className={`w-[23px] h-[23px] rounded-full border-2 flex items-center justify-center ${
+                        i === 4 ? "border-cream bg-cream" : "border-cream/30 bg-wine"
+                      }`}>
+                        {i === 4 && (
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    {/* Content */}
+                    <div className="pt-0.5">
+                      <div className="flex items-baseline gap-3">
+                        <span className="font-mono text-[10px] tracking-wider text-cream/30 uppercase">{step.label}</span>
+                        <h3 className="text-lg font-display">{step.title}</h3>
+                      </div>
+                      <p className="text-cream/45 text-sm mt-0.5">{step.desc}</p>
                     </div>
                   </div>
-                  {/* Content */}
-                  <div className="pt-0.5">
-                    <div className="flex items-baseline gap-3">
-                      <span className="font-mono text-[10px] tracking-wider text-cream/30 uppercase">{step.label}</span>
-                      <h3 className="text-lg font-display">{step.title}</h3>
-                    </div>
-                    <p className="text-cream/45 text-sm mt-0.5">{step.desc}</p>
-                  </div>
-                </div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </div>
       </section>
@@ -260,57 +319,70 @@ export default function LandingPage() {
       {/* ─── FOR EVERYONE: Inclusive positioning ─── */}
       <section id="everyone" className="bg-cream py-24 sm:py-32 px-6 scroll-mt-12">
         <div className="max-w-lg mx-auto text-center">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
-            For everyone
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug">
-            Looking for love, friendship, or just someone to grab coffee with.
-          </h2>
-          <p className="mt-6 text-ink-mid text-lg leading-relaxed max-w-md mx-auto">
-            New to Amsterdam? Looking for your people? We get two humans to sit down, face to face, over good coffee.
-          </p>
+          <ScrollReveal variant="fade-up">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
+              For everyone
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug">
+              Looking for love, friendship, or just someone to grab coffee with.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.15}>
+            <p className="mt-6 text-ink-mid text-lg leading-relaxed max-w-md mx-auto">
+              New to Amsterdam? Looking for your people? We get two humans to sit down, face to face, over good coffee.
+            </p>
+          </ScrollReveal>
 
-          <div className="flex flex-wrap justify-center gap-2.5 mt-10">
+          <StaggerContainer className="flex flex-wrap justify-center gap-2.5 mt-10" staggerDelay={0.08}>
             {["Dating", "Friendship", "New in town", "Expats", "Coffee people"].map((tag) => (
-              <span
-                key={tag}
-                className="px-5 py-2 rounded-full bg-wine/8 text-wine text-sm font-medium border border-wine/10"
-              >
-                {tag}
-              </span>
+              <StaggerItem key={tag}>
+                <span className="px-5 py-2 rounded-full bg-wine/8 text-wine text-sm font-medium border border-wine/10 inline-block">
+                  {tag}
+                </span>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* ─── PRICING: Clean and bold ─── */}
       <section id="pricing" className="bg-stripe-white py-24 sm:py-32 px-6 scroll-mt-12">
         <div className="max-w-md mx-auto text-center">
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
-            Simple pricing
-          </p>
-          <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine mb-3">
-            Only
-          </p>
-          <div className="flex items-baseline justify-center gap-2">
-            <span className="text-7xl sm:text-8xl font-display text-ink">€8,99</span>
-            <span className="text-xl text-wine font-light">/month</span>
-          </div>
-          <p className="mt-3 text-gray text-sm tracking-wide">
-            <span className="text-wine">Cancel every month. No strings attached.</span>
-          </p>
+          <ScrollReveal variant="fade">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
+              Simple pricing
+            </p>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.1}>
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine mb-3">
+              Only
+            </p>
+            <div className="flex items-baseline justify-center gap-2">
+              <span className="text-7xl sm:text-8xl font-display text-ink">€8,99</span>
+              <span className="text-xl text-wine font-light">/month</span>
+            </div>
+            <p className="mt-3 text-gray text-sm tracking-wide">
+              <span className="text-wine">Cancel every month. No strings attached.</span>
+            </p>
+          </ScrollReveal>
 
-          <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
-            &ldquo;Your matcha costs more.<br />
-            <span className="text-wine">And it never texts back.&rdquo;</span>
-          </p>
+          <ScrollReveal variant="fade" delay={0.1}>
+            <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
+              &ldquo;Your matcha costs more.<br />
+              <span className="text-wine">And it never texts back.&rdquo;</span>
+            </p>
+          </ScrollReveal>
 
-          <div className="w-px h-12 bg-ink/8 mx-auto mt-12" />
+          <ScrollReveal>
+            <div className="w-px h-12 bg-ink/8 mx-auto mt-12" />
+          </ScrollReveal>
 
-          <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
-            Join the waitlist.<br />
-            <span className="text-wine">First 2 months free.</span>
-          </p>
+          <ScrollReveal variant="fade-up">
+            <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
+              Join the waitlist.<br />
+              <span className="text-wine">First 2 months free.</span>
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -320,12 +392,16 @@ export default function LandingPage() {
         <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-burgundy opacity-15" />
 
         <div className="max-w-md mx-auto text-center relative z-10">
-          <h2 className="text-4xl sm:text-5xl font-display leading-tight">
-            Where dates<br />begin.
-          </h2>
-          <p className="mt-5 text-cream/50 max-w-xs mx-auto">
-            Launching in Amsterdam. Join the waitlist and get 2 months free.
-          </p>
+          <ScrollReveal variant="blur" duration={1}>
+            <h2 className="text-4xl sm:text-5xl font-display leading-tight">
+              Where dates<br />begin.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.2}>
+            <p className="mt-5 text-cream/50 max-w-xs mx-auto">
+              Launching in Amsterdam. Join the waitlist and get 2 months free.
+            </p>
+          </ScrollReveal>
 
           {submitted ? (
             <div className="mt-12">
@@ -366,13 +442,13 @@ export default function LandingPage() {
 
       {/* ─── DISCOVER: Horizontal scrollable mood gallery ─── */}
       <section id="glimpse" className="bg-cream py-16 sm:py-20 overflow-hidden scroll-mt-12">
-        <div className="px-6 mb-8">
+        <ScrollReveal variant="fade" className="px-6 mb-8">
           <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray text-center">
             A glimpse
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="flex gap-3 overflow-x-auto pl-6 pr-3 pb-4 snap-x snap-mandatory scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
+        <div className="flex gap-3 overflow-x-auto pl-6 pr-3 pb-4 snap-x snap-proximity scrollbar-hide">
           {[
             { src: "/images/Surf coffee.jpeg", alt: "Surf coffee", aspect: "aspect-[3/4]", width: "w-48" },
             { src: "/images/date.jpeg", alt: "Coffee date", aspect: "aspect-[4/5]", width: "w-44" },
@@ -392,6 +468,8 @@ export default function LandingPage() {
                   src={photo.src}
                   alt={photo.alt}
                   fill
+                  loading="lazy"
+                  sizes="(max-width: 768px) 192px, 192px"
                   className="object-cover"
                 />
               </div>
@@ -407,19 +485,21 @@ export default function LandingPage() {
 
       {/* ─── FOOTER: Minimal ─── */}
       <footer className="bg-ink py-10 px-6">
-        <div className="max-w-xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <span className="font-display text-cream/60 text-lg">BLEND</span>
-            <span className="text-cream/20 text-[10px] font-mono tracking-wider">
-              Amsterdam, 2026
-            </span>
+        <ScrollReveal variant="fade" duration={0.8} threshold={0.3}>
+          <div className="max-w-xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <span className="font-display text-cream/60 text-lg">BLEND</span>
+              <span className="text-cream/20 text-[10px] font-mono tracking-wider">
+                Amsterdam, 2026
+              </span>
+            </div>
+            <div className="flex gap-6 text-cream/30 text-xs">
+              <a href="/privacy" className="hover:text-cream/60 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-cream/60 transition-colors">Terms of Service</a>
+              <a href="mailto:privacy@bl-nd.nl" className="hover:text-cream/60 transition-colors">Contact</a>
+            </div>
           </div>
-          <div className="flex gap-6 text-cream/30 text-xs">
-            <a href="/privacy" className="hover:text-cream/60 transition-colors">Privacy Policy</a>
-            <a href="/terms" className="hover:text-cream/60 transition-colors">Terms of Service</a>
-            <a href="mailto:privacy@bl-nd.nl" className="hover:text-cream/60 transition-colors">Contact</a>
-          </div>
-        </div>
+        </ScrollReveal>
       </footer>
       {/* ─── EXAMPLE PROFILE MODAL ─── */}
       <AnimatePresence>
