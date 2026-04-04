@@ -29,7 +29,7 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
   }, [messages]);
 
   // Handle keyboard resize on iOS
@@ -37,7 +37,7 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
     function handleResize() {
       // Scroll input into view when keyboard opens
       setTimeout(() => {
-        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        inputRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
       }, 100);
     }
 

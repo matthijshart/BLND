@@ -24,8 +24,9 @@ html {
   /* Support safe areas on notched iPhones in PWA mode */
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-restoration: manual;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -36,6 +37,12 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), Georgia, serif;
+}
+
+/* Hide scrollbar for horizontal scroll galleries */
+/* Smooth scroll only for anchor navigation, not global */
+.scroll-smooth {
+  scroll-behavior: smooth;
 }
 
 /* Hide scrollbar for horizontal scroll galleries */

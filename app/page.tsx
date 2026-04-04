@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { addToWaitlist } from "@/lib/db";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function LandingPage() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  // scroll-restoration: manual in globals.css handles scroll reset
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +30,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col overflow-x-hidden">
+    <div className="min-h-dvh flex flex-col overflow-x-hidden scroll-smooth">
       {/* ─── TOP BANNER: Coming soon ─── */}
       <div className="bg-cream text-wine/60 py-2 px-4 text-center text-[11px] font-mono tracking-wider">
         Coming soon to the App Store
@@ -372,7 +370,7 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pl-6 pr-3 pb-4 snap-x snap-mandatory scrollbar-hide" style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none", msOverflowStyle: "none" }}>
+        <div className="flex gap-3 overflow-x-auto pl-6 pr-3 pb-4 snap-x snap-proximity scrollbar-hide">
           {[
             { src: "/images/Surf coffee.jpeg", alt: "Surf coffee", aspect: "aspect-[3/4]", width: "w-48" },
             { src: "/images/date.jpeg", alt: "Coffee date", aspect: "aspect-[4/5]", width: "w-44" },
@@ -392,6 +390,8 @@ export default function LandingPage() {
                   src={photo.src}
                   alt={photo.alt}
                   fill
+                  loading="lazy"
+                  sizes="(max-width: 768px) 192px, 192px"
                   className="object-cover"
                 />
               </div>
