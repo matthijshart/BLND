@@ -73,8 +73,8 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
         </button>
       </div>
 
-      {/* Photo */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
+      {/* Photo — constrained to safe area */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden relative px-2" style={{ maxHeight: "calc(100dvh - 120px)" }} onClick={(e) => e.stopPropagation()}>
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={index}
@@ -88,7 +88,8 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.15}
             onDragEnd={handleDragEnd}
-            className="w-full h-full relative"
+            className="w-full relative"
+            style={{ height: "100%", maxHeight: "80vh" }}
           >
             <Image
               src={photos[index]}
@@ -97,6 +98,7 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
               className="object-contain pointer-events-none select-none"
               priority
               draggable={false}
+              sizes="100vw"
             />
           </motion.div>
         </AnimatePresence>
