@@ -39,6 +39,18 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), Georgia, serif;
 }
 
+/* Shimmer loading animation for images */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, var(--color-cream) 25%, var(--color-stripe-white) 50%, var(--color-cream) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
 /* Hide scrollbar for horizontal scroll galleries */
 /* Smooth scroll only for anchor navigation, not global */
 .scroll-smooth {

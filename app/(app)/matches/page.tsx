@@ -5,6 +5,7 @@ import { useAuthContext } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 import Link from "next/link";
 import type { User } from "@/types";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
 
 function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefined): string | null {
   if (!myOrder || !theirOrder) return null;
@@ -31,7 +32,7 @@ export default function MatchesPage() {
     return (
       <div className="px-4 pt-8">
         <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-stripe-white animate-pulse">
               <div className="w-14 h-14 rounded-full bg-cream" />
@@ -53,7 +54,7 @@ export default function MatchesPage() {
 
         {/* Mood image */}
         <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
-          <Image
+          <ShimmerImage
             src="/images/coffe couple.jpeg"
             alt="Coffee date"
             fill
@@ -81,7 +82,7 @@ export default function MatchesPage() {
   return (
     <div className="px-4 pt-8">
       <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {matches.map((match) => (
           <Link
             key={match.id}
@@ -90,7 +91,7 @@ export default function MatchesPage() {
           >
             <div className="flex items-center gap-4">
               <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
-                <Image
+                <ShimmerImage
                   src={match.otherUser.photos[0] || "/images/sipping.png"}
                   alt={match.otherUser.displayName}
                   fill

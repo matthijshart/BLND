@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
 
 interface ProfileCardProps {
   profile: User;
@@ -49,6 +50,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
   const [exitX, setExitX] = useState(0);
   const [swiped, setSwiped] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
 
   const photos = profile.photos?.length > 0 ? profile.photos : ["/images/sipping.png"];
   const overlaps = getOverlaps(currentUser, profile);
@@ -102,7 +104,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
       >
         {/* Photo section — shorter to show content below */}
         <div className="relative aspect-[4/5]">
-          <Image
+          <ShimmerImage
             src={photos[photoIndex]}
             alt={profile.displayName}
             fill
@@ -167,7 +169,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
         </div>
 
         {/* Content below photo — always visible, scroll to see */}
-        <div className="p-5 space-y-4">
+        <div className="p-6 space-y-5">
           {/* Coffee order as signature */}
           {profile.coffeeOrder && (
             <div className={`flex items-center gap-3 -mt-1 ${overlaps.sameCoffee ? "bg-wine/8 -mx-5 px-5 py-2.5 rounded-xl" : ""}`}>
@@ -263,6 +265,31 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
         </div>
       </motion.div>
 
+      {/* Heart pop animation overlay */}
+      <AnimatePresence>
+        {showHeart && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.svg
+              width="80"
+              height="80"
+              viewBox="0 0 24 24"
+              fill="#6b1520"
+              initial={{ scale: 0.5, opacity: 0.8 }}
+              animate={{ scale: 1.2, opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </motion.svg>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Action buttons */}
       {!previewMode && (
         <div className="flex justify-center gap-6 mt-5">
@@ -276,7 +303,13 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
             </svg>
           </button>
           <button
-            onClick={onLike}
+            onClick={() => {
+              setShowHeart(true);
+              setTimeout(() => {
+                setShowHeart(false);
+                onLike();
+              }, 600);
+            }}
             className="w-14 h-14 rounded-full bg-wine text-cream flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">

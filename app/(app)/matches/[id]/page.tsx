@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getMatchWithProfile } from "@/lib/matching";
@@ -155,7 +156,7 @@ export default function MatchDetailPage() {
         onClick={() => setPhotoViewerOpen(true)}
         className="relative aspect-[3/4] mx-4 rounded-2xl overflow-hidden shadow-lg block w-[calc(100%-2rem)]"
       >
-        <Image
+        <ShimmerImage
           src={otherUser.photos[0] || "/images/sipping.png"}
           alt={otherUser.displayName}
           fill

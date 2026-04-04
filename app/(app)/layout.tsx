@@ -10,6 +10,7 @@ import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { WelcomeScreen } from "@/components/ui/WelcomeScreen";
+import { motion } from "framer-motion";
 
 function IconToday({ active }: { active: boolean }) {
   return (
@@ -134,6 +135,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   )}
                 </div>
                 {item.label}
+                {isActive && (
+                  <motion.div
+                    layoutId="nav-indicator"
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-wine"
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  />
+                )}
               </Link>
             );
           })}

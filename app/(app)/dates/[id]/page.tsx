@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/lib/db";
@@ -268,7 +269,7 @@ export default function DateDetailPage() {
       <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm mb-4">
         <div className="flex items-center gap-4">
           <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0">
-            <Image
+            <ShimmerImage
               src={otherUser.photos[0] || "/images/sipping.png"}
               alt={otherUser.displayName}
               fill

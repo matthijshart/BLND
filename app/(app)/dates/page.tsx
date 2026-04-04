@@ -3,6 +3,7 @@
 import { useDates } from "@/hooks/useDates";
 import Image from "next/image";
 import Link from "next/link";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
 
 export default function DatesPage() {
   const { dates, loading } = useDates();
@@ -18,7 +19,7 @@ export default function DatesPage() {
     return (
       <div className="px-4 pt-8">
         <h1 className="text-2xl font-display text-ink mb-6">Meets</h1>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[1, 2].map((i) => (
             <div key={i} className="rounded-2xl bg-stripe-white animate-pulse h-32" />
           ))}
@@ -34,7 +35,7 @@ export default function DatesPage() {
 
         {/* Mood image */}
         <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
-          <Image
+          <ShimmerImage
             src="/images/chess terrace.jpeg"
             alt="Café terrace"
             fill
@@ -67,7 +68,7 @@ export default function DatesPage() {
     <div className="pb-24">
       {/* Hero mood image — always visible */}
       <div className="relative aspect-[21/9] overflow-hidden">
-        <Image
+        <ShimmerImage
           src="/images/chess terrace.jpeg"
           alt="Café terrace vibes"
           fill
@@ -84,7 +85,7 @@ export default function DatesPage() {
         {upcoming.length > 0 && (
           <div className="mb-6">
             <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray mb-3">Coming up</p>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {upcoming.map((date) => (
                 <DateCard key={date.id} date={date} />
               ))}
@@ -96,7 +97,7 @@ export default function DatesPage() {
         {past.length > 0 && (
           <div>
             <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray mb-3">Past</p>
-            <div className="space-y-3 opacity-60">
+            <div className="space-y-4 opacity-60">
               {past.map((date) => (
                 <DateCard key={date.id} date={date} />
               ))}
@@ -155,7 +156,7 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
     >
       <div className="flex items-start gap-4">
         <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
-          <Image
+          <ShimmerImage
             src={date.otherUser.photos[0] || "/images/sipping.png"}
             alt={date.otherUser.displayName}
             fill

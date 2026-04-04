@@ -8,6 +8,7 @@ import { updateUser } from "@/lib/db";
 import { uploadUserPhoto, deleteUserPhoto } from "@/lib/storage";
 import { signOut } from "@/lib/auth";
 import Image from "next/image";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer, SwipeHintArrows } from "@/components/ui/PhotoViewer";
@@ -381,7 +382,7 @@ export default function ProfilePage() {
                 }}
                 className="absolute inset-0"
               >
-                <Image
+                <ShimmerImage
                   src={validPhotos[photoIndex]}
                   alt={profile.displayName}
                   fill
