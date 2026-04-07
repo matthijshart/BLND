@@ -15,6 +15,13 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
   const [direction, setDirection] = useState(0);
   const [showArrows, setShowArrows] = useState(true);
 
+  // Lock body scroll while viewer is open
+  useEffect(() => {
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = original; };
+  }, []);
+
   // Fade out arrows after 2 seconds
   useEffect(() => {
     setShowArrows(true);
@@ -54,27 +61,18 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-[200] bg-ink/95 flex flex-col"
+      className="fixed inset-0 z-[200] bg-ink"
       onClick={onClose}
     >
-      {/* Close button */}
+      {/* Photo — absolutely positioned, fills available space minus header/footer */}
       <div
-        className="flex justify-end px-4 relative z-10"
-        style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
+        className="absolute inset-x-0 overflow-hidden"
+        style={{
+          top: "max(4rem, calc(env(safe-area-inset-top) + 3.5rem))",
+          bottom: "max(4rem, calc(env(safe-area-inset-bottom) + 3rem))",
+        }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Photo — constrained to safe area */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden relative px-2" style={{ maxHeight: "calc(100dvh - 120px)" }} onClick={(e) => e.stopPropagation()}>
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={index}
@@ -88,8 +86,7 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.15}
             onDragEnd={handleDragEnd}
-            className="w-full relative"
-            style={{ height: "100%", maxHeight: "80vh" }}
+            className="absolute inset-0"
           >
             <Image
               src={photos[index]}
@@ -144,29 +141,48 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
         )}
       </div>
 
-      {/* Counter */}
-      {photos.length > 1 && (
-        <div className="text-center text-white/50 text-xs font-mono pb-2">
-          {index + 1} / {photos.length}
-        </div>
-      )}
+      {/* Close button — top */}
+      <div
+        className="absolute top-0 inset-x-0 flex justify-end px-4 z-20"
+        style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
+      >
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
 
-      {/* Progress bars */}
-      {photos.length > 1 && (
-        <div className="flex gap-1.5 px-6" style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }}>
-          {photos.map((_, i) => (
-            <button
-              key={i}
-              onClick={(e) => { e.stopPropagation(); goTo(i); }}
-              className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/20"
-            >
-              <div
-                className={`h-full bg-white rounded-full transition-all duration-300 ${i <= index ? "w-full" : "w-0"}`}
-              />
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Footer: counter + progress bars */}
+      <div
+        className="absolute bottom-0 inset-x-0 z-20"
+        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+      >
+        {photos.length > 1 && (
+          <>
+            <div className="text-center text-white/50 text-xs font-mono pb-2">
+              {index + 1} / {photos.length}
+            </div>
+            <div className="flex gap-1.5 px-6">
+              {photos.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.stopPropagation(); goTo(i); }}
+                  className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/20"
+                >
+                  <div
+                    className={`h-full bg-white rounded-full transition-all duration-300 ${i <= index ? "w-full" : "w-0"}`}
+                  />
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </motion.div>
   );
 }

@@ -169,26 +169,39 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
             {isSecondCup ? "Second cup" : "Coffee"} with {date.otherUser.displayName}
           </h3>
 
-          <p className="text-ink-mid text-sm mt-1">
-            {dateTime.toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-            })}
-            {" at "}
-            {dateTime.toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: false,
-            })}
-          </p>
+          {isSecondCup ? (
+            <>
+              <p className="text-wine text-sm mt-1 font-medium">
+                Chat is open — plan your next coffee
+              </p>
+              <p className="text-gray text-sm mt-0.5">
+                First met at {caféName}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-ink-mid text-sm mt-1">
+                {dateTime.toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })}
+                {" at "}
+                {dateTime.toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: false,
+                })}
+              </p>
 
-          <p className="text-gray text-sm mt-0.5">
-            {caféName}
-            {caféVibe && (
-              <span className="text-gray-light"> · {caféVibe}</span>
-            )}
-          </p>
+              <p className="text-gray text-sm mt-0.5">
+                {caféName}
+                {caféVibe && (
+                  <span className="text-gray-light"> · {caféVibe}</span>
+                )}
+              </p>
+            </>
+          )}
         </div>
 
         {isSecondCup && (

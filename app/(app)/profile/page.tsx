@@ -359,20 +359,20 @@ export default function ProfilePage() {
   // ─── VIEW MODE (default) — looks like how others see you ───
   return (
     <div className="max-w-sm mx-auto pb-28">
-      {/* Photo hero — fullscreen, swipeable */}
-      <div className="relative aspect-[4/5] overflow-hidden">
+      {/* Photo hero — premium swipeable gallery */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white">
         {validPhotos.length > 0 ? (
           <>
-            <AnimatePresence initial={false} mode="popLayout" custom={photoIndex}>
+            <AnimatePresence initial={false} mode="popLayout">
               <motion.div
                 key={photoIndex}
-                initial={{ opacity: 0, x: 80 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -80 }}
+                initial={{ opacity: 0, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.12}
+                dragElastic={0.15}
                 onDragEnd={(_, info) => {
                   if (info.offset.x < -50 || info.velocity.x < -300) {
                     setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1));
@@ -393,26 +393,49 @@ export default function ProfilePage() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Photo progress bars */}
+            {/* Photo progress bars — Instagram style */}
             {validPhotos.length > 1 && (
-              <div className="absolute top-[max(0.75rem,env(safe-area-inset-top))] inset-x-0 flex gap-1 px-3 z-20">
+              <div
+                className="absolute inset-x-0 flex gap-1 px-3 z-20"
+                style={{ top: "max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem))" }}
+              >
                 {validPhotos.map((_, i) => (
-                  <button key={i} onClick={() => setPhotoIndex(i)} className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/25">
-                    <div className={`h-full bg-white rounded-full transition-all duration-300 ${i <= photoIndex ? "w-full" : "w-0"}`} />
+                  <button
+                    key={i}
+                    onClick={() => setPhotoIndex(i)}
+                    className="flex-1 h-[2.5px] rounded-full overflow-hidden bg-white/25"
+                  >
+                    <div className={`h-full bg-white rounded-full transition-all duration-500 ${i <= photoIndex ? "w-full" : "w-0"}`} />
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Tap zones: sides for nav, center for fullscreen */}
+            {/* Tap zones: left/right for nav, center for fullscreen */}
             {validPhotos.length > 1 ? (
               <>
-                <button className="absolute left-0 top-0 w-1/4 h-full z-10" onClick={() => setPhotoIndex(Math.max(0, photoIndex - 1))} />
-                <button className="absolute left-1/4 top-0 w-1/2 h-full z-10" onClick={() => setPhotoViewerOpen(true)} />
-                <button className="absolute right-0 top-0 w-1/4 h-full z-10" onClick={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))} />
+                <button
+                  className="absolute left-0 top-0 w-1/4 h-full z-10"
+                  onClick={() => setPhotoIndex(Math.max(0, photoIndex - 1))}
+                  aria-label="Previous photo"
+                />
+                <button
+                  className="absolute left-1/4 top-0 w-1/2 h-full z-10"
+                  onClick={() => setPhotoViewerOpen(true)}
+                  aria-label="View fullscreen"
+                />
+                <button
+                  className="absolute right-0 top-0 w-1/4 h-full z-10"
+                  onClick={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))}
+                  aria-label="Next photo"
+                />
               </>
             ) : (
-              <button className="absolute inset-0 z-10" onClick={() => validPhotos.length > 0 && setPhotoViewerOpen(true)} />
+              <button
+                className="absolute inset-0 z-10"
+                onClick={() => validPhotos.length > 0 && setPhotoViewerOpen(true)}
+                aria-label="View fullscreen"
+              />
             )}
 
             {/* Swipe hint arrows */}
@@ -426,33 +449,45 @@ export default function ProfilePage() {
               />
             )}
 
-            {/* Gradient */}
-            <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent z-10 pointer-events-none" />
+            {/* Gradient overlay */}
+            <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent z-10 pointer-events-none" />
 
-            {/* Name overlay */}
-            <div className="absolute bottom-0 inset-x-0 p-6 z-10 pointer-events-none">
-              <h1 className="text-3xl font-display text-white">{profile.displayName}, {profile.age}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
+            {/* Name + neighborhood overlay */}
+            <div className="absolute bottom-0 inset-x-0 p-6 pb-7 z-10 pointer-events-none">
+              <h1 className="text-[2rem] font-display text-white leading-tight">
+                {profile.displayName}, {profile.age}
+              </h1>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/65">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                <span className="text-white/60 text-sm">{profile.neighborhood}</span>
+                <span className="text-white/65 text-sm">{profile.neighborhood}</span>
               </div>
             </div>
           </>
         ) : (
-          <div className="w-full h-full bg-stripe-white flex items-center justify-center">
-            <button onClick={() => { setIsEditMode(true); }} className="text-gray text-sm">Add your first photo</button>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+            <div className="w-14 h-14 rounded-full bg-wine/10 flex items-center justify-center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-wine">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </div>
+            <button onClick={() => setIsEditMode(true)} className="text-wine text-sm font-medium">
+              Add your first photo
+            </button>
           </div>
         )}
 
-        {/* Edit button — floating */}
+        {/* Edit button — floating, positioned below safe area */}
         <button
           onClick={() => setIsEditMode(true)}
-          className="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-4 bg-wine text-cream px-5 py-2.5 rounded-full text-sm font-medium z-20 shadow-lg"
+          className="absolute right-4 z-20 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider"
+          style={{ top: "max(1.75rem, calc(env(safe-area-inset-top) + 1.25rem))" }}
         >
-          Edit profile
+          Edit
         </button>
       </div>
 
@@ -467,60 +502,65 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* Coffee order — signature element */}
+      {/* Coffee order — signature element, edge to edge */}
       {profile.coffeeOrder && (
-        <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-cream">
-          <span className="text-xl">☕</span>
-          <div>
-            <p className="text-[9px] text-gray uppercase tracking-[0.2em]">Go-to coffee</p>
-            <p className="text-ink font-medium">{profile.coffeeOrder}</p>
+        <div className="flex items-center gap-4 px-6 py-5 bg-white border-b border-cream">
+          <div className="w-11 h-11 rounded-full bg-wine/8 flex items-center justify-center shrink-0">
+            <span className="text-lg">☕</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Go-to coffee</p>
+            <p className="text-ink font-medium text-[15px] mt-0.5">{profile.coffeeOrder}</p>
           </div>
         </div>
       )}
 
       {/* Bio */}
       {profile.bio && (
-        <div className="px-6 py-5">
-          <p className="text-ink-mid text-[15px] leading-relaxed">{profile.bio}</p>
+        <div className="px-6 py-6">
+          <p className="text-ink-mid text-[15px] leading-[1.65]">{profile.bio}</p>
         </div>
       )}
 
-      {/* Prompts — compact, clean */}
+      {/* Prompts — premium cards */}
       {profile.prompts && profile.prompts.length > 0 && (
-        <div className="px-5 pb-4 space-y-2.5">
+        <div className="px-5 pb-5 space-y-3">
           {profile.prompts.map((p, i) => (
-            <div key={i} className="bg-stripe-white rounded-xl px-4 py-3.5">
-              <p className="text-wine text-[10px] font-medium uppercase tracking-wider mb-1">{p.question}</p>
-              <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
+            <div key={i} className="bg-stripe-white rounded-2xl px-5 py-4">
+              <p className="text-wine text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5">{p.question}</p>
+              <p className="text-ink text-[15px] leading-snug font-display">{p.answer}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Profile song */}
+      {/* Profile song — premium player */}
       {profile.profileSong && (
-        <div className="px-4 pb-4">
-          <div className="bg-wine rounded-2xl p-5">
-            <p className="text-cream/60 text-xs font-medium uppercase tracking-wider mb-3">My song</p>
-            <SpotifyPlayer trackUrl={profile.profileSong} />
+        <div className="px-5 pb-5">
+          <div className="bg-wine rounded-2xl p-5 relative overflow-hidden">
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-burgundy/30" />
+            <div className="relative">
+              <p className="text-cream/50 text-[10px] font-semibold uppercase tracking-[0.25em] mb-3">My song</p>
+              <SpotifyPlayer trackUrl={profile.profileSong} />
+            </div>
           </div>
         </div>
       )}
 
       {/* Interests */}
       {profile.interests && profile.interests.length > 0 && (
-        <div className="px-5 pb-5">
-          <p className="text-[9px] text-gray uppercase tracking-[0.2em] mb-2.5">Interests</p>
+        <div className="px-6 pb-6">
+          <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-3">Interests</p>
           <div className="flex flex-wrap gap-2">
             {profile.interests.map((interest) => (
-              <span key={interest} className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-sm font-medium border border-wine/10">{interest}</span>
+              <span key={interest} className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-[13px] font-medium border border-wine/10">{interest}</span>
             ))}
           </div>
         </div>
       )}
 
       {/* Share + actions */}
-      <div className="px-4 pb-4 flex gap-3">
+      <div className="px-5 pb-5 flex gap-3">
         <button
           onClick={() => {
             const url = `https://bl-nd.nl/p/${firebaseUser?.uid}`;
@@ -532,7 +572,7 @@ export default function ProfilePage() {
               setTimeout(() => setSaved(false), 2000);
             }
           }}
-          className="flex-1 py-3.5 rounded-full bg-wine text-cream text-sm font-medium flex items-center justify-center gap-2"
+          className="flex-1 py-4 rounded-full bg-wine text-cream text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
@@ -540,7 +580,10 @@ export default function ProfilePage() {
           </svg>
           Share profile
         </button>
-        <button onClick={() => setIsEditMode(true)} className="py-3.5 px-6 rounded-full border border-ink/10 text-gray text-sm font-medium">
+        <button
+          onClick={() => setIsEditMode(true)}
+          className="py-4 px-6 rounded-full border border-ink/10 text-ink text-sm font-medium active:scale-[0.98] transition-transform"
+        >
           Edit
         </button>
       </div>
