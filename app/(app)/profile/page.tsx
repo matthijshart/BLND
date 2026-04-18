@@ -136,6 +136,7 @@ export default function ProfilePage() {
   const [deleting, setDeleting] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -363,9 +364,45 @@ export default function ProfilePage() {
 
           <p className="text-gray text-xs mb-2">Age range</p>
           <div className="flex items-center gap-3">
-            <input type="number" value={ageRange[0]} onChange={(e) => setAgeRange([parseInt(e.target.value) || 18, ageRange[1]])} min={18} max={99} className="w-20 px-3 py-2 rounded-xl bg-white text-ink text-center focus:outline-none focus:ring-1 focus:ring-wine/20" />
+            <input
+              type="number"
+              value={ageRange[0]}
+              onChange={(e) => {
+                const n = parseInt(e.target.value) || 18;
+                const newMin = Math.max(18, Math.min(99, n));
+                // If min goes above max, push max up too
+                const newMax = Math.max(newMin, ageRange[1]);
+                setAgeRange([newMin, newMax]);
+              }}
+              onBlur={(e) => {
+                const n = parseInt(e.target.value) || 18;
+                if (n < 18 || n > 99) setAgeRange([18, ageRange[1]]);
+              }}
+              min={18}
+              max={99}
+              className="w-20 px-3 py-2 rounded-xl bg-white text-ink text-center focus:outline-none focus:ring-1 focus:ring-wine/20"
+              aria-label="Minimum age"
+            />
             <span className="text-gray">—</span>
-            <input type="number" value={ageRange[1]} onChange={(e) => setAgeRange([ageRange[0], parseInt(e.target.value) || 99])} min={18} max={99} className="w-20 px-3 py-2 rounded-xl bg-white text-ink text-center focus:outline-none focus:ring-1 focus:ring-wine/20" />
+            <input
+              type="number"
+              value={ageRange[1]}
+              onChange={(e) => {
+                const n = parseInt(e.target.value) || 99;
+                const newMax = Math.max(18, Math.min(99, n));
+                // If max goes below min, pull min down too
+                const newMin = Math.min(newMax, ageRange[0]);
+                setAgeRange([newMin, newMax]);
+              }}
+              onBlur={(e) => {
+                const n = parseInt(e.target.value) || 99;
+                if (n < 18 || n > 99) setAgeRange([ageRange[0], 99]);
+              }}
+              min={18}
+              max={99}
+              className="w-20 px-3 py-2 rounded-xl bg-white text-ink text-center focus:outline-none focus:ring-1 focus:ring-wine/20"
+              aria-label="Maximum age"
+            />
           </div>
         </section>
 
@@ -593,14 +630,37 @@ export default function ProfilePage() {
       {/* Share + actions */}
       <div className="px-5 pb-5 flex gap-3">
         <button
-          onClick={() => {
+          onClick={async () => {
             const url = `https://bl-nd.nl/p/${firebaseUser?.uid}`;
-            if (navigator.share) {
-              navigator.share({ title: `${profile.displayName} on BLEND`, text: "Check out my profile on BLEND ☕", url });
-            } else {
-              navigator.clipboard.writeText(url);
-              setSaved(true);
-              setTimeout(() => setSaved(false), 2000);
+            // Prefer native share sheet (iOS/Android)
+            if (typeof navigator !== "undefined" && "share" in navigator) {
+              try {
+                await navigator.share({
+                  title: `${profile.displayName} on BLEND`,
+                  text: "Check out my profile on BLEND ☕",
+                  url,
+                });
+                return;
+              } catch (err) {
+                // User cancelled share sheet — that's fine, don't fall back
+                if ((err as Error)?.name === "AbortError") return;
+              }
+            }
+            // Clipboard fallback
+            if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+              try {
+                await navigator.clipboard.writeText(url);
+                setSavedMessage("Link copied ✓");
+                setSaved(true);
+                setTimeout(() => { setSaved(false); setSavedMessage(null); }, 2000);
+                return;
+              } catch {
+                // Clipboard denied
+              }
+            }
+            // Last-resort: show the URL in a prompt for manual copy
+            if (typeof window !== "undefined") {
+              window.prompt("Copy your profile link:", url);
             }
           }}
           className="flex-1 py-4 rounded-full bg-wine text-cream text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
@@ -724,7 +784,7 @@ export default function ProfilePage() {
             className="fixed top-6 inset-x-0 flex justify-center z-50 pointer-events-none"
           >
             <div className="bg-ink text-cream px-5 py-2.5 rounded-full text-sm font-medium shadow-lg">
-              {navigator.clipboard ? "Link copied ✓" : "Saved ✓"}
+              {savedMessage || "Saved ✓"}
             </div>
           </motion.div>
         )}

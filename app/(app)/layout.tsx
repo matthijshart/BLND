@@ -75,26 +75,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [firebaseUser, hasProfile, loading, router]);
 
-  // Listen for new blends — show badge
+  // Badge = actionable blends (need to plan OR need to confirm proposed date).
+  // It reflects real state — no manual reset needed.
   useEffect(() => {
     if (!firebaseUser) return;
     const q = query(
       collection(db, "matches"),
       where("users", "array-contains", firebaseUser.uid),
-      where("status", "==", "scheduling")
+      where("status", "in", ["scheduling", "date_proposed"])
     );
     const unsubscribe = onSnapshot(q, (snap) => {
-      setNewBlends(snap.size);
+      const now = Date.now();
+      // Filter out expired matches (the hook does this too, but keep badge honest)
+      const active = snap.docs.filter((d) => {
+        const expiresAt = d.data().expiresAt?.toMillis?.();
+        return !expiresAt || expiresAt > now;
+      });
+      setNewBlends(active.length);
     }, () => {});
     return unsubscribe;
   }, [firebaseUser]);
-
-  // Reset badge when visiting blends page
-  useEffect(() => {
-    if (pathname.startsWith("/matches")) {
-      setNewBlends(0);
-    }
-  }, [pathname]);
 
   if (loading) {
     return (
