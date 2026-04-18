@@ -1,20 +1,71 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "./firebase";
 
+// Max file size: 10MB before compression (compressed output is much smaller)
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+
+export class PhotoUploadError extends Error {
+  constructor(
+    message: string,
+    public readonly code:
+      | "invalid_type"
+      | "too_large"
+      | "network"
+      | "compression_failed"
+      | "upload_failed"
+      | "permission_denied"
+      | "unknown"
+  ) {
+    super(message);
+    this.name = "PhotoUploadError";
+  }
+}
+
+/**
+ * Validate a file before attempting to upload it.
+ * Throws a PhotoUploadError with a user-friendly message on failure.
+ */
+export function validatePhotoFile(file: File): void {
+  if (!file.type || !file.type.startsWith("image/")) {
+    throw new PhotoUploadError(
+      "That doesn't look like an image. Try a JPEG, PNG, or HEIC.",
+      "invalid_type"
+    );
+  }
+
+  // Some iOS images come through as "image/heic" — allow anything starting with image/
+  if (!ACCEPTED_TYPES.some((t) => file.type === t) && !file.type.startsWith("image/")) {
+    throw new PhotoUploadError(
+      "That image format isn't supported. Try a JPEG or PNG.",
+      "invalid_type"
+    );
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    const mb = (file.size / 1024 / 1024).toFixed(1);
+    throw new PhotoUploadError(
+      `That photo is ${mb}MB — too big. Try one under 10MB.`,
+      "too_large"
+    );
+  }
+}
+
 /**
  * Compress an image file before uploading.
  * Resizes to max 1200px and converts to JPEG at 80% quality.
  */
 async function compressImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    // Skip compression for non-image files
     if (!file.type.startsWith("image/")) {
-      return reject(new Error("Not an image"));
+      return reject(new PhotoUploadError("Not an image", "invalid_type"));
     }
 
+    const objectUrl = URL.createObjectURL(file);
     const img = document.createElement("img");
+
     img.onload = () => {
-      URL.revokeObjectURL(img.src);
+      URL.revokeObjectURL(objectUrl);
       try {
         const canvas = document.createElement("canvas");
         const MAX_SIZE = 1200;
@@ -33,50 +84,96 @@ async function compressImage(file: File): Promise<Blob> {
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
-        if (!ctx) return reject(new Error("Canvas not supported"));
+        if (!ctx) return reject(new PhotoUploadError("Canvas not supported", "compression_failed"));
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(
           (blob) => {
             if (blob) resolve(blob);
-            else reject(new Error("Compression failed"));
+            else reject(new PhotoUploadError("Couldn't process that photo. Try another one.", "compression_failed"));
           },
           "image/jpeg",
           0.8
         );
-      } catch (err) {
-        reject(err);
+      } catch {
+        reject(new PhotoUploadError("Couldn't process that photo. Try another one.", "compression_failed"));
       }
     };
+
     img.onerror = () => {
-      URL.revokeObjectURL(img.src);
-      reject(new Error("Failed to load image"));
+      URL.revokeObjectURL(objectUrl);
+      reject(new PhotoUploadError("Couldn't read that photo. Try another one.", "compression_failed"));
     };
-    // Don't set crossOrigin for local blob URLs
-    img.src = URL.createObjectURL(file);
+
+    img.src = objectUrl;
   });
 }
 
+/**
+ * Upload a photo to Firebase Storage with retry on network errors.
+ * Throws PhotoUploadError on failure.
+ */
 export async function uploadUserPhoto(
   uid: string,
   file: File,
-  index: number
+  index: number,
+  options?: { onProgress?: (stage: "validating" | "compressing" | "uploading") => void }
 ): Promise<string> {
+  options?.onProgress?.("validating");
+  validatePhotoFile(file);
+
   const storageRef = ref(storage, `users/${uid}/photos/${index}.jpg`);
 
+  // Try to compress; fall back to original if compression fails
+  let payload: Blob | File = file;
+  let contentType = file.type || "image/jpeg";
+
+  options?.onProgress?.("compressing");
   try {
-    const compressed = await compressImage(file);
-    await uploadBytes(storageRef, compressed, {
-      contentType: "image/jpeg",
-    });
+    payload = await compressImage(file);
+    contentType = "image/jpeg";
   } catch {
-    // Fallback: upload original file without compression
-    await uploadBytes(storageRef, file, {
-      contentType: file.type || "image/jpeg",
-    });
+    // Compression failed — upload original (may be HEIC from iOS)
+    payload = file;
+    contentType = file.type || "image/jpeg";
   }
 
-  return getDownloadURL(storageRef);
+  // Retry upload up to 3 times on network errors (exponential backoff)
+  options?.onProgress?.("uploading");
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await uploadBytes(storageRef, payload, { contentType });
+      return await getDownloadURL(storageRef);
+    } catch (err: unknown) {
+      lastError = err;
+      const code = (err as { code?: string })?.code;
+      // Don't retry permission errors — the user needs to re-auth
+      if (code === "storage/unauthorized") {
+        throw new PhotoUploadError(
+          "Couldn't upload — please sign out and back in.",
+          "permission_denied"
+        );
+      }
+      // Retry on network/unknown errors
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 500 * Math.pow(2, attempt)));
+      }
+    }
+  }
+
+  // All retries failed
+  const code = (lastError as { code?: string })?.code;
+  if (code === "storage/retry-limit-exceeded" || code?.includes("network")) {
+    throw new PhotoUploadError(
+      "Upload failed — check your connection and try again.",
+      "network"
+    );
+  }
+  throw new PhotoUploadError(
+    "Upload failed. Try again in a moment.",
+    "upload_failed"
+  );
 }
 
 export async function deleteUserPhoto(

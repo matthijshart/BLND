@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { createUser } from "@/lib/db";
-import { uploadUserPhoto } from "@/lib/storage";
+import { uploadUserPhoto, validatePhotoFile, PhotoUploadError } from "@/lib/storage";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 
 const NEIGHBORHOODS = [
@@ -20,11 +20,32 @@ const INTERESTS = [
   "sports", "tennis", "padel", "football", "surfing", "skating",
 ];
 
+const DRAFT_KEY = "blend_onboarding_draft";
+
+interface OnboardingDraft {
+  step: number;
+  displayName: string;
+  age: string;
+  gender: string;
+  genderPreference: string[];
+  lookingFor: string;
+  bio: string;
+  neighborhood: string;
+  interests: string[];
+  profilePrompt: string;
+  profileSong: string;
+  coffeeOrder: string;
+  prompts: { question: string; answer: string }[];
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const { firebaseUser, refreshProfile } = useAuthContext();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [draftRestored, setDraftRestored] = useState(false);
 
   // Step 1
   const [displayName, setDisplayName] = useState("");
@@ -42,12 +63,74 @@ export default function OnboardingPage() {
   const [coffeeOrder, setCoffeeOrder] = useState("");
   const [prompts, setPrompts] = useState<{ question: string; answer: string }[]>([]);
 
-  // Step 3
+  // Step 3 (photos are never persisted to localStorage — user reselects)
   const [photos, setPhotos] = useState<(File | null)[]>([null, null, null, null, null, null]);
   const [previews, setPreviews] = useState<(string | null)[]>([null, null, null, null, null, null]);
   const [uploading, setUploading] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeSlot, setActiveSlot] = useState(0);
+
+  // ─── Draft restore on mount ───
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as OnboardingDraft;
+      if (draft.displayName) setDisplayName(draft.displayName);
+      if (draft.age) setAge(draft.age);
+      if (draft.gender) setGender(draft.gender);
+      if (draft.genderPreference) setGenderPreference(draft.genderPreference);
+      if (draft.lookingFor) setLookingFor(draft.lookingFor);
+      if (draft.bio) setBio(draft.bio);
+      if (draft.neighborhood) setNeighborhood(draft.neighborhood);
+      if (draft.interests) setInterests(draft.interests);
+      if (draft.profilePrompt) setProfilePrompt(draft.profilePrompt);
+      if (draft.profileSong) setProfileSong(draft.profileSong);
+      if (draft.coffeeOrder) setCoffeeOrder(draft.coffeeOrder);
+      if (draft.prompts) setPrompts(draft.prompts);
+      // Don't restore step past 2 — photos need reselection anyway
+      if (draft.step && draft.step <= 2) setStep(draft.step);
+      setDraftRestored(true);
+    } catch {
+      // Bad draft data — ignore
+    }
+  }, []);
+
+  // ─── Auto-save draft on every change ───
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const draft: OnboardingDraft = {
+      step,
+      displayName,
+      age,
+      gender,
+      genderPreference,
+      lookingFor,
+      bio,
+      neighborhood,
+      interests,
+      profilePrompt,
+      profileSong,
+      coffeeOrder,
+      prompts,
+    };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      // Storage full — fail silently
+    }
+  }, [step, displayName, age, gender, genderPreference, lookingFor, bio, neighborhood, interests, profilePrompt, profileSong, coffeeOrder, prompts]);
+
+  // ─── Revoke all preview URLs on unmount to prevent memory leaks ───
+  useEffect(() => {
+    return () => {
+      previews.forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function toggleGenderPref(val: string) {
     setGenderPreference((prev) =>
@@ -65,8 +148,11 @@ export default function OnboardingPage() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    setPhotoError(null);
+
     const newPhotos = [...photos];
     const newPreviews = [...previews];
+    const failed: string[] = [];
 
     // Find empty slots starting from activeSlot
     let slotIndex = activeSlot;
@@ -77,13 +163,38 @@ export default function OnboardingPage() {
       }
       if (slotIndex >= 6) break;
 
-      newPhotos[slotIndex] = files[i];
-      newPreviews[slotIndex] = URL.createObjectURL(files[i]);
+      const file = files[i];
+
+      // Validate file BEFORE setting — prevents invalid data from being tracked
+      try {
+        validatePhotoFile(file);
+      } catch (err) {
+        if (err instanceof PhotoUploadError) {
+          failed.push(err.message);
+        } else {
+          failed.push("One photo couldn't be added.");
+        }
+        continue;
+      }
+
+      // Revoke existing preview URL if slot is being replaced
+      if (newPreviews[slotIndex]) {
+        URL.revokeObjectURL(newPreviews[slotIndex]!);
+      }
+
+      newPhotos[slotIndex] = file;
+      newPreviews[slotIndex] = URL.createObjectURL(file);
       slotIndex++;
     }
 
     setPhotos(newPhotos);
     setPreviews(newPreviews);
+
+    if (failed.length > 0) {
+      setPhotoError(failed[0]);
+      setTimeout(() => setPhotoError(null), 5000);
+    }
+
     // Reset input so same files can be selected again
     e.target.value = "";
   }
@@ -113,15 +224,27 @@ export default function OnboardingPage() {
   async function handleFinish() {
     if (!firebaseUser || saving) return;
     setSaving(true);
+    setError(null);
 
     try {
-      // Upload photos
+      // Upload photos with per-photo error tracking
       const photoUrls: string[] = [];
       for (let i = 0; i < photos.length; i++) {
-        if (photos[i]) {
-          setUploading(i);
-          const url = await uploadUserPhoto(firebaseUser.uid, photos[i]!, i);
+        const photo = photos[i];
+        if (!photo) continue;
+        setUploading(i);
+        try {
+          const url = await uploadUserPhoto(firebaseUser.uid, photo, i);
           photoUrls.push(url);
+        } catch (err) {
+          setUploading(null);
+          if (err instanceof PhotoUploadError) {
+            setError(`Photo ${i + 1}: ${err.message}`);
+          } else {
+            setError(`Photo ${i + 1} couldn't be uploaded. Check your connection and try again.`);
+          }
+          setSaving(false);
+          return;
         }
       }
       setUploading(null);
@@ -147,10 +270,18 @@ export default function OnboardingPage() {
         ageRange: [18, 99],
       });
 
+      // Clear draft once profile is created
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        // ignore
+      }
+
       await refreshProfile();
       router.push("/today");
     } catch (err) {
       console.error("Onboarding error:", err);
+      setError("Something went wrong. Try again.");
       setSaving(false);
     }
   }
@@ -168,7 +299,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Progress */}
-        <div className="flex gap-2 mb-10">
+        <div className="flex gap-2 mb-6">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
@@ -178,6 +309,20 @@ export default function OnboardingPage() {
             />
           ))}
         </div>
+
+        {/* Draft restored banner */}
+        {draftRestored && (
+          <div className="bg-cream/10 border border-cream/20 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-3">
+            <p className="text-cream/80 text-xs">Welcome back — we saved your progress.</p>
+            <button
+              onClick={() => setDraftRestored(false)}
+              className="text-cream/50 text-xs hover:text-cream"
+              aria-label="Dismiss"
+            >
+              Got it
+            </button>
+          </div>
+        )}
 
         {/* Step 1: Basics */}
         {step === 1 && (
@@ -303,13 +448,18 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <p className="text-cream/60 text-sm mb-2">Interests (pick at least 3)</p>
+              <div className="flex items-baseline justify-between mb-2">
+                <p className="text-cream/60 text-sm">Interests</p>
+                <p className={`text-xs ${interests.length >= 3 ? "text-cream/40" : "text-cream/70"}`}>
+                  {interests.length < 3 ? `Pick ${3 - interests.length} more` : `${interests.length} picked`}
+                </p>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {INTERESTS.map((i) => (
                   <button
                     key={i}
                     onClick={() => toggleInterest(i)}
-                    className={`px-4 py-1.5 rounded-full text-sm transition-colors ${
+                    className={`px-4 py-2.5 min-h-[44px] rounded-full text-sm transition-colors ${
                       interests.includes(i)
                         ? "bg-cream text-wine font-medium"
                         : "border border-cream/20 text-cream/60 hover:bg-cream/10"
@@ -449,19 +599,37 @@ export default function OnboardingPage() {
               ))}
             </div>
 
+            {/* Photo error toast */}
+            {photoError && (
+              <div className="bg-coral/20 border border-coral/40 rounded-xl px-4 py-3 text-coral text-sm">
+                {photoError}
+              </div>
+            )}
+
+            {/* Upload/save error */}
+            {error && (
+              <div className="bg-coral/20 border border-coral/40 rounded-xl px-4 py-3 text-coral text-sm">
+                {error}
+              </div>
+            )}
+
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setStep(2)}
-                className="flex-1 py-4 rounded-full border border-cream/20 text-cream font-medium hover:bg-cream/10 transition-colors"
+                disabled={saving}
+                className="flex-1 py-4 rounded-full border border-cream/20 text-cream font-medium hover:bg-cream/10 transition-colors disabled:opacity-40"
               >
                 Back
               </button>
               <button
                 onClick={handleFinish}
                 disabled={!canFinish() || saving}
-                className="flex-1 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-30"
+                className="flex-1 py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-30 flex items-center justify-center gap-2"
               >
-                {saving ? "Saving..." : "Let's go"}
+                {saving && (
+                  <span className="w-4 h-4 rounded-full border-2 border-wine border-t-transparent animate-spin" />
+                )}
+                {saving ? (uploading !== null ? `Uploading photo ${uploading + 1}...` : "Saving profile...") : "Let's go"}
               </button>
             </div>
           </div>

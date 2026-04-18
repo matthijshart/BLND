@@ -136,6 +136,7 @@ export default function ProfilePage() {
   const [deleting, setDeleting] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Reset swipe hint when photo changes
   useEffect(() => {
@@ -165,22 +166,47 @@ export default function ProfilePage() {
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0 || !firebaseUser) return;
+    setUploadError(null);
     const newPhotos = [...photos];
     let slot = activeSlot;
+    const { uploadUserPhoto: upload, validatePhotoFile, PhotoUploadError } = await import("@/lib/storage");
+
     for (let i = 0; i < files.length && slot < 6; i++) {
       while (slot < 6 && newPhotos[slot]) slot++;
       if (slot >= 6) break;
+
+      // Pre-validate before upload — fail fast with user-friendly message
+      try {
+        validatePhotoFile(files[i]);
+      } catch (err) {
+        if (err instanceof PhotoUploadError) {
+          setUploadError(err.message);
+          setTimeout(() => setUploadError(null), 5000);
+        }
+        continue;
+      }
+
       setUploading(slot);
       try {
-        const { uploadUserPhoto: upload } = await import("@/lib/storage");
         const url = await upload(firebaseUser.uid, files[i], slot);
         newPhotos[slot] = url;
         setPhotos([...newPhotos]);
-      } catch (err) { console.error(err); }
+        // Persist incrementally — if something fails later, we still save what worked
+        await updateUser(firebaseUser.uid, { photos: newPhotos.filter(Boolean) });
+      } catch (err) {
+        if (err instanceof PhotoUploadError) {
+          setUploadError(err.message);
+        } else {
+          setUploadError("Upload failed. Check your connection and try again.");
+        }
+        setTimeout(() => setUploadError(null), 5000);
+        setUploading(null);
+        // Stop the loop on upload failure — user can retry
+        break;
+      }
       slot++;
     }
     setUploading(null);
-    await updateUser(firebaseUser.uid, { photos: newPhotos.filter(Boolean) });
     await refreshProfile();
     e.target.value = "";
   }
@@ -263,6 +289,11 @@ export default function ProfilePage() {
             }}
             onAddClick={(slot) => { setActiveSlot(slot); fileInputRef.current?.click(); }}
           />
+          {uploadError && (
+            <div className="mt-3 bg-coral/10 border border-coral/30 rounded-xl px-4 py-2.5 text-coral text-xs">
+              {uploadError}
+            </div>
+          )}
           <p className="text-[10px] text-gray-light text-center mt-2">Drag to reorder</p>
         </section>
 
