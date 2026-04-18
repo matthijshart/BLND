@@ -25,7 +25,7 @@ const DRAFT_KEY = "blend_onboarding_draft";
 interface OnboardingDraft {
   step: number;
   displayName: string;
-  age: string;
+  dateOfBirth: string; // YYYY-MM-DD
   gender: string;
   genderPreference: string[];
   lookingFor: string;
@@ -36,6 +36,18 @@ interface OnboardingDraft {
   profileSong: string;
   coffeeOrder: string;
   prompts: { question: string; answer: string }[];
+}
+
+/** Calculate age in years from YYYY-MM-DD. */
+function calcAge(dob: string): number {
+  if (!dob) return 0;
+  const birth = new Date(dob);
+  if (isNaN(birth.getTime())) return 0;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
+  return age;
 }
 
 export default function OnboardingPage() {
@@ -53,6 +65,8 @@ export default function OnboardingPage() {
   const [gender, setGender] = useState("");
   const [genderPreference, setGenderPreference] = useState<string[]>([]);
   const [lookingFor, setLookingFor] = useState("");
+
+  const derivedAge = calcAge(dateOfBirth);
 
   // Step 2
   const [bio, setBio] = useState("");
@@ -78,7 +92,7 @@ export default function OnboardingPage() {
       if (!raw) return;
       const draft = JSON.parse(raw) as OnboardingDraft;
       if (draft.displayName) setDisplayName(draft.displayName);
-      if (draft.age) setAge(draft.age);
+      if (draft.dateOfBirth) setDateOfBirth(draft.dateOfBirth);
       if (draft.gender) setGender(draft.gender);
       if (draft.genderPreference) setGenderPreference(draft.genderPreference);
       if (draft.lookingFor) setLookingFor(draft.lookingFor);
@@ -103,7 +117,6 @@ export default function OnboardingPage() {
     const draft: OnboardingDraft = {
       step,
       displayName,
-      age,
       dateOfBirth,
       gender,
       genderPreference,
