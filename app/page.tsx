@@ -15,13 +15,20 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showExample, setShowExample] = useState(false);
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email || isSubmitting) return;
+    const trimmed = email.trim();
+    if (!EMAIL_REGEX.test(trimmed)) {
+      setError("That doesn't look like a valid email.");
+      return;
+    }
     setIsSubmitting(true);
     setError("");
     try {
-      await addToWaitlist(email, "Amsterdam");
+      await addToWaitlist(trimmed, "Amsterdam");
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Try again.");

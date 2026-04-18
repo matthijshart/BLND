@@ -49,11 +49,22 @@ export default function DateDetailPage() {
           if (user) setOtherUser(user);
         }
         setLoading(false);
+
+        // Auto-transition status to "chat_open" once we've passed chatOpenAt.
+        // First participant to load the detail page triggers it — keeps data clean.
+        if (data.status === "upcoming" && data.chatOpenAt) {
+          const openAt = data.chatOpenAt.toDate?.() || new Date(data.chatOpenAt as unknown as string);
+          if (Date.now() >= openAt.getTime()) {
+            updateDoc(doc(db, "dates", data.id), { status: "chat_open" }).catch(() => {
+              // If another client beat us to it, that's fine
+            });
+          }
+        }
       }
     );
 
     return unsubscribe;
-  }, [firebaseUser, params.id]);
+  }, [firebaseUser, params.id, otherUser]);
 
   // Countdown timer
   useEffect(() => {
@@ -131,7 +142,8 @@ export default function DateDetailPage() {
   const chatOpenAt = dateData.chatOpenAt?.toDate?.()
     || new Date(dateData.chatOpenAt as unknown as string);
   const isSecondCup = dateData.status === "second_cup";
-  const isChatOpen = isSecondCup || new Date() >= chatOpenAt;
+  const isCancelled = dateData.status === "cancelled" || dateData.status === "no_show";
+  const isChatOpen = !isCancelled && (isSecondCup || new Date() >= chatOpenAt);
   const isPast = dateTime < new Date() && !isSecondCup;
 
   // Pre-meet calmer message
@@ -161,6 +173,20 @@ export default function DateDetailPage() {
           ← Back
         </button>
       </div>
+
+      {/* Cancellation banner — honest when things went wrong */}
+      {isCancelled && (
+        <div className="mx-4 mb-4 bg-coral/10 border border-coral/30 rounded-2xl px-4 py-3">
+          <p className="text-coral text-sm font-medium">
+            {dateData.status === "no_show" ? "Meet was missed" : "Meet was cancelled"}
+          </p>
+          <p className="text-ink-mid text-xs mt-1">
+            {dateData.status === "no_show"
+              ? "One of you didn't show up. Chat is closed."
+              : "This meet was cancelled. Chat is closed."}
+          </p>
+        </div>
+      )}
 
       {/* Countdown hero */}
       <div className="mx-4 bg-wine rounded-2xl p-8 text-center mb-6">

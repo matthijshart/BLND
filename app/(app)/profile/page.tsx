@@ -10,7 +10,7 @@ import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
-import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
+import { SpotifyPlayer, isValidSpotifyUrl } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import {
   DndContext,
@@ -217,6 +217,17 @@ export default function ProfilePage() {
 
   async function saveAll() {
     if (!firebaseUser) return;
+    // Guardrails — block save on known invalid states
+    if (prompts.length < 3) {
+      setUploadError("Pick at least 3 prompts before saving.");
+      setTimeout(() => setUploadError(null), 4000);
+      return;
+    }
+    if (profileSong && !isValidSpotifyUrl(profileSong)) {
+      setUploadError("Your Spotify link isn't valid. Remove it or fix it first.");
+      setTimeout(() => setUploadError(null), 4000);
+      return;
+    }
     setSaving(true);
     try {
       const updates: Record<string, unknown> = {
@@ -343,8 +354,25 @@ export default function ProfilePage() {
         {/* Profile song */}
         <section className="px-5 py-4 border-t border-wine/5">
           <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Your Song</h3>
-          <input type="url" value={profileSong} onChange={(e) => setProfileSong(e.target.value)} placeholder="Paste a Spotify song link" className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
-          <p className="text-gray-light text-[10px] mt-1">open.spotify.com/track/...</p>
+          <input
+            type="url"
+            value={profileSong}
+            onChange={(e) => setProfileSong(e.target.value)}
+            placeholder="Paste a Spotify song link"
+            aria-label="Spotify song URL"
+            className={`w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 ${
+              profileSong && !isValidSpotifyUrl(profileSong)
+                ? "ring-1 ring-coral/40 focus:ring-coral/40"
+                : "focus:ring-wine/20"
+            }`}
+          />
+          {profileSong && !isValidSpotifyUrl(profileSong) ? (
+            <p className="text-coral text-[11px] mt-1.5">
+              That doesn&apos;t look like a Spotify track link. Copy the share URL from Spotify.
+            </p>
+          ) : (
+            <p className="text-gray-light text-[10px] mt-1">open.spotify.com/track/...</p>
+          )}
         </section>
 
         {/* Preferences */}

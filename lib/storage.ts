@@ -1,8 +1,8 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "./firebase";
 
-// Max file size: 10MB before compression (compressed output is much smaller)
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+// Max file size: 5MB before compression (compressed output is ~200KB)
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 
 export class PhotoUploadError extends Error {
@@ -45,7 +45,7 @@ export function validatePhotoFile(file: File): void {
   if (file.size > MAX_FILE_SIZE) {
     const mb = (file.size / 1024 / 1024).toFixed(1);
     throw new PhotoUploadError(
-      `That photo is ${mb}MB — too big. Try one under 10MB.`,
+      `That photo is ${mb}MB — too big. Try one under 5MB.`,
       "too_large"
     );
   }

@@ -425,12 +425,24 @@ export default function OnboardingPage() {
             <div>
               <textarea
                 value={bio}
-                onChange={(e) => setBio(e.target.value.slice(0, 300))}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v.length > 300) {
+                    setBio(v.slice(0, 300));
+                    setPhotoError("Bio is limited to 300 characters.");
+                    setTimeout(() => setPhotoError(null), 3000);
+                  } else {
+                    setBio(v);
+                  }
+                }}
                 placeholder="Write a short bio..."
                 rows={3}
+                aria-label="Short bio, up to 300 characters"
                 className="w-full px-5 py-4 rounded-2xl bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors resize-none"
               />
-              <p className="text-cream/30 text-xs text-right mt-1">{bio.length}/300</p>
+              <p className={`text-xs text-right mt-1 ${bio.length >= 280 ? "text-coral" : "text-cream/30"}`}>
+                {bio.length}/300
+              </p>
             </div>
 
             <div>

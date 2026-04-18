@@ -79,6 +79,8 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
+            autoComplete="email"
+            aria-label="Email address"
             className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
           />
           <input
@@ -88,6 +90,8 @@ export default function SignupPage() {
             placeholder="Password (min. 6 characters)"
             required
             minLength={6}
+            autoComplete="new-password"
+            aria-label="Password, at least 6 characters"
             className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
           />
 

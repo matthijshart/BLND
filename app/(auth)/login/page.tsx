@@ -103,6 +103,8 @@ function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
+              autoComplete="email"
+              aria-label="Email address"
               className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
             />
 
@@ -151,11 +153,15 @@ function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
+              autoComplete="email"
+              aria-label="Email address"
               className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
             />
             <input
               type="password"
               value={password}
+              autoComplete="current-password"
+              aria-label="Password"
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required

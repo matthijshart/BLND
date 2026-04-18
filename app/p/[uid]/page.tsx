@@ -127,6 +127,8 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
 
+  const [slowLoad, setSlowLoad] = useState(false);
+
   useEffect(() => {
     async function load() {
       if (!params.uid) return;
@@ -137,10 +139,22 @@ export default function PublicProfilePage() {
     load();
   }, [params.uid]);
 
+  // Show "taking a while" message after 5 seconds of loading
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => setSlowLoad(true), 5000);
+    return () => clearTimeout(t);
+  }, [loading]);
+
   if (loading) {
     return (
-      <div className="min-h-dvh bg-cream flex items-center justify-center">
+      <div className="min-h-dvh bg-cream flex flex-col items-center justify-center gap-4">
         <div className="w-8 h-8 rounded-full bg-wine/20 animate-pulse" />
+        {slowLoad && (
+          <p className="text-gray text-sm px-6 text-center max-w-xs">
+            Taking a while... check your connection.
+          </p>
+        )}
       </div>
     );
   }
