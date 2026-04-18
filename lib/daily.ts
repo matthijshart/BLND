@@ -151,9 +151,14 @@ export async function fetchCandidateProfiles(
     getMatchedUids(uid),
   ]);
 
-  users = users.filter(
-    (u) => !alreadySwiped.has(u.uid) && !alreadyMatched.has(u.uid)
-  );
+  // Mutual block filter: never show blocked users, and never show users who blocked you
+  const myBlocked = new Set(currentUser?.blockedUsers || []);
+  users = users.filter((u) => {
+    if (myBlocked.has(u.uid)) return false;
+    const theirBlocked = new Set(u.blockedUsers || []);
+    if (theirBlocked.has(uid)) return false;
+    return !alreadySwiped.has(u.uid) && !alreadyMatched.has(u.uid);
+  });
 
   // Shuffle and return max
   const shuffled = users.sort(() => Math.random() - 0.5);
