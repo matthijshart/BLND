@@ -418,6 +418,19 @@ export default function MatchDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Report / block bottom sheet */}
+      <ReportSheet
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        targetUid={otherUser.uid}
+        targetName={otherUser.displayName}
+        context="blend"
+        onBlocked={() => {
+          // User is removed from match automatically by blockUser; go back to list
+          setTimeout(() => router.push("/matches"), 600);
+        }}
+      />
     </div>
   );
 }
