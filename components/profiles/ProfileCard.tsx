@@ -7,6 +7,7 @@ import type { User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { ReportSheet } from "@/components/ui/ReportSheet";
 
 interface ProfileCardProps {
   profile: User;
@@ -51,6 +52,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
   const [swiped, setSwiped] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const photos = profile.photos?.length > 0 ? profile.photos : ["/images/sipping.png"];
   const overlaps = getOverlaps(currentUser, profile);
