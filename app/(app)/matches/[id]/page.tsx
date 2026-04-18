@@ -14,6 +14,7 @@ import { SlotPicker } from "@/components/match/SlotPicker";
 import type { Match, User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
+import { ReportSheet } from "@/components/ui/ReportSheet";
 import { AnimatePresence } from "framer-motion";
 // import { calculateVibeMatch, getCoffeeCompatibility } from "@/lib/compatibility";
 
@@ -29,6 +30,7 @@ export default function MatchDetailPage() {
   const [showSlotPicker, setShowSlotPicker] = useState(false);
   const [noOverlap, setNoOverlap] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   // Real-time match subscription
   useEffect(() => {
