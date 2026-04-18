@@ -3,35 +3,85 @@
 import { useDailyProfiles } from "@/hooks/useDailyProfiles";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { DoneForToday } from "@/components/profiles/DoneForToday";
-import { checkForMatch, createMatch } from "@/lib/matching";
 import { useAuthContext } from "@/components/providers/AuthProvider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CoffeeBeans } from "@/components/ui/CoffeeBeans";
 import { playBlendSound, triggerHaptic } from "@/lib/sounds";
 
+const MATCH_MODAL_DELAY_MS = 450; // Wait for ProfileCard exit animation to finish
+
 export default function TodayPage() {
-  const { firebaseUser, profile: currentUser } = useAuthContext();
-  const { currentProfile, currentIndex, total, isComplete, loading, handleAction } =
-    useDailyProfiles();
+  const { profile: currentUser } = useAuthContext();
+  const {
+    currentProfile,
+    currentIndex,
+    total,
+    isComplete,
+    loading,
+    lastPassed,
+    handleAction,
+    undoLastPass,
+  } = useDailyProfiles();
+
   const [matchedUid, setMatchedUid] = useState<string | null>(null);
+  const [showUndo, setShowUndo] = useState(false);
+  const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear undo chip when it's no longer possible to undo
+  useEffect(() => {
+    if (!lastPassed && undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+      undoTimeoutRef.current = null;
+      setShowUndo(false);
+    }
+  }, [lastPassed]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
+    };
+  }, []);
 
   async function onLike() {
-    if (!firebaseUser) return;
-    const targetUid = await handleAction("like");
-    if (targetUid) {
-      const isMatch = await checkForMatch(firebaseUser.uid, targetUid);
-      if (isMatch) {
-        await createMatch(firebaseUser.uid, targetUid);
-        setMatchedUid(targetUid);
+    triggerHaptic();
+    const result = await handleAction("like");
+    if (!result) return;
+    if (result.matchedUid) {
+      // Delay match modal so the card exit animation can finish first
+      setTimeout(() => {
+        setMatchedUid(result.matchedUid);
         playBlendSound();
         triggerHaptic();
-      }
+      }, MATCH_MODAL_DELAY_MS);
     }
   }
 
   async function onPass() {
-    await handleAction("pass");
+    triggerHaptic();
+    const result = await handleAction("pass");
+    if (!result) return;
+
+    // Show undo chip for 4 seconds
+    if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
+    setShowUndo(true);
+    undoTimeoutRef.current = setTimeout(() => {
+      setShowUndo(false);
+      undoTimeoutRef.current = null;
+    }, 4000);
+  }
+
+  async function onUndoPass() {
+    triggerHaptic();
+    const success = await undoLastPass();
+    if (success) {
+      setShowUndo(false);
+      if (undoTimeoutRef.current) {
+        clearTimeout(undoTimeoutRef.current);
+        undoTimeoutRef.current = null;
+      }
+    }
   }
 
   if (loading) {
@@ -80,6 +130,31 @@ export default function TodayPage() {
         </motion.div>
       </AnimatePresence>
 
+      {/* Undo pass chip — floats near the action buttons */}
+      <AnimatePresence>
+        {showUndo && lastPassed && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="fixed left-1/2 -translate-x-1/2 z-40"
+            style={{ bottom: "calc(max(5rem, env(safe-area-inset-bottom)) + 5rem)" }}
+          >
+            <button
+              onClick={onUndoPass}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink/90 backdrop-blur-md text-cream text-sm font-medium shadow-lg active:scale-[0.98] transition-transform"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+              </svg>
+              Oops — undo
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Match notification */}
       <AnimatePresence>
         {matchedUid && (
@@ -126,8 +201,11 @@ export default function TodayPage() {
               className="flex flex-col gap-3 w-full max-w-xs mt-10"
             >
               <button
-                onClick={() => setMatchedUid(null)}
-                className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors"
+                onClick={() => {
+                  triggerHaptic();
+                  setMatchedUid(null);
+                }}
+                className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors active:scale-[0.98]"
               >
                 Keep browsing
               </button>

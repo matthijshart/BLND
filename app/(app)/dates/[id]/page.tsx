@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/lib/db";
 import { useAuthContext } from "@/components/providers/AuthProvider";
@@ -30,7 +30,7 @@ export default function DateDetailPage() {
   const [countdown, setCountdown] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [secondCupSubmitted, setSecondCupSubmitted] = useState(false);
-  const [showSecondCupResult, setShowSecondCupResult] = useState(false);
+  // showSecondCupResult now derives from server status (second_cup)
 
   // Real-time date subscription
   useEffect(() => {
@@ -84,7 +84,8 @@ export default function DateDetailPage() {
     }
 
     updateCountdown();
-    const interval = setInterval(updateCountdown, 60000);
+    // Update every 5 seconds when >1 hour away, every second when close
+    const interval = setInterval(updateCountdown, 5000);
     return () => clearInterval(interval);
   }, [dateData]);
 
@@ -340,27 +341,49 @@ export default function DateDetailPage() {
               otherUser={otherUser}
               firebaseUser={firebaseUser}
               submitted={secondCupSubmitted}
-              showResult={showSecondCupResult}
+              showResult={dateData.status === "second_cup"}
               onSubmit={async (wantSecondCup: boolean) => {
                 if (!firebaseUser || !dateData) return;
-                const ratings = dateData.ratings || {};
+                const ratings = { ...(dateData.ratings || {}) };
                 ratings[firebaseUser.uid] = {
                   ...ratings[firebaseUser.uid],
                   rating: wantSecondCup ? 5 : 3,
                   shareContact: wantSecondCup,
                   secondCup: wantSecondCup,
                 } as typeof ratings[string];
-                await updateDoc(doc(db, "dates", dateData.id), { ratings, status: "completed" });
-                setSecondCupSubmitted(true);
 
-                // Check if both submitted and both want second cup
+                // Check if both users now agree on second cup
                 const otherUid = dateData.users.find((u) => u !== firebaseUser.uid);
                 const otherRating = otherUid ? ratings[otherUid] : null;
-                if (otherRating && (otherRating as Record<string, unknown>).secondCup && wantSecondCup) {
-                  setShowSecondCupResult(true);
-                } else if (otherRating && (!(otherRating as Record<string, unknown>).secondCup || !wantSecondCup)) {
-                  // One said no — show nothing, no rejection visible
+                const bothWantSecondCup =
+                  wantSecondCup &&
+                  !!otherRating &&
+                  !!(otherRating as Record<string, unknown>).secondCup;
+
+                // Server-driven status so both clients see the same thing via onSnapshot
+                const nextStatus = bothWantSecondCup ? "second_cup" : "completed";
+                const updates: Record<string, unknown> = { ratings, status: nextStatus };
+
+                // If we're entering second_cup, reopen chat now (chatOpenAt may be in the past)
+                if (bothWantSecondCup) {
+                  updates.chatOpenAt = Timestamp.fromDate(new Date());
                 }
+
+                await updateDoc(doc(db, "dates", dateData.id), updates);
+
+                // Also update the match status so Blends list surfaces it correctly
+                if (bothWantSecondCup && dateData.matchId) {
+                  try {
+                    await updateDoc(doc(db, "matches", dateData.matchId), {
+                      status: "second_cup",
+                    });
+                  } catch {
+                    // Match may have been cleaned up — not fatal
+                  }
+                }
+
+                setSecondCupSubmitted(true);
+                // onSnapshot will push the status change; no need for client-side showResult state
               }}
             />
           ) : (
