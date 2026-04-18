@@ -49,7 +49,7 @@ export default function OnboardingPage() {
 
   // Step 1
   const [displayName, setDisplayName] = useState("");
-  const [age, setAge] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState(""); // YYYY-MM-DD
   const [gender, setGender] = useState("");
   const [genderPreference, setGenderPreference] = useState<string[]>([]);
   const [lookingFor, setLookingFor] = useState("");
@@ -104,6 +104,7 @@ export default function OnboardingPage() {
       step,
       displayName,
       age,
+      dateOfBirth,
       gender,
       genderPreference,
       lookingFor,
@@ -120,7 +121,7 @@ export default function OnboardingPage() {
     } catch {
       // Storage full — fail silently
     }
-  }, [step, displayName, age, gender, genderPreference, lookingFor, bio, neighborhood, interests, profilePrompt, profileSong, coffeeOrder, prompts]);
+  }, [step, displayName, dateOfBirth, gender, genderPreference, lookingFor, bio, neighborhood, interests, profilePrompt, profileSong, coffeeOrder, prompts]);
 
   // ─── Revoke all preview URLs on unmount to prevent memory leaks ───
   useEffect(() => {
@@ -210,7 +211,15 @@ export default function OnboardingPage() {
   }
 
   function canProceedStep1() {
-    return displayName && age && gender && genderPreference.length > 0 && lookingFor;
+    return (
+      displayName &&
+      dateOfBirth &&
+      derivedAge >= 18 &&
+      derivedAge <= 120 &&
+      gender &&
+      genderPreference.length > 0 &&
+      lookingFor
+    );
   }
 
   function canProceedStep2() {
@@ -251,7 +260,8 @@ export default function OnboardingPage() {
 
       const userData: Record<string, unknown> = {
         displayName,
-        age: parseInt(age),
+        age: derivedAge,
+        dateOfBirth, // authoritative — used for age verification + recalculation on birthday
         gender,
         genderPreference,
         lookingFor: lookingFor as "dating" | "friends" | "open",
@@ -334,18 +344,36 @@ export default function OnboardingPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="First name"
+              aria-label="First name"
+              autoComplete="given-name"
               className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
             />
 
-            <input
-              type="number"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              placeholder="Age"
-              min={18}
-              max={99}
-              className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
-            />
+            <div>
+              <label htmlFor="dob" className="text-cream/60 text-sm mb-2 block">
+                Date of birth
+              </label>
+              <input
+                id="dob"
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                max={new Date(Date.now() - 18 * 365.25 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
+                min="1920-01-01"
+                aria-label="Date of birth"
+                className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors [color-scheme:dark]"
+              />
+              {dateOfBirth && derivedAge < 18 && (
+                <p className="text-coral text-xs mt-1.5">
+                  You must be 18 or older to use BLEND.
+                </p>
+              )}
+              {dateOfBirth && derivedAge >= 18 && (
+                <p className="text-cream/40 text-xs mt-1.5">
+                  {derivedAge} years old — looking good ✓
+                </p>
+              )}
+            </div>
 
             <div>
               <p className="text-cream/60 text-sm mb-2">I am</p>

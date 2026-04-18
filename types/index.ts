@@ -4,6 +4,8 @@ export interface User {
   uid: string;
   displayName: string;
   age: number;
+  /** ISO date string YYYY-MM-DD. Source of truth; `age` is derived. */
+  dateOfBirth?: string;
   bio: string;
   photos: string[]; // Firebase Storage URLs, max 6
   neighborhood: string; // Amsterdam neighborhood
@@ -18,8 +20,29 @@ export interface User {
   ageRange: [number, number];
   dateTokens: number;
   freezeUntil?: Timestamp;
+  /** UIDs this user has blocked. Blocked users never see each other. */
+  blockedUsers?: string[];
   createdAt: Timestamp;
   lastActive: Timestamp;
+}
+
+export type ReportReason =
+  | "inappropriate_photos"
+  | "fake_profile"
+  | "harassment"
+  | "minor" // suspected under 18
+  | "spam"
+  | "other";
+
+export interface Report {
+  id: string;
+  reporterId: string;
+  reportedId: string;
+  reason: ReportReason;
+  context: "today" | "blend" | "meet" | "chat" | "profile";
+  notes?: string;
+  resolved?: boolean;
+  createdAt: Timestamp;
 }
 
 export interface DailyProfile {
