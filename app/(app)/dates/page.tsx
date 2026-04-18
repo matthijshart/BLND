@@ -141,7 +141,7 @@ function openAppleCalendar(title: string, start: Date, location: string) {
 
 function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number] }) {
   const dateTime = date.dateTime?.toDate?.() || new Date(date.dateTime as unknown as string);
-  const caféName = (date as unknown as Record<string, string>).caféName || "TBD";
+  const caféName = (date as unknown as Record<string, string>).caféName || "Spot being picked...";
   const caféVibe = (date as unknown as Record<string, string>).caféVibe || "";
   const isChatOpen = date.status === "chat_open" || date.status === "second_cup";
   const isSecondCup = date.status === "second_cup";

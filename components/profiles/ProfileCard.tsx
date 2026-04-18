@@ -176,7 +176,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
               <span className="text-lg">☕</span>
               <div className="flex-1">
                 <p className="text-[9px] text-gray uppercase tracking-[0.2em]">Go-to coffee</p>
-                <p className="text-ink font-medium text-sm">{profile.coffeeOrder}</p>
+                <p className="text-ink font-medium text-sm" dir="auto">{profile.coffeeOrder}</p>
               </div>
               {overlaps.sameCoffee && (
                 <span className="text-[10px] text-wine font-medium bg-wine/10 px-2 py-0.5 rounded-full">Same!</span>
@@ -186,7 +186,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
 
           {/* Bio */}
           {profile.bio && (
-            <p className="text-ink-mid text-[15px] leading-relaxed">{profile.bio}</p>
+            <p className="text-ink-mid text-[15px] leading-relaxed whitespace-pre-wrap break-words" dir="auto">{profile.bio}</p>
           )}
 
           {/* Prompts — compact, with overlap highlights */}
@@ -206,7 +206,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
                         <span className="text-[9px] text-wine/70 font-medium">You too</span>
                       )}
                     </div>
-                    <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
+                    <p className="text-ink text-[15px] leading-snug break-words" dir="auto">{p.answer}</p>
                   </div>
                 );
               })}
@@ -217,7 +217,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
           {profile.profilePrompt && !profile.prompts?.length && (
             <div className="bg-wine/5 rounded-xl p-4">
               <p className="text-wine text-xs font-medium italic mb-1">Fun fact</p>
-              <p className="text-ink text-[15px]">{profile.profilePrompt}</p>
+              <p className="text-ink text-[15px] break-words" dir="auto">{profile.profilePrompt}</p>
             </div>
           )}
 

@@ -578,7 +578,7 @@ export default function ProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Go-to coffee</p>
-            <p className="text-ink font-medium text-[15px] mt-0.5">{profile.coffeeOrder}</p>
+            <p className="text-ink font-medium text-[15px] mt-0.5" dir="auto">{profile.coffeeOrder}</p>
           </div>
         </div>
       )}
@@ -586,7 +586,7 @@ export default function ProfilePage() {
       {/* Bio */}
       {profile.bio && (
         <div className="px-6 py-6">
-          <p className="text-ink-mid text-[15px] leading-[1.65]">{profile.bio}</p>
+          <p className="text-ink-mid text-[15px] leading-[1.65] whitespace-pre-wrap break-words" dir="auto">{profile.bio}</p>
         </div>
       )}
 
@@ -596,7 +596,7 @@ export default function ProfilePage() {
           {profile.prompts.map((p, i) => (
             <div key={i} className="bg-stripe-white rounded-2xl px-5 py-4">
               <p className="text-wine text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5">{p.question}</p>
-              <p className="text-ink text-[15px] leading-snug font-display">{p.answer}</p>
+              <p className="text-ink text-[15px] leading-snug font-display break-words" dir="auto">{p.answer}</p>
             </div>
           ))}
         </div>

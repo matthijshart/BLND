@@ -191,7 +191,7 @@ export default function MatchDetailPage() {
 
       {/* Bio */}
       <div className="px-6 mt-6">
-        <p className="text-ink-mid leading-relaxed">{otherUser.bio}</p>
+        <p className="text-ink-mid leading-relaxed whitespace-pre-wrap break-words" dir="auto">{otherUser.bio}</p>
 
         {/* Coffee order */}
         {otherUser.coffeeOrder && (
@@ -199,7 +199,7 @@ export default function MatchDetailPage() {
             <span className="text-xl">☕</span>
             <div className="flex-1">
               <p className="text-[10px] text-gray uppercase tracking-wider">Go-to coffee</p>
-              <p className="text-ink text-[15px] font-medium">{otherUser.coffeeOrder}</p>
+              <p className="text-ink text-[15px] font-medium" dir="auto">{otherUser.coffeeOrder}</p>
             </div>
             {sameCoffee && (
               <span className="text-[10px] text-wine font-medium bg-wine/15 px-2 py-0.5 rounded-full">Same!</span>
@@ -224,7 +224,7 @@ export default function MatchDetailPage() {
                       <span className="text-[9px] text-wine/70 font-medium">You too</span>
                     )}
                   </div>
-                  <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
+                  <p className="text-ink text-[15px] leading-snug break-words" dir="auto">{p.answer}</p>
                 </div>
               );
             })}

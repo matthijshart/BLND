@@ -84,9 +84,23 @@ export default function DateDetailPage() {
     }
 
     updateCountdown();
-    // Update every 5 seconds when >1 hour away, every second when close
-    const interval = setInterval(updateCountdown, 5000);
-    return () => clearInterval(interval);
+    // Smart polling: 1s when close (<10min), 10s when <1h, 60s otherwise
+    let timer: ReturnType<typeof setTimeout>;
+    function schedule() {
+      const dt = dateData!.dateTime?.toDate?.() || new Date(dateData!.dateTime as unknown as string);
+      const diff = dt.getTime() - Date.now();
+      const delay =
+        diff <= 0 ? 60000 :
+        diff < 10 * 60 * 1000 ? 1000 :
+        diff < 60 * 60 * 1000 ? 10000 :
+        60000;
+      timer = setTimeout(() => {
+        updateCountdown();
+        schedule();
+      }, delay);
+    }
+    schedule();
+    return () => clearTimeout(timer);
   }, [dateData]);
 
   if (loading) {
@@ -241,7 +255,7 @@ export default function DateDetailPage() {
           </div>
           <div className="flex-1">
             <p className="font-display text-lg text-ink">
-              {dateData.caféName || "Café TBD"}
+              {dateData.caféName || "Spot being picked..."}
             </p>
             {dateData.caféAddress && (
               <p className="text-ink-mid text-sm mt-0.5">{dateData.caféAddress}</p>
@@ -289,7 +303,7 @@ export default function DateDetailPage() {
       {/* Chat section */}
       {isChatOpen && !isPast && chatOpen ? (
         /* Full chat view */
-        <div className="fixed inset-0 z-50 bg-cream flex flex-col">
+        <div className="fixed inset-0 z-50 bg-cream flex flex-col" style={{ height: "100dvh" }}>
           {/* Chat header with back — safe area respected */}
           <div className="bg-white border-b border-stripe-white" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
             <div className="flex items-center gap-3 px-4 py-3">

@@ -193,7 +193,7 @@ export default function PublicProfilePage() {
         {/* Bio */}
         {profile.bio && (
           <div className="px-6 mt-6">
-            <p className="text-ink-mid leading-relaxed">{profile.bio}</p>
+            <p className="text-ink-mid leading-relaxed whitespace-pre-wrap break-words" dir="auto">{profile.bio}</p>
           </div>
         )}
 
@@ -203,7 +203,7 @@ export default function PublicProfilePage() {
             <span className="text-xl">☕</span>
             <div>
               <p className="text-[10px] text-gray uppercase tracking-wider">Their order</p>
-              <p className="text-ink text-[15px] font-medium">{profile.coffeeOrder}</p>
+              <p className="text-ink text-[15px] font-medium" dir="auto">{profile.coffeeOrder}</p>
             </div>
           </div>
         )}
@@ -214,7 +214,7 @@ export default function PublicProfilePage() {
             {profile.prompts.map((p, i) => (
               <div key={i} className="bg-wine/5 rounded-xl p-4">
                 <p className="text-wine text-xs font-medium italic mb-1">{p.question}</p>
-                <p className="text-ink text-[15px]">{p.answer}</p>
+                <p className="text-ink text-[15px] break-words" dir="auto">{p.answer}</p>
               </div>
             ))}
           </div>

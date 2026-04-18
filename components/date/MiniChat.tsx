@@ -32,19 +32,27 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
   }, [messages]);
 
-  // Handle keyboard resize on iOS
+  // Handle keyboard resize on iOS — sync container height with visualViewport
+  // and keep input visible when keyboard opens.
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
     function handleResize() {
-      // Scroll input into view when keyboard opens
-      setTimeout(() => {
-        inputRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
-      }, 100);
+      // When keyboard opens on iOS, visualViewport height shrinks.
+      // Make sure the messages end and input are visible.
+      window.requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+      });
     }
 
-    if (typeof visualViewport !== "undefined" && visualViewport) {
-      visualViewport.addEventListener("resize", handleResize);
-      return () => visualViewport?.removeEventListener("resize", handleResize);
-    }
+    vv.addEventListener("resize", handleResize);
+    vv.addEventListener("scroll", handleResize);
+    return () => {
+      vv.removeEventListener("resize", handleResize);
+      vv.removeEventListener("scroll", handleResize);
+    };
   }, []);
 
   async function handleSend(e: React.FormEvent) {
@@ -127,7 +135,7 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
                       : "bg-white text-ink shadow-sm rounded-bl-md"
                   }`}
                 >
-                  <p className="text-sm leading-relaxed">{msg.text}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words" dir="auto">{msg.text}</p>
                   <p
                     className={`text-[10px] mt-1 ${
                       isMine ? "text-cream/50" : "text-gray-light"

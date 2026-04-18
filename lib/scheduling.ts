@@ -110,13 +110,18 @@ export async function submitAvailability(
 
 /**
  * Pick a café based on two users' neighborhoods.
- * Finds cafés closest to the midpoint of both neighborhoods.
+ * Guaranteed to return a valid café — falls back to any café if none match.
  */
 export function pickCafé(
   neighborhoodA: string,
   neighborhoodB: string
 ): (typeof AMSTERDAM_CAFES)[number] {
-  // If same neighborhood, pick a café in that neighborhood
+  // Safety net: AMSTERDAM_CAFES should always have entries but guard anyway
+  if (AMSTERDAM_CAFES.length === 0) {
+    throw new Error("No cafés configured — cannot schedule a date");
+  }
+
+  // Same neighborhood → prefer a café there
   if (neighborhoodA === neighborhoodB) {
     const local = AMSTERDAM_CAFES.filter(
       (c) => c.neighborhood === neighborhoodA
@@ -124,10 +129,17 @@ export function pickCafé(
     if (local.length > 0) {
       return local[Math.floor(Math.random() * local.length)];
     }
+  } else {
+    // Different neighborhoods → prefer a café in either one (rough midpoint)
+    const either = AMSTERDAM_CAFES.filter(
+      (c) => c.neighborhood === neighborhoodA || c.neighborhood === neighborhoodB
+    );
+    if (either.length > 0) {
+      return either[Math.floor(Math.random() * either.length)];
+    }
   }
 
-  // Otherwise pick a random café — in MVP we keep it simple
-  // Later: calculate geographic midpoint and pick closest
+  // Final fallback: random café from the full list — never TBD
   return AMSTERDAM_CAFES[Math.floor(Math.random() * AMSTERDAM_CAFES.length)];
 }
 

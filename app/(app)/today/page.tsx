@@ -162,8 +162,18 @@ export default function TodayPage() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 100 || info.velocity.y > 400) {
+                setMatchedUid(null);
+              }
+            }}
             className="fixed inset-0 z-50 bg-wine flex flex-col items-center justify-center px-6"
           >
+            {/* Drag indicator at top */}
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-cream/30 pointer-events-none" style={{ top: "max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem))" }} />
             <CoffeeBeans />
 
             <motion.div
