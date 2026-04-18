@@ -134,6 +134,21 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
             <button onClick={() => setViewerOpen(true)} className="absolute inset-0 z-10" />
           )}
 
+          {/* Report/block menu — subtle 3-dot button */}
+          {!previewMode && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setReportOpen(true); }}
+              aria-label="Report or block this person"
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-ink/30 backdrop-blur-md flex items-center justify-center z-30 active:scale-95 transition-transform"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+                <circle cx="5" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="19" cy="12" r="1.5" />
+              </svg>
+            </button>
+          )}
+
           {/* Drag indicator — large and clear */}
           {dragDirection === "right" && (
             <motion.div
@@ -333,6 +348,19 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
           />
         )}
       </AnimatePresence>
+
+      {/* Report / block bottom sheet */}
+      <ReportSheet
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        targetUid={profile.uid}
+        targetName={profile.displayName}
+        context="today"
+        onBlocked={() => {
+          // After block, immediately pass on this profile so they're removed from view
+          setTimeout(() => onPass(), 300);
+        }}
+      />
     </div>
   );
 }
