@@ -11,7 +11,7 @@ import Image from "next/image";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
-import { PhotoViewer, SwipeHintArrows } from "@/components/ui/PhotoViewer";
+import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import {
   DndContext,
   closestCenter,
@@ -135,15 +135,7 @@ export default function ProfilePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
-  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  // Reset swipe hint when photo changes
-  useEffect(() => {
-    setShowSwipeHint(true);
-    const t = setTimeout(() => setShowSwipeHint(false), 2000);
-    return () => clearTimeout(t);
-  }, [photoIndex]);
 
   useEffect(() => {
     if (profile) {
@@ -391,7 +383,20 @@ export default function ProfilePage() {
   return (
     <div className="max-w-sm mx-auto pb-28">
       {/* Photo hero — premium swipeable gallery */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white">
+      <motion.div
+        className="relative aspect-[4/5] overflow-hidden bg-stripe-white"
+        drag={validPhotos.length > 1 ? "x" : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.18}
+        dragDirectionLock
+        onDragEnd={(_, info) => {
+          if (info.offset.x < -60 || info.velocity.x < -350) {
+            setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1));
+          } else if (info.offset.x > 60 || info.velocity.x > 350) {
+            setPhotoIndex(Math.max(0, photoIndex - 1));
+          }
+        }}
+      >
         {validPhotos.length > 0 ? (
           <>
             <AnimatePresence initial={false} mode="popLayout">
@@ -401,16 +406,6 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.15}
-                onDragEnd={(_, info) => {
-                  if (info.offset.x < -50 || info.velocity.x < -300) {
-                    setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1));
-                  } else if (info.offset.x > 50 || info.velocity.x > 300) {
-                    setPhotoIndex(Math.max(0, photoIndex - 1));
-                  }
-                }}
                 className="absolute inset-0"
               >
                 <ShimmerImage
@@ -427,14 +422,14 @@ export default function ProfilePage() {
             {/* Photo progress bars — Instagram style */}
             {validPhotos.length > 1 && (
               <div
-                className="absolute inset-x-0 flex gap-1 px-3 z-20"
+                className="absolute inset-x-0 flex gap-1 px-3 z-20 pointer-events-none"
                 style={{ top: "max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem))" }}
               >
                 {validPhotos.map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setPhotoIndex(i)}
-                    className="flex-1 h-[2.5px] rounded-full overflow-hidden bg-white/25"
+                    onClick={(e) => { e.stopPropagation(); setPhotoIndex(i); }}
+                    className="flex-1 h-[2.5px] rounded-full overflow-hidden bg-white/25 pointer-events-auto"
                   >
                     <div className={`h-full bg-white rounded-full transition-all duration-500 ${i <= photoIndex ? "w-full" : "w-0"}`} />
                   </button>
@@ -442,41 +437,46 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Tap zones: left/right for nav, center for fullscreen */}
-            {validPhotos.length > 1 ? (
+            {/* Prominent nav arrows — always visible when multiple photos */}
+            {validPhotos.length > 1 && (
               <>
-                <button
-                  className="absolute left-0 top-0 w-1/4 h-full z-10"
-                  onClick={() => setPhotoIndex(Math.max(0, photoIndex - 1))}
-                  aria-label="Previous photo"
-                />
-                <button
-                  className="absolute left-1/4 top-0 w-1/2 h-full z-10"
-                  onClick={() => setPhotoViewerOpen(true)}
-                  aria-label="View fullscreen"
-                />
-                <button
-                  className="absolute right-0 top-0 w-1/4 h-full z-10"
-                  onClick={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))}
-                  aria-label="Next photo"
-                />
+                {photoIndex > 0 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setPhotoIndex(photoIndex - 1); }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center z-30 shadow-md active:scale-95 transition-transform"
+                    aria-label="Previous photo"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                )}
+                {photoIndex < validPhotos.length - 1 && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setPhotoIndex(photoIndex + 1); }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center z-30 shadow-md active:scale-95 transition-transform"
+                    aria-label="Next photo"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 6 15 12 9 18" />
+                    </svg>
+                  </button>
+                )}
               </>
+            )}
+
+            {/* Center tap zone for fullscreen — NOT covering edges so drag/arrows still work */}
+            {validPhotos.length > 1 ? (
+              <button
+                className="absolute left-[25%] top-[25%] w-1/2 h-1/2 z-10"
+                onClick={(e) => { e.stopPropagation(); setPhotoViewerOpen(true); }}
+                aria-label="View fullscreen"
+              />
             ) : (
               <button
                 className="absolute inset-0 z-10"
                 onClick={() => validPhotos.length > 0 && setPhotoViewerOpen(true)}
                 aria-label="View fullscreen"
-              />
-            )}
-
-            {/* Swipe hint arrows */}
-            {validPhotos.length > 1 && (
-              <SwipeHintArrows
-                show={showSwipeHint}
-                canGoLeft={photoIndex > 0}
-                canGoRight={photoIndex < validPhotos.length - 1}
-                onLeft={() => setPhotoIndex(Math.max(0, photoIndex - 1))}
-                onRight={() => setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1))}
               />
             )}
 
@@ -515,12 +515,12 @@ export default function ProfilePage() {
         {/* Edit button — floating, positioned below safe area */}
         <button
           onClick={() => setIsEditMode(true)}
-          className="absolute right-4 z-20 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider"
+          className="absolute right-4 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider"
           style={{ top: "max(1.75rem, calc(env(safe-area-inset-top) + 1.25rem))" }}
         >
           Edit
         </button>
-      </div>
+      </motion.div>
 
       {/* Fullscreen photo viewer */}
       <AnimatePresence>
