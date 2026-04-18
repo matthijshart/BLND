@@ -143,13 +143,24 @@ export default function MatchDetailPage() {
 
   return (
     <div className="max-w-sm mx-auto pb-28">
-      {/* Back button */}
-      <div className="px-4 pt-6 mb-4">
+      {/* Back + menu */}
+      <div className="px-4 pt-6 mb-4 flex items-center justify-between">
         <button
           onClick={() => router.push("/matches")}
           className="text-gray text-sm"
         >
           ← Back
+        </button>
+        <button
+          onClick={() => setReportOpen(true)}
+          aria-label="Report or block this person"
+          className="w-9 h-9 rounded-full bg-stripe-white flex items-center justify-center active:scale-95 transition-transform"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-gray">
+            <circle cx="5" cy="12" r="1.5" />
+            <circle cx="12" cy="12" r="1.5" />
+            <circle cx="19" cy="12" r="1.5" />
+          </svg>
         </button>
       </div>
 
