@@ -13,6 +13,8 @@ import { db } from "@/lib/firebase";
 import { getUser } from "@/lib/db";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import type { Match, User } from "@/types";
+// Block-aware: if current user blocked them OR they blocked current user,
+// the match is hidden (and cancelled on the other side via blockUser).
 
 export interface MatchWithProfile extends Match {
   otherUser: User;
@@ -24,9 +26,10 @@ export interface MatchWithProfile extends Match {
  * Hides expired/cancelled matches from the list.
  */
 export function useMatches() {
-  const { firebaseUser } = useAuthContext();
+  const { firebaseUser, profile } = useAuthContext();
   const [matches, setMatches] = useState<MatchWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const myBlocked = new Set(profile?.blockedUsers || []);
 
   useEffect(() => {
     if (!firebaseUser) {
@@ -74,10 +77,16 @@ export function useMatches() {
           const otherUid = match.users.find((uid) => uid !== firebaseUser.uid);
           if (!otherUid) continue;
 
+          // Mutual block filter — hide blends with anyone you or they blocked
+          if (myBlocked.has(otherUid)) continue;
+
           if (!profileCache[otherUid]) {
             const profile = await getUser(otherUid);
             if (profile) profileCache[otherUid] = profile;
           }
+
+          // Also hide if the other user blocked me
+          if (profileCache[otherUid]?.blockedUsers?.includes(firebaseUser.uid)) continue;
 
           if (profileCache[otherUid]) {
             matchesWithProfiles.push({
@@ -116,7 +125,10 @@ export function useMatches() {
     );
 
     return unsubscribe;
-  }, [firebaseUser]);
+    // myBlocked is re-derived from profile on every render; we intentionally
+    // don't include it in deps to avoid re-subscribing on every profile change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firebaseUser, profile?.blockedUsers?.length]);
 
   return { matches, loading };
 }
