@@ -121,28 +121,44 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
             </div>
           )}
 
-          {messages.map((msg) => {
+          {messages.map((msg, idx) => {
             const isMine = msg.senderId === firebaseUser?.uid;
+            const prev = messages[idx - 1];
+            const next = messages[idx + 1];
+            const isFirstInGroup = !prev || prev.senderId !== msg.senderId;
+            const isLastInGroup = !next || next.senderId !== msg.senderId;
+            // Only last message in a consecutive group shows the timestamp
+            const showTime = isLastInGroup;
+
+            // Asymmetric corners for proper iMessage-style tail
+            const tailCorners = isMine
+              ? // Mine (right side): tail bottom-right, tight top-right if grouped
+                `${isFirstInGroup ? "rounded-tr-2xl" : "rounded-tr-md"} rounded-tl-2xl ${isLastInGroup ? "rounded-br-[4px]" : "rounded-br-2xl"} rounded-bl-2xl`
+              : // Theirs (left side): tail bottom-left, tight top-left if grouped
+                `rounded-tr-2xl ${isFirstInGroup ? "rounded-tl-2xl" : "rounded-tl-md"} rounded-br-2xl ${isLastInGroup ? "rounded-bl-[4px]" : "rounded-bl-2xl"}`;
+
             return (
               <div
                 key={msg.id}
-                className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                className={`flex ${isMine ? "justify-end" : "justify-start"} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
               >
                 <div
-                  className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
+                  className={`max-w-[75%] px-4 py-2.5 ${tailCorners} ${
                     isMine
-                      ? "bg-wine text-cream rounded-br-md"
-                      : "bg-white text-ink shadow-sm rounded-bl-md"
+                      ? "bg-wine text-cream"
+                      : "bg-white text-ink shadow-sm"
                   }`}
                 >
                   <p className="text-sm leading-relaxed whitespace-pre-wrap break-words" dir="auto">{msg.text}</p>
-                  <p
-                    className={`text-[10px] mt-1 ${
-                      isMine ? "text-cream/50" : "text-gray-light"
-                    }`}
-                  >
-                    {formatTime(msg)}
-                  </p>
+                  {showTime && (
+                    <p
+                      className={`text-[10px] mt-1 ${
+                        isMine ? "text-cream/50" : "text-gray-light"
+                      }`}
+                    >
+                      {formatTime(msg)}
+                    </p>
+                  )}
                 </div>
               </div>
             );
