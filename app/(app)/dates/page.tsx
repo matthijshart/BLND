@@ -8,12 +8,29 @@ import { ShimmerImage } from "@/components/ui/ShimmerImage";
 export default function DatesPage() {
   const { dates, loading } = useDates();
 
-  const upcoming = dates.filter((d) =>
-    ["upcoming", "chat_open", "second_cup"].includes(d.status)
-  );
-  const past = dates.filter((d) =>
-    ["completed", "cancelled", "no_show"].includes(d.status) && d.status !== "second_cup"
-  );
+  const now = Date.now();
+  const MEET_BUFFER_MS = 2 * 60 * 60 * 1000; // 2h grace window after meet time
+
+  // Second cup = own section, no dateTime-based grouping
+  const secondCups = dates.filter((d) => d.status === "second_cup");
+
+  // Upcoming = future OR within 2h grace window after start (chat still relevant)
+  const upcoming = dates.filter((d) => {
+    if (d.status !== "upcoming" && d.status !== "chat_open") return false;
+    const dt = d.dateTime?.toDate?.() || new Date(d.dateTime as unknown as string);
+    return dt.getTime() + MEET_BUFFER_MS > now;
+  });
+
+  // Past = completed/cancelled/no_show/stuck-overdue meets
+  const past = dates.filter((d) => {
+    if (["completed", "cancelled", "no_show"].includes(d.status)) return true;
+    // Stuck meets (upcoming/chat_open but past grace window) — show as past
+    if (d.status === "upcoming" || d.status === "chat_open") {
+      const dt = d.dateTime?.toDate?.() || new Date(d.dateTime as unknown as string);
+      return dt.getTime() + MEET_BUFFER_MS <= now;
+    }
+    return false;
+  });
 
   if (loading) {
     return (
@@ -81,51 +98,71 @@ export default function DatesPage() {
       </div>
 
       <div className="px-4 pt-4">
-        {/* Grouped by time proximity */}
+        {/* Second cup — own section, shown first since these need attention */}
+        {secondCups.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-wine" />
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-wine">☕☕ Second cup</p>
+            </div>
+            <div className="space-y-4">
+              {secondCups.map((date) => <DateCard key={date.id} date={date} />)}
+            </div>
+          </div>
+        )}
+
+        {/* Date-grouped upcoming */}
         {(() => {
-          const now = new Date();
-          const startOfToday = new Date(now);
+          const nowDate = new Date();
+          const startOfToday = new Date(nowDate);
           startOfToday.setHours(0, 0, 0, 0);
           const endOfToday = new Date(startOfToday);
           endOfToday.setDate(endOfToday.getDate() + 1);
 
-          // "This weekend" = upcoming Friday 00:00 to Sunday 23:59 (or remaining Fri-Sun if we're already in weekend)
-          const dayIdx = now.getDay(); // 0=Sun, 5=Fri, 6=Sat
-          const fridayOffset = (5 - dayIdx + 7) % 7; // days until next Friday
-          const fridayStart = new Date(startOfToday);
-          fridayStart.setDate(fridayStart.getDate() + fridayOffset);
+          const endOfTomorrow = new Date(endOfToday);
+          endOfTomorrow.setDate(endOfTomorrow.getDate() + 1);
+
+          // "This weekend" = upcoming Fri 00:00 → Mon 00:00. If today is Fri/Sat/Sun, count this weekend's remaining days.
+          const dayIdx = nowDate.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
+          let fridayStart: Date;
+          if (dayIdx === 5 || dayIdx === 6 || dayIdx === 0) {
+            // Already in weekend — "this weekend" = from today's start to next Mon 00:00
+            fridayStart = new Date(startOfToday);
+            if (dayIdx === 5) { /* already Friday */ }
+            else if (dayIdx === 6) fridayStart.setDate(fridayStart.getDate() - 1);
+            else if (dayIdx === 0) fridayStart.setDate(fridayStart.getDate() - 2);
+          } else {
+            const fridayOffset = (5 - dayIdx + 7) % 7;
+            fridayStart = new Date(startOfToday);
+            fridayStart.setDate(fridayStart.getDate() + fridayOffset);
+          }
           const sundayEnd = new Date(fridayStart);
           sundayEnd.setDate(sundayEnd.getDate() + 3); // Fri 00:00 + 3 = Mon 00:00
 
-          const endOfNextWeek = new Date(startOfToday);
-          endOfNextWeek.setDate(endOfNextWeek.getDate() + 14);
-
-          const isInRange = (d: Date, start: Date, end: Date) =>
+          const inRange = (d: Date, start: Date, end: Date) =>
             d.getTime() >= start.getTime() && d.getTime() < end.getTime();
 
           const groups: { label: string; dates: typeof upcoming }[] = [
             { label: "Today", dates: [] },
+            { label: "Tomorrow", dates: [] },
             { label: "This weekend", dates: [] },
             { label: "Later", dates: [] },
           ];
 
           for (const d of upcoming) {
             const dt = d.dateTime?.toDate?.() || new Date(d.dateTime as unknown as string);
-            if (dt < now) {
-              // Past chat window but meet still marked upcoming (or second_cup) — put at top
+            if (inRange(dt, startOfToday, endOfToday)) {
               groups[0].dates.push(d);
-            } else if (isInRange(dt, startOfToday, endOfToday)) {
-              groups[0].dates.push(d);
-            } else if (isInRange(dt, fridayStart, sundayEnd)) {
+            } else if (inRange(dt, endOfToday, endOfTomorrow)) {
               groups[1].dates.push(d);
-            } else {
+            } else if (inRange(dt, fridayStart, sundayEnd) && dt > endOfTomorrow) {
               groups[2].dates.push(d);
+            } else if (dt >= endOfTomorrow) {
+              groups[3].dates.push(d);
             }
           }
 
           const nonEmpty = groups.filter((g) => g.dates.length > 0);
-          if (nonEmpty.length === 0 && past.length === 0) return null;
-
           return (
             <>
               {nonEmpty.map((g) => (
