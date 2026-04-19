@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { User } from "@/types";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { CoffeeRing } from "@/components/ui/CoffeeRing";
 
 function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefined): string | null {
   if (!myOrder || !theirOrder) return null;
@@ -85,8 +86,9 @@ export default function MatchesPage() {
   const secondCups = matches.filter((m) => m.status === "second_cup");
 
   return (
-    <div className="px-4 pt-8 pb-8">
-      <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
+    <div className="px-4 pt-8 pb-8 relative">
+      <CoffeeRing variant="double" className="-top-6 right-2 w-24 h-24" opacity={0.05} rotate={25} />
+      <h1 className="text-2xl font-display text-ink mb-6 relative z-10">Blends</h1>
 
       {needsYou.length > 0 && (
         <Section label="Needs you" color="coral">

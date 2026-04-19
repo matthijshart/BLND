@@ -7,6 +7,7 @@ import { useAuthContext } from "@/components/providers/AuthProvider";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CoffeeBeans } from "@/components/ui/CoffeeBeans";
+import { CoffeeRing } from "@/components/ui/CoffeeRing";
 import { playBlendSound, triggerHaptic } from "@/lib/sounds";
 
 const MATCH_MODAL_DELAY_MS = 450; // Wait for ProfileCard exit animation to finish
@@ -110,8 +111,11 @@ export default function TodayPage() {
   }
 
   return (
-    <div className="px-4 pt-8 max-w-sm mx-auto">
-      <div className="flex items-center justify-between mb-2">
+    <div className="px-4 pt-8 max-w-sm mx-auto relative">
+      {/* Decorative coffee stain — signature BLEND detail */}
+      <CoffeeRing variant="drip" className="-top-4 -right-2 w-20 h-20" opacity={0.06} rotate={12} />
+
+      <div className="flex items-center justify-between mb-2 relative z-10">
         <h1 className="text-2xl font-display text-ink">Today</h1>
         <span className="text-gray-light text-[10px] font-mono uppercase tracking-[0.2em]">
           {currentIndex + 1} / {total}

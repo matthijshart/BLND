@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { CoffeeRing } from "@/components/ui/CoffeeRing";
 
 const SLIDESHOW_PHOTOS = [
   "/images/coffe couple.jpeg",
@@ -108,11 +109,12 @@ export function DoneForToday() {
       </div>
 
       {/* Countdown */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-        <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-gray text-center mb-4">
+      <div className="bg-white rounded-2xl p-6 shadow-sm mb-4 relative overflow-hidden">
+        <CoffeeRing variant="ring" className="-bottom-8 -right-6 w-28 h-28" opacity={0.05} rotate={-18} />
+        <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-gray text-center mb-4 relative z-10">
           Next drop
         </p>
-        <div className="flex justify-center items-center gap-3">
+        <div className="flex justify-center items-center gap-3 relative z-10">
           <div className="flex flex-col items-center">
             <span className="text-4xl font-display text-ink tabular-nums">{hours}</span>
             <span className="text-[9px] font-mono uppercase tracking-wider text-gray-light mt-1">hrs</span>

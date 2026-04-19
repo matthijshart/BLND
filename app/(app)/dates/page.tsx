@@ -4,6 +4,7 @@ import { useDates } from "@/hooks/useDates";
 import Image from "next/image";
 import Link from "next/link";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { CoffeeRing } from "@/components/ui/CoffeeRing";
 
 export default function DatesPage() {
   const { dates, loading } = useDates();
@@ -97,7 +98,8 @@ export default function DatesPage() {
         </div>
       </div>
 
-      <div className="px-4 pt-4">
+      <div className="px-4 pt-4 relative">
+        <CoffeeRing variant="drip" className="-top-8 left-4 w-20 h-20" opacity={0.06} rotate={-8} />
         {/* Second cup — own section, shown first since these need attention */}
         {secondCups.length > 0 && (
           <div className="mb-6">
