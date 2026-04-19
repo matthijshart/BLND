@@ -115,14 +115,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
 
       <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-stripe-white pb-[env(safe-area-inset-bottom)]">
-        <div className="flex justify-around items-center h-14 max-w-lg mx-auto">
+        <div className="relative flex justify-around items-center h-14 max-w-lg mx-auto">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 text-[10px] font-medium tracking-wide uppercase transition-colors relative ${
+                className={`flex-1 flex flex-col items-center gap-1 text-[10px] font-medium tracking-wide uppercase transition-colors relative py-1 ${
                   isActive ? "text-wine" : "text-gray-light"
                 }`}
               >
@@ -138,8 +138,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 {isActive && (
                   <motion.div
                     layoutId="nav-indicator"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-wine"
-                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2.5px] rounded-b-full bg-wine"
+                    transition={{ type: "spring", stiffness: 450, damping: 32 }}
                   />
                 )}
               </Link>

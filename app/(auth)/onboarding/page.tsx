@@ -6,6 +6,7 @@ import { useAuthContext } from "@/components/providers/AuthProvider";
 import { createUser } from "@/lib/db";
 import { uploadUserPhoto, validatePhotoFile, PhotoUploadError } from "@/lib/storage";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
+import { DateOfBirthInput } from "@/components/ui/DateOfBirthInput";
 
 const NEIGHBORHOODS = [
   "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
@@ -363,27 +364,18 @@ export default function OnboardingPage() {
             />
 
             <div>
-              <label htmlFor="dob" className="text-cream/60 text-sm mb-2 block">
+              <label className="text-cream/60 text-sm mb-2 block">
                 Date of birth
               </label>
-              <input
-                id="dob"
-                type="date"
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                max={new Date(Date.now() - 18 * 365.25 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
-                min="1920-01-01"
-                aria-label="Date of birth"
-                className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors [color-scheme:dark]"
-              />
-              {dateOfBirth && derivedAge < 18 && (
-                <p className="text-coral text-xs mt-1.5">
+              <DateOfBirthInput value={dateOfBirth} onChange={setDateOfBirth} theme="dark" />
+              {dateOfBirth && derivedAge > 0 && derivedAge < 18 && (
+                <p className="text-coral text-xs mt-2">
                   You must be 18 or older to use BLEND.
                 </p>
               )}
               {dateOfBirth && derivedAge >= 18 && (
-                <p className="text-cream/40 text-xs mt-1.5">
-                  {derivedAge} years old — looking good ✓
+                <p className="text-cream/40 text-xs mt-2">
+                  {derivedAge} years old
                 </p>
               )}
             </div>

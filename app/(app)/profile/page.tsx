@@ -298,7 +298,17 @@ export default function ProfilePage() {
               {uploadError}
             </div>
           )}
-          <p className="text-[10px] text-gray-light text-center mt-2">Drag to reorder</p>
+          <div className="flex items-center justify-center gap-1.5 mt-3">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-wine/60">
+              <polyline points="5 9 2 12 5 15" />
+              <polyline points="9 5 12 2 15 5" />
+              <polyline points="15 19 12 22 9 19" />
+              <polyline points="19 9 22 12 19 15" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <line x1="12" y1="2" x2="12" y2="22" />
+            </svg>
+            <p className="text-[11px] text-wine/70 font-medium">Hold and drag to reorder</p>
+          </div>
         </section>
 
         {/* Name & Age */}
@@ -691,19 +701,13 @@ export default function ProfilePage() {
               window.prompt("Copy your profile link:", url);
             }
           }}
-          className="flex-1 py-4 rounded-full bg-wine text-cream text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          className="w-full py-4 rounded-full bg-wine text-cream text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
             <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
           </svg>
           Share profile
-        </button>
-        <button
-          onClick={() => setIsEditMode(true)}
-          className="py-4 px-6 rounded-full border border-ink/10 text-ink text-sm font-medium active:scale-[0.98] transition-transform"
-        >
-          Edit
         </button>
       </div>
 

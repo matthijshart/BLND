@@ -40,8 +40,11 @@ export default function LandingPage() {
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden scroll-smooth">
       {/* ─── TOP BANNER: Coming soon ─── */}
-      <div className="bg-cream text-wine/60 py-2 px-4 text-center text-[11px] font-mono tracking-wider">
-        Coming soon to the App Store
+      <div className="bg-wine text-cream py-2.5 px-4 text-center text-[11px] font-mono tracking-[0.2em] uppercase flex items-center justify-center gap-2">
+        <svg width="10" height="12" viewBox="0 0 24 24" fill="currentColor" className="opacity-70">
+          <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+        </svg>
+        <span>Coming soon to the App Store</span>
       </div>
 
       {/* ─── NAV: Subtle hamburger menu ─── */}
@@ -352,24 +355,28 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── PRICING: Clean and bold ─── */}
-      <section id="pricing" className="bg-stripe-white py-24 sm:py-32 px-6 scroll-mt-12">
-        <div className="max-w-md mx-auto text-center">
+      {/* ─── PRICING: Editorial, subdued, on cream ─── */}
+      <section id="pricing" className="bg-cream py-24 sm:py-32 px-6 scroll-mt-12 relative overflow-hidden">
+        {/* Subtle decorative circle */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-wine/[0.04] pointer-events-none" />
+
+        <div className="max-w-md mx-auto text-center relative z-10">
           <ScrollReveal variant="fade">
-            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
-              Simple pricing
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine/60 mb-12">
+              — The cost of entry —
             </p>
           </ScrollReveal>
           <ScrollReveal variant="fade-up" delay={0.1}>
-            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine mb-3">
+            <p className="font-mono text-[10px] tracking-[0.5em] uppercase text-wine mb-4">
               Only
             </p>
             <div className="flex items-baseline justify-center gap-2">
-              <span className="text-7xl sm:text-8xl font-display text-ink">€8,99</span>
-              <span className="text-xl text-wine font-light">/month</span>
+              <span className="text-7xl sm:text-8xl font-display text-ink tracking-tight">€8,99</span>
+              <span className="text-xl text-wine font-light font-display">/month</span>
             </div>
-            <p className="mt-3 text-gray text-sm tracking-wide">
-              <span className="text-wine">Cancel every month. No strings attached.</span>
+            <div className="w-8 h-px bg-wine/30 mx-auto mt-8" />
+            <p className="mt-5 text-ink-mid text-sm italic font-display">
+              Cancel every month. No strings attached.
             </p>
           </ScrollReveal>
 
