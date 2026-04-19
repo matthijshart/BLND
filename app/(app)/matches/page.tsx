@@ -79,79 +79,110 @@ export default function MatchesPage() {
     );
   }
 
-  return (
-    <div className="px-4 pt-8">
-      <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
-      <div className="space-y-4">
-        {matches.map((match) => (
-          <Link
-            key={match.id}
-            href={`/matches/${match.id}`}
-            className="block p-4 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center gap-4">
-              <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
-                <ShimmerImage
-                  src={match.otherUser.photos[0] || "/images/sipping.png"}
-                  alt={match.otherUser.displayName}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-display text-lg text-ink">
-                  {match.otherUser.displayName}, {match.otherUser.age}
-                </h3>
-                <p className="text-gray text-sm">{match.otherUser.neighborhood}</p>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${
-                  match.status === "scheduling"
-                    ? "bg-wine/10 text-wine"
-                    : match.status === "date_confirmed"
-                    ? "bg-blue/10 text-blue"
-                    : match.status === "date_proposed"
-                    ? "bg-coral/10 text-coral"
-                    : match.status === "second_cup"
-                    ? "bg-wine/15 text-wine"
-                    : "bg-stripe-white text-gray"
-                }`}
-              >
-                {match.status === "scheduling"
-                  ? "Plan meet"
-                  : match.status === "date_proposed"
-                  ? "Confirm meet"
-                  : match.status === "date_confirmed"
-                  ? "Meet planned ✓"
-                  : match.status === "second_cup"
-                  ? "☕☕ Second cup"
-                  : match.status}
-              </span>
-            </div>
+  // Sort into sections
+  const needsYou = matches.filter((m) => m.status === "date_proposed" || m.status === "scheduling");
+  const planned = matches.filter((m) => m.status === "date_confirmed");
+  const secondCups = matches.filter((m) => m.status === "second_cup");
 
-            {/* Coffee combo + shared interests */}
-            {(() => {
-              const combo = getCoffeeCombo(profile?.coffeeOrder, match.otherUser.coffeeOrder);
-              const shared = getSharedCount(profile, match.otherUser);
-              if (!combo && shared === 0) return null;
-              return (
-                <div className="mt-3 pt-3 border-t border-cream flex items-center gap-3 flex-wrap">
-                  {combo && (
-                    <span className="flex items-center gap-1.5 text-[11px] text-wine font-medium">
-                      <span>☕</span> {combo}
-                    </span>
-                  )}
-                  {shared > 0 && (
-                    <span className="text-[11px] text-gray">
-                      {shared} shared interest{shared > 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
-              );
-            })()}
-          </Link>
-        ))}
-      </div>
+  return (
+    <div className="px-4 pt-8 pb-8">
+      <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
+
+      {needsYou.length > 0 && (
+        <Section label="Needs you" color="coral">
+          {needsYou.map((m) => (
+            <MatchRow key={m.id} match={m} profile={profile} />
+          ))}
+        </Section>
+      )}
+
+      {secondCups.length > 0 && (
+        <Section label="Second cup" color="wine">
+          {secondCups.map((m) => (
+            <MatchRow key={m.id} match={m} profile={profile} />
+          ))}
+        </Section>
+      )}
+
+      {planned.length > 0 && (
+        <Section label="Planned" color="gray">
+          {planned.map((m) => (
+            <MatchRow key={m.id} match={m} profile={profile} />
+          ))}
+        </Section>
+      )}
     </div>
+  );
+}
+
+function Section({ label, color, children }: { label: string; color: "coral" | "wine" | "gray"; children: React.ReactNode }) {
+  const colorClass = color === "coral" ? "text-coral" : color === "wine" ? "text-wine" : "text-gray";
+  const dotClass = color === "coral" ? "bg-coral" : color === "wine" ? "bg-wine" : "bg-gray-light";
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-2 mb-3 px-1">
+        <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+        <p className={`text-[10px] font-mono uppercase tracking-[0.25em] ${colorClass}`}>{label}</p>
+      </div>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+
+function MatchRow({ match, profile }: { match: ReturnType<typeof useMatches>["matches"][number]; profile: User | null }) {
+  const statusMap: Record<string, { label: string; style: string }> = {
+    scheduling: { label: "Plan meet", style: "bg-coral/10 text-coral" },
+    date_proposed: { label: "Confirm meet", style: "bg-coral text-white" },
+    date_confirmed: { label: "Planned ✓", style: "bg-wine/10 text-wine" },
+    second_cup: { label: "☕☕", style: "bg-wine text-cream" },
+  };
+  const s = statusMap[match.status] || { label: match.status, style: "bg-stripe-white text-gray" };
+
+  return (
+    <Link
+      href={`/matches/${match.id}`}
+      className="block p-4 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow active:scale-[0.99]"
+    >
+      <div className="flex items-center gap-4">
+        <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
+          <ShimmerImage
+            src={match.otherUser.photos[0] || "/images/sipping.png"}
+            alt={match.otherUser.displayName}
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display text-lg text-ink truncate">
+            {match.otherUser.displayName}, {match.otherUser.age}
+          </h3>
+          <p className="text-gray text-sm truncate">{match.otherUser.neighborhood}</p>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${s.style}`}>
+          {s.label}
+        </span>
+      </div>
+
+      {/* Coffee combo + shared interests */}
+      {(() => {
+        const combo = getCoffeeCombo(profile?.coffeeOrder, match.otherUser.coffeeOrder);
+        const shared = getSharedCount(profile, match.otherUser);
+        if (!combo && shared === 0) return null;
+        return (
+          <div className="mt-3 pt-3 border-t border-cream flex items-center gap-3 flex-wrap">
+            {combo && (
+              <span className="flex items-center gap-1.5 text-[11px] text-wine font-medium">
+                <span>☕</span> {combo}
+              </span>
+            )}
+            {shared > 0 && (
+              <span className="text-[11px] text-gray">
+                {shared} shared interest{shared > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+        );
+      })()}
+    </Link>
   );
 }
