@@ -87,9 +87,14 @@ export default function TodayPage() {
   if (loading) {
     return (
       <div className="px-4 pt-8 max-w-sm mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-2">
           <div className="h-8 w-20 bg-stripe-white rounded-full animate-pulse" />
-          <div className="h-4 w-16 bg-stripe-white rounded-full animate-pulse" />
+          <div className="h-3 w-12 bg-stripe-white rounded-full animate-pulse" />
+        </div>
+        <div className="flex gap-1 mb-6">
+          {[1,2,3,4,5,6,7,8,9,10].map((i) => (
+            <div key={i} className="flex-1 h-[3px] rounded-full bg-stripe-white" />
+          ))}
         </div>
         <div className="aspect-[3/4] rounded-2xl bg-stripe-white animate-pulse" />
         <div className="flex justify-center gap-6 mt-6">
@@ -106,11 +111,23 @@ export default function TodayPage() {
 
   return (
     <div className="px-4 pt-8 max-w-sm mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-display text-ink">Today</h1>
-        <span className="text-gray text-sm font-mono">
-          {currentIndex + 1} of {total}
+        <span className="text-gray-light text-[10px] font-mono uppercase tracking-[0.2em]">
+          {currentIndex + 1} / {total}
         </span>
+      </div>
+
+      {/* Visual progression — compact dots */}
+      <div className="flex gap-1 mb-6">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={`flex-1 h-[3px] rounded-full transition-colors duration-500 ${
+              i < currentIndex ? "bg-wine" : i === currentIndex ? "bg-wine/60" : "bg-stripe-white"
+            }`}
+          />
+        ))}
       </div>
 
       <AnimatePresence mode="wait">
