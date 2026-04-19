@@ -81,31 +81,82 @@ export default function DatesPage() {
       </div>
 
       <div className="px-4 pt-4">
-        {/* Upcoming */}
-        {upcoming.length > 0 && (
-          <div className="mb-6">
-            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray mb-3">Coming up</p>
-            <div className="space-y-4">
-              {upcoming.map((date) => (
-                <DateCard key={date.id} date={date} />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Grouped by time proximity */}
+        {(() => {
+          const now = new Date();
+          const startOfToday = new Date(now);
+          startOfToday.setHours(0, 0, 0, 0);
+          const endOfToday = new Date(startOfToday);
+          endOfToday.setDate(endOfToday.getDate() + 1);
 
-        {/* Past */}
+          // "This weekend" = upcoming Friday 00:00 to Sunday 23:59 (or remaining Fri-Sun if we're already in weekend)
+          const dayIdx = now.getDay(); // 0=Sun, 5=Fri, 6=Sat
+          const fridayOffset = (5 - dayIdx + 7) % 7; // days until next Friday
+          const fridayStart = new Date(startOfToday);
+          fridayStart.setDate(fridayStart.getDate() + fridayOffset);
+          const sundayEnd = new Date(fridayStart);
+          sundayEnd.setDate(sundayEnd.getDate() + 3); // Fri 00:00 + 3 = Mon 00:00
+
+          const endOfNextWeek = new Date(startOfToday);
+          endOfNextWeek.setDate(endOfNextWeek.getDate() + 14);
+
+          const isInRange = (d: Date, start: Date, end: Date) =>
+            d.getTime() >= start.getTime() && d.getTime() < end.getTime();
+
+          const groups: { label: string; dates: typeof upcoming }[] = [
+            { label: "Today", dates: [] },
+            { label: "This weekend", dates: [] },
+            { label: "Later", dates: [] },
+          ];
+
+          for (const d of upcoming) {
+            const dt = d.dateTime?.toDate?.() || new Date(d.dateTime as unknown as string);
+            if (dt < now) {
+              // Past chat window but meet still marked upcoming (or second_cup) — put at top
+              groups[0].dates.push(d);
+            } else if (isInRange(dt, startOfToday, endOfToday)) {
+              groups[0].dates.push(d);
+            } else if (isInRange(dt, fridayStart, sundayEnd)) {
+              groups[1].dates.push(d);
+            } else {
+              groups[2].dates.push(d);
+            }
+          }
+
+          const nonEmpty = groups.filter((g) => g.dates.length > 0);
+          if (nonEmpty.length === 0 && past.length === 0) return null;
+
+          return (
+            <>
+              {nonEmpty.map((g) => (
+                <div key={g.label} className="mb-6">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-wine mb-3">{g.label}</p>
+                  <div className="space-y-4">
+                    {g.dates.map((date) => (
+                      <DateCard key={date.id} date={date} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </>
+          );
+        })()}
+
+        {/* Past — collapsible feel with subtler styling */}
         {past.length > 0 && (
-          <div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray mb-3">Past</p>
-            <div className="space-y-4 opacity-60">
+          <div className="mt-8 pt-6 border-t border-ink/5">
+            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-gray-light mb-3">Past</p>
+            <div className="space-y-3">
               {past.map((date) => (
-                <DateCard key={date.id} date={date} />
+                <div key={date.id} className="opacity-70">
+                  <DateCard date={date} />
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        <p className="text-gray-light text-xs mt-8 font-mono tracking-wide text-center">
+        <p className="text-gray-light text-xs mt-10 font-mono tracking-wide text-center">
           Two people. One spot. Just coffee.
         </p>
       </div>
