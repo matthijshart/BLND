@@ -10,6 +10,7 @@ import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { WelcomeScreen } from "@/components/ui/WelcomeScreen";
+import { WelcomeBack } from "@/components/ui/WelcomeBack";
 import { motion } from "framer-motion";
 
 function IconToday({ active }: { active: boolean }) {
@@ -150,6 +151,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <AddToHomescreen />
       <WelcomeScreen />
+      <WelcomeBack />
     </div>
   );
 }
