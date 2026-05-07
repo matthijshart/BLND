@@ -711,6 +711,56 @@ export default function ProfilePage() {
         </button>
       </div>
 
+      {/* Verification CTA — different state per status */}
+      <div className="px-5 pt-1 pb-3">
+        {profile.verificationStatus === "verified" ? (
+          <div className="flex items-center gap-3 py-3 px-4 rounded-xl bg-stripe-white">
+            <VerifiedBadge size="md" />
+            <div className="flex-1">
+              <p className="text-ink text-sm font-medium">Verified profile</p>
+              <p className="text-gray-light text-xs">Other users see your blue checkmark</p>
+            </div>
+          </div>
+        ) : profile.verificationStatus === "pending" ? (
+          <div className="flex items-center gap-3 py-3 px-4 rounded-xl bg-stripe-white">
+            <div className="w-5 h-5 rounded-full border-2 border-wine/30 border-t-wine animate-spin" />
+            <div className="flex-1">
+              <p className="text-ink text-sm font-medium">Verification under review</p>
+              <p className="text-gray-light text-xs">We&apos;ll let you know within 24 hours</p>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowVerification(true)}
+            className="w-full flex items-center gap-3 py-3 px-4 rounded-xl bg-wine/[0.06] hover:bg-wine/[0.09] transition-colors text-left"
+          >
+            <VerifiedBadge size="md" />
+            <div className="flex-1">
+              <p className="text-ink text-sm font-medium">
+                {profile.verificationStatus === "rejected"
+                  ? "Verification didn't match — try again"
+                  : "Get a verified checkmark"}
+              </p>
+              <p className="text-gray-light text-xs">30-second selfie · builds trust before meets</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wine">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Verification modal */}
+      {showVerification && firebaseUser && (
+        <VerificationFlow
+          uid={firebaseUser.uid}
+          onClose={() => {
+            setShowVerification(false);
+            refreshProfile();
+          }}
+        />
+      )}
+
       {/* About + How it works + Sign out */}
       <div className="px-5 pb-6 pt-2 space-y-2">
         <a
