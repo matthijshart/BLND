@@ -238,11 +238,7 @@ export default function ProfilePage() {
   async function saveAll() {
     if (!firebaseUser) return;
     // Guardrails — block save on known invalid states
-    if (prompts.length < 3) {
-      setUploadError("Pick at least 3 prompts before saving.");
-      setTimeout(() => setUploadError(null), 4000);
-      return;
-    }
+    // Rick: prompts blijven optioneel — geen minimum-validatie meer.
     if (profileSong && !isValidSpotifyUrl(profileSong)) {
       setUploadError("Your Spotify link isn't valid. Remove it or fix it first.");
       setTimeout(() => setUploadError(null), 4000);

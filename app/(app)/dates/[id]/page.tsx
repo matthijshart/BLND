@@ -238,6 +238,9 @@ export default function DateDetailPage() {
             "END:VCALENDAR",
           ].join("\r\n");
           const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+          // iOS opens the .ics file in the system calendar handler when we
+          // navigate to a blob URL — the only reliable way to do this on Safari.
+          // eslint-disable-next-line react-hooks/immutability
           window.location.href = URL.createObjectURL(blob);
         }}
         className="mx-4 bg-white rounded-2xl p-5 shadow-sm mb-4 w-[calc(100%-2rem)] text-left"

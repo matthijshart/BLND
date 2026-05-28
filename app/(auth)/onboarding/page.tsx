@@ -269,8 +269,9 @@ export default function OnboardingPage() {
   }
 
   function canProceedStep2() {
-    // Rick: talen verplicht
-    return neighborhood && languages.length > 0 && interests.length >= 3 && prompts.length >= 3;
+    // Rick: alleen wijk + talen zijn verplicht. Bio, interests en prompts
+    // blijven optioneel — Rick wil geen onboarding-block op deze velden.
+    return neighborhood && languages.length > 0;
   }
 
   function canFinish() {

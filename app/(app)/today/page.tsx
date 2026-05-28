@@ -34,6 +34,9 @@ export default function TodayPage() {
     if (!lastPassed && undoTimeoutRef.current) {
       clearTimeout(undoTimeoutRef.current);
       undoTimeoutRef.current = null;
+      // Hiding the undo chip when the underlying state cleared — legitimate
+      // sync of external (ref) → internal state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowUndo(false);
     }
   }, [lastPassed]);
