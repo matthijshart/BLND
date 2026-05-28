@@ -43,8 +43,34 @@ export interface User {
   verificationSubmittedAt?: Timestamp;
   /** Random pose challenge that was issued — keeps selfies hard to fake. */
   verificationPose?: "peace" | "thumbs_up" | "call_me";
+  /**
+   * BLEND Etiquette tracking — last-minute cancellations and no-shows.
+   * Profile becomes banned when thresholds are crossed (see lib/strikes.ts).
+   */
+  strikes?: Strike[];
+  /** When set, user is permanently banned and cannot use the app. */
+  bannedAt?: Timestamp;
+  banReason?: "repeated_cancellations" | "no_show" | "manual";
   createdAt: Timestamp;
   lastActive: Timestamp;
+}
+
+/**
+ * A single meet-etiquette incident. Stored as an array on the User doc
+ * because (a) we always query the user anyway, and (b) the array stays
+ * small (4-5 entries) since bans kick in early.
+ */
+export interface Strike {
+  type: "cancellation" | "no_show";
+  /** How close to the meet time the cancellation happened. */
+  timing?: "far" | "close" | "last_minute";
+  /** Free-text or canonical reason (e.g. "work_emergency", "sick"). */
+  reason?: string;
+  /** Date doc this incident happened on — for audit + admin undo. */
+  dateId: string;
+  /** For no-shows: who marked this user as no-show. Null for self-cancels. */
+  reportedBy?: string;
+  createdAt: Timestamp;
 }
 
 export type ReportReason =
