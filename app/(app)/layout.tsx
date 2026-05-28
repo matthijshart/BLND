@@ -8,7 +8,6 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { WelcomeScreen } from "@/components/ui/WelcomeScreen";
 import { WelcomeBack } from "@/components/ui/WelcomeBack";
 import { motion } from "framer-motion";
@@ -110,9 +109,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-dvh bg-cream">
       <main className="flex-1 pb-20">
-          <PullToRefresh>
-            <PageTransition>{children}</PageTransition>
-          </PullToRefresh>
+          <PageTransition>{children}</PageTransition>
         </main>
 
       <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-stripe-white pb-[env(safe-area-inset-bottom)]">

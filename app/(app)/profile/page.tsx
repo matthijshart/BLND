@@ -9,7 +9,10 @@ import { uploadUserPhoto, deleteUserPhoto } from "@/lib/storage";
 import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { VerificationFlow } from "@/components/verification/VerificationFlow";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
+import { getProfileNumber, LANGUAGES, formatHeight, HEIGHT_MIN_CM, HEIGHT_MAX_CM } from "@/lib/userHelpers";
 import { SpotifyPlayer, isValidSpotifyUrl } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import {
@@ -116,8 +119,17 @@ export default function ProfilePage() {
 
   const [displayName, setDisplayName] = useState("");
   const [age, setAge] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState(""); // YYYY-MM-DD
   const [bio, setBio] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  // Rick: separate "lives in" (neighborhood) from "comes from" (hometown).
+  const [hometown, setHometown] = useState("");
+  const [heightCm, setHeightCm] = useState<string>(""); // string so empty input is allowed
+  const [languages, setLanguages] = useState<string[]>([]);
+  // Optional career fields per Rick
+  const [work, setWork] = useState("");
+  const [company, setCompany] = useState("");
+  const [education, setEducation] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
   const [lookingFor, setLookingFor] = useState("");
   const [gender, setGender] = useState("");
@@ -133,6 +145,7 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState<number | null>(null);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -142,8 +155,15 @@ export default function ProfilePage() {
     if (profile) {
       setDisplayName(profile.displayName || "");
       setAge(profile.age?.toString() || "");
+      setDateOfBirth(profile.dateOfBirth || "");
       setBio(profile.bio || "");
       setNeighborhood(profile.neighborhood || "");
+      setHometown(profile.hometown || "");
+      setHeightCm(profile.heightCm ? String(profile.heightCm) : "");
+      setLanguages(profile.languages || []);
+      setWork(profile.work || "");
+      setCompany(profile.company || "");
+      setEducation(profile.education || "");
       setInterests(profile.interests || []);
       setLookingFor(profile.lookingFor || "");
       setGender(profile.gender || "");
@@ -228,6 +248,23 @@ export default function ProfilePage() {
       setTimeout(() => setUploadError(null), 4000);
       return;
     }
+    // Required-field guardrails per Rick: age, height, languages
+    const heightNum = parseInt(heightCm);
+    if (!age || parseInt(age) < 18) {
+      setUploadError("Age is required (18+).");
+      setTimeout(() => setUploadError(null), 4000);
+      return;
+    }
+    if (!heightNum || heightNum < HEIGHT_MIN_CM || heightNum > HEIGHT_MAX_CM) {
+      setUploadError(`Height is required (${HEIGHT_MIN_CM}–${HEIGHT_MAX_CM} cm).`);
+      setTimeout(() => setUploadError(null), 4000);
+      return;
+    }
+    if (languages.length === 0) {
+      setUploadError("Pick at least one language you speak.");
+      setTimeout(() => setUploadError(null), 4000);
+      return;
+    }
     setSaving(true);
     try {
       const updates: Record<string, unknown> = {
@@ -235,7 +272,14 @@ export default function ProfilePage() {
         lookingFor: lookingFor as "dating" | "friends" | "open", gender, genderPreference,
         coffeeOrder: coffeeOrder || "",
         ageRange,
+        heightCm: heightNum,
+        languages,
       };
+      if (dateOfBirth) updates.dateOfBirth = dateOfBirth;
+      if (hometown) updates.hometown = hometown;
+      if (work) updates.work = work;
+      if (company) updates.company = company;
+      if (education) updates.education = education;
       if (profileSong) updates.profileSong = profileSong;
       if (prompts.length > 0) updates.prompts = prompts;
       await updateUser(firebaseUser.uid, updates);
@@ -311,12 +355,106 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Name & Age */}
+        {/* Basics — name, DOB-derived age, height, lives in, comes from */}
         <section className="px-5 py-4 border-t border-wine/5">
           <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Basics</h3>
           <div className="space-y-3">
-            <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="First name" className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
-            <input type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Age" min={18} max={99} className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
+            <Field label="First name *">
+              <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="First name" className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
+            </Field>
+            <Field label="Date of birth *">
+              <input
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => {
+                  setDateOfBirth(e.target.value);
+                  // Auto-derive age — Rick: leeftijd past zich automatisch aan
+                  if (e.target.value) {
+                    const dob = new Date(e.target.value);
+                    const diff = Date.now() - dob.getTime();
+                    const ageNum = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+                    setAge(String(ageNum));
+                  }
+                }}
+                className="w-full px-4 py-3 rounded-xl bg-white text-ink focus:outline-none focus:ring-1 focus:ring-wine/20"
+              />
+              {age && <p className="text-gray-light text-[11px] mt-1">Age: {age}</p>}
+            </Field>
+            <Field label="Height (cm) *">
+              <input
+                type="number"
+                value={heightCm}
+                onChange={(e) => setHeightCm(e.target.value)}
+                placeholder="175"
+                min={HEIGHT_MIN_CM}
+                max={HEIGHT_MAX_CM}
+                inputMode="numeric"
+                className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20"
+              />
+              {heightCm && Number(heightCm) >= HEIGHT_MIN_CM && Number(heightCm) <= HEIGHT_MAX_CM && (
+                <p className="text-gray-light text-[11px] mt-1">{formatHeight(Number(heightCm))}</p>
+              )}
+            </Field>
+            <Field label="Lives in *">
+              <select value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white text-ink focus:outline-none focus:ring-1 focus:ring-wine/20 appearance-none">
+                {NEIGHBORHOODS.map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </Field>
+            <Field label="Comes from">
+              <input
+                type="text"
+                value={hometown}
+                onChange={(e) => setHometown(e.target.value.slice(0, 60))}
+                placeholder="Cape Town, Milan, Utrecht…"
+                className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20"
+              />
+            </Field>
+          </div>
+        </section>
+
+        {/* Languages — required */}
+        <section className="px-5 py-4 border-t border-wine/5">
+          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Languages spoken *</h3>
+          <div className="flex flex-wrap gap-2">
+            {LANGUAGES.map((l) => {
+              const active = languages.includes(l);
+              return (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() =>
+                    setLanguages((prev) =>
+                      prev.includes(l) ? prev.filter((v) => v !== l) : [...prev, l]
+                    )
+                  }
+                  className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                    active ? "bg-wine text-cream font-medium" : "bg-white text-gray hover:bg-stripe-white"
+                  }`}
+                >
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+          {languages.length > 0 && (
+            <p className="text-gray-light text-[11px] mt-2">{languages.length} selected</p>
+          )}
+        </section>
+
+        {/* Work & Education — optional */}
+        <section className="px-5 py-4 border-t border-wine/5">
+          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Work & Education</h3>
+          <p className="text-gray-light text-[11px] mb-3">Optional — leave blank if you&apos;d rather not say.</p>
+          <div className="space-y-3">
+            <Field label="What you do">
+              <input type="text" value={work} onChange={(e) => setWork(e.target.value.slice(0, 60))} placeholder="Product designer, chef, founder…" className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
+            </Field>
+            <Field label="Company">
+              <input type="text" value={company} onChange={(e) => setCompany(e.target.value.slice(0, 60))} placeholder="ING, Booking, freelance…" className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
+            </Field>
+            <Field label="Education">
+              <input type="text" value={education} onChange={(e) => setEducation(e.target.value.slice(0, 60))} placeholder="University of Amsterdam, TU Delft…" className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
+            </Field>
           </div>
         </section>
 
@@ -331,14 +469,6 @@ export default function ProfilePage() {
         <section className="px-5 py-4 border-t border-wine/5">
           <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Coffee Order</h3>
           <input type="text" value={coffeeOrder} onChange={(e) => setCoffeeOrder(e.target.value.slice(0, 50))} placeholder="Oat flat white, espresso, chai latte..." className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
-        </section>
-
-        {/* Neighborhood */}
-        <section className="px-5 py-4 border-t border-wine/5">
-          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Neighborhood</h3>
-          <select value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white text-ink focus:outline-none focus:ring-1 focus:ring-wine/20 appearance-none">
-            {NEIGHBORHOODS.map((n) => <option key={n} value={n}>{n}</option>)}
-          </select>
         </section>
 
         {/* Interests */}
@@ -385,63 +515,21 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {/* Preferences */}
+        {/* Preferences moved to /preferences — Rick: dedicated page */}
         <section className="px-5 py-4 border-t border-wine/5">
-          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Preferences</h3>
-
-          <p className="text-gray text-xs mb-2">Interested in</p>
-          <div className="flex gap-2 mb-4">
-            {["Men", "Women", "Everyone"].map((g) => (
-              <button key={g} onClick={() => {
-                setGenderPreference((prev) => prev.includes(g.toLowerCase()) ? prev.filter((v) => v !== g.toLowerCase()) : [...prev, g.toLowerCase()]);
-              }} className={`flex-1 py-2.5 rounded-full text-sm font-medium transition-colors ${genderPreference.includes(g.toLowerCase()) ? "bg-wine text-cream" : "bg-white text-gray"}`}>
-                {g}
-              </button>
-            ))}
-          </div>
-
-          <p className="text-gray text-xs mb-2">Age range</p>
-          <div className="flex items-center gap-3">
-            <input
-              type="number"
-              value={ageRange[0]}
-              onChange={(e) => {
-                const n = parseInt(e.target.value) || 18;
-                const newMin = Math.max(18, Math.min(99, n));
-                // If min goes above max, push max up too
-                const newMax = Math.max(newMin, ageRange[1]);
-                setAgeRange([newMin, newMax]);
-              }}
-              onBlur={(e) => {
-                const n = parseInt(e.target.value) || 18;
-                if (n < 18 || n > 99) setAgeRange([18, ageRange[1]]);
-              }}
-              min={18}
-              max={99}
-              className="w-20 px-3 py-2 rounded-xl bg-white text-ink text-center focus:outline-none focus:ring-1 focus:ring-wine/20"
-              aria-label="Minimum age"
-            />
-            <span className="text-gray">—</span>
-            <input
-              type="number"
-              value={ageRange[1]}
-              onChange={(e) => {
-                const n = parseInt(e.target.value) || 99;
-                const newMax = Math.max(18, Math.min(99, n));
-                // If max goes below min, pull min down too
-                const newMin = Math.min(newMax, ageRange[0]);
-                setAgeRange([newMin, newMax]);
-              }}
-              onBlur={(e) => {
-                const n = parseInt(e.target.value) || 99;
-                if (n < 18 || n > 99) setAgeRange([ageRange[0], 99]);
-              }}
-              min={18}
-              max={99}
-              className="w-20 px-3 py-2 rounded-xl bg-white text-ink text-center focus:outline-none focus:ring-1 focus:ring-wine/20"
-              aria-label="Maximum age"
-            />
-          </div>
+          <button
+            type="button"
+            onClick={() => router.push("/preferences")}
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-white hover:bg-stripe-white transition-colors text-left"
+          >
+            <div>
+              <p className="text-ink font-medium text-sm">Preferences</p>
+              <p className="text-gray-light text-[11px] mt-0.5">Who you&apos;d like to meet, age range, dating or friends mode</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wine">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
         </section>
 
         {/* Sign out */}
@@ -457,118 +545,54 @@ export default function ProfilePage() {
   // ─── VIEW MODE (default) — looks like how others see you ───
   return (
     <div className="max-w-sm mx-auto pb-28">
-      {/* Photo hero — premium swipeable gallery */}
-      <motion.div
+      {/* Photo hero — single main photo, stacked extras shown below */}
+      <div
         className="relative aspect-[4/5] overflow-hidden bg-stripe-white"
-        drag={validPhotos.length > 1 ? "x" : false}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.18}
-        dragDirectionLock
-        onDragEnd={(_, info) => {
-          if (info.offset.x < -60 || info.velocity.x < -350) {
-            setPhotoIndex(Math.min(validPhotos.length - 1, photoIndex + 1));
-          } else if (info.offset.x > 60 || info.velocity.x > 350) {
-            setPhotoIndex(Math.max(0, photoIndex - 1));
-          }
-        }}
       >
         {validPhotos.length > 0 ? (
           <>
-            <AnimatePresence initial={false} mode="popLayout">
-              <motion.div
-                key={photoIndex}
-                initial={{ opacity: 0, scale: 1.02 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                className="absolute inset-0"
-              >
-                <ShimmerImage
-                  src={validPhotos[photoIndex]}
-                  alt={profile.displayName}
-                  fill
-                  className="object-cover pointer-events-none select-none"
-                  priority
-                  draggable={false}
-                />
-              </motion.div>
-            </AnimatePresence>
+            <ShimmerImage
+              src={validPhotos[0]}
+              alt={profile.displayName}
+              fill
+              className="object-cover select-none"
+              priority
+              draggable={false}
+            />
 
-            {/* Photo progress bars — Instagram style */}
-            {validPhotos.length > 1 && (
-              <div
-                className="absolute inset-x-0 flex gap-1 px-3 z-20 pointer-events-none"
-                style={{ top: "max(0.75rem, calc(env(safe-area-inset-top) + 0.5rem))" }}
-              >
-                {validPhotos.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={(e) => { e.stopPropagation(); setPhotoIndex(i); }}
-                    className="flex-1 h-[2.5px] rounded-full overflow-hidden bg-white/25 pointer-events-auto"
-                  >
-                    <div className={`h-full bg-white rounded-full transition-all duration-500 ${i <= photoIndex ? "w-full" : "w-0"}`} />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Prominent nav arrows — always visible when multiple photos */}
-            {validPhotos.length > 1 && (
-              <>
-                {photoIndex > 0 && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setPhotoIndex(photoIndex - 1); }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center z-30 shadow-md active:scale-95 transition-transform"
-                    aria-label="Previous photo"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                  </button>
-                )}
-                {photoIndex < validPhotos.length - 1 && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setPhotoIndex(photoIndex + 1); }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/85 backdrop-blur-md flex items-center justify-center z-30 shadow-md active:scale-95 transition-transform"
-                    aria-label="Next photo"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 6 15 12 9 18" />
-                    </svg>
-                  </button>
-                )}
-              </>
-            )}
-
-            {/* Center tap zone for fullscreen — NOT covering edges so drag/arrows still work */}
-            {validPhotos.length > 1 ? (
-              <button
-                className="absolute left-[25%] top-[25%] w-1/2 h-1/2 z-10"
-                onClick={(e) => { e.stopPropagation(); setPhotoViewerOpen(true); }}
-                aria-label="View fullscreen"
-              />
-            ) : (
-              <button
-                className="absolute inset-0 z-10"
-                onClick={() => validPhotos.length > 0 && setPhotoViewerOpen(true)}
-                aria-label="View fullscreen"
-              />
-            )}
+            {/* Tap to open fullscreen viewer */}
+            <button
+              className="absolute inset-0 z-10"
+              onClick={() => {
+                setPhotoIndex(0);
+                setPhotoViewerOpen(true);
+              }}
+              aria-label="View fullscreen"
+            />
 
             {/* Gradient overlay */}
             <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent z-10 pointer-events-none" />
 
-            {/* Name + neighborhood overlay */}
+            {/* Name + neighborhood + profile number overlay */}
             <div className="absolute bottom-0 inset-x-0 p-6 pb-7 z-10 pointer-events-none">
-              <h1 className="text-[2rem] font-display text-white leading-tight">
-                {profile.displayName}, {profile.age}
+              <h1 className="text-[2rem] font-display text-white leading-tight flex items-center gap-2 flex-wrap">
+                <span>{profile.displayName}, {profile.age}</span>
+                {profile.verificationStatus === "verified" && (
+                  <VerifiedBadge size="lg" />
+                )}
               </h1>
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/65">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span className="text-white/65 text-sm">{profile.neighborhood}</span>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/65">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="text-white/65 text-sm">{profile.neighborhood}</span>
+                </div>
+                {/* Profile number — Rick: voeg een profielnummer toe */}
+                <span className="text-white/50 text-xs font-mono tracking-wider">
+                  · {firebaseUser ? getProfileNumber(firebaseUser.uid) : ""}
+                </span>
               </div>
             </div>
           </>
@@ -595,7 +619,7 @@ export default function ProfilePage() {
         >
           Edit
         </button>
-      </motion.div>
+      </div>
 
       {/* Fullscreen photo viewer */}
       <AnimatePresence>
@@ -621,6 +645,25 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Vitals strip — Rick: lives in / comes from / height / work */}
+      {(profile.hometown || profile.heightCm || profile.work || profile.languages?.length || profile.education) && (
+        <div className="px-6 py-5 grid grid-cols-2 gap-x-4 gap-y-4 border-b border-cream bg-white">
+          {profile.neighborhood && (
+            <Vital label="Lives in" value={profile.neighborhood} />
+          )}
+          {profile.hometown && <Vital label="From" value={profile.hometown} />}
+          {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
+          {profile.languages && profile.languages.length > 0 && (
+            <Vital
+              label="Languages"
+              value={profile.languages.slice(0, 3).join(", ") + (profile.languages.length > 3 ? ` +${profile.languages.length - 3}` : "")}
+            />
+          )}
+          {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
+          {profile.education && <Vital label="Education" value={profile.education} />}
+        </div>
+      )}
+
       {/* Bio */}
       {profile.bio && (
         <div className="px-6 py-6">
@@ -628,13 +671,13 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Prompts — premium cards */}
+      {/* Prompts — compact dilemma cards per Rick (less "stuko") */}
       {profile.prompts && profile.prompts.length > 0 && (
-        <div className="px-5 pb-5 space-y-3">
+        <div className="px-5 pb-5 space-y-2">
           {profile.prompts.map((p, i) => (
-            <div key={i} className="bg-stripe-white rounded-2xl px-5 py-4">
-              <p className="text-wine text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5">{p.question}</p>
-              <p className="text-ink text-[15px] leading-snug font-display break-words" dir="auto">{p.answer}</p>
+            <div key={i} className="bg-stripe-white rounded-xl px-4 py-3">
+              <p className="text-wine/80 text-[10px] font-medium uppercase tracking-[0.15em] mb-0.5">{p.question}</p>
+              <p className="text-ink text-[14px] leading-snug break-words" dir="auto">{p.answer}</p>
             </div>
           ))}
         </div>
@@ -653,7 +696,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Interests */}
+      {/* Interests — Rick wants a clear header above the tags */}
       {profile.interests && profile.interests.length > 0 && (
         <div className="px-6 pb-6">
           <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-3">Interests</p>
@@ -662,6 +705,32 @@ export default function ProfilePage() {
               <span key={interest} className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-[13px] font-medium border border-wine/10">{interest}</span>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* More photos — Rick: foto's onder elkaar, met lijn rond de fotorand */}
+      {validPhotos.length > 1 && (
+        <div className="px-5 pb-6 space-y-4">
+          <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold">More photos</p>
+          {validPhotos.slice(1).map((url, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setPhotoIndex(i + 1);
+                setPhotoViewerOpen(true);
+              }}
+              className="block w-full relative aspect-[4/5] rounded-2xl overflow-hidden border border-ink/10 shadow-sm bg-stripe-white"
+              aria-label={`View photo ${i + 2}`}
+            >
+              <ShimmerImage
+                src={url}
+                alt={`${profile.displayName} photo ${i + 2}`}
+                fill
+                className="object-cover"
+                draggable={false}
+              />
+            </button>
+          ))}
         </div>
       )}
 
@@ -871,6 +940,26 @@ export default function ProfilePage() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// Compact labelled-field helper for the edit form
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-gray mb-1.5">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+// Vitals item — lives-in, from, height, etc. on profile view.
+function Vital({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">{label}</p>
+      <p className="text-ink text-[14px] mt-0.5 truncate" title={value}>{value}</p>
     </div>
   );
 }

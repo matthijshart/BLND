@@ -96,12 +96,19 @@ export function DoneForToday() {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent z-10" />
-        <div className="absolute bottom-0 inset-x-0 p-6 z-10">
-          <h2 className="text-3xl font-display text-white">
+        {/* Stronger gradient + plate so headline always reads — Rick: contrast fix */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/55 to-ink/15 z-10" />
+        <div className="absolute bottom-0 inset-x-0 z-10 px-6 pb-7 pt-12 bg-gradient-to-t from-ink/95 via-ink/65 to-transparent">
+          <h2
+            className="text-3xl font-display text-white"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.55)" }}
+          >
             That&apos;s a wrap.
           </h2>
-          <p className="text-white/70 text-sm mt-2 max-w-[260px] leading-relaxed">
+          <p
+            className="text-white/90 text-sm mt-2 max-w-[280px] leading-relaxed"
+            style={{ textShadow: "0 1px 6px rgba(0,0,0,0.45)" }}
+          >
             You&apos;ve seen today&apos;s profiles. New ones drop tomorrow.
           </p>
         </div>

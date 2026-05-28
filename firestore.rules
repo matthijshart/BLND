@@ -1,0 +1,132 @@
+rules_version = '2';
+
+// ──────────────────────────────────────────────────────────────────────────
+//  BLEND — Firestore Security Rules
+//
+//  Default DENY. Every collection is explicitly locked down.
+//  Mental model: a hostile user with the public API key + valid auth must
+//  not be able to read or modify any data they don't own.
+// ──────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── helpers ──────────────────────────────────────────────────────────
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function isMember(arr) {
+      return signedIn() && request.auth.uid in arr;
+    }
+    // Block the user from changing internal/server-managed fields on their
+    // own profile (dateTokens, freezeUntil, createdAt). Only server scripts
+    // touch these via the Admin SDK (which bypasses rules).
+    function profileUpdateAllowed() {
+      let locked = ['dateTokens', 'freezeUntil', 'createdAt', 'uid'];
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      // Verification status: client may only set it to "pending" (when
+      // submitting a selfie) or "unverified" (reset). Admin SDK promotes
+      // to "verified" / "rejected".
+      let nextStatus = request.resource.data.verificationStatus;
+      let statusOk = !('verificationStatus' in changed)
+                   || nextStatus == 'pending'
+                   || nextStatus == 'unverified';
+      return !changed.hasAny(locked) && statusOk;
+    }
+
+    // ─── waitlist ─────────────────────────────────────────────────────────
+    // Anyone can JOIN the waitlist (write-only). Nobody can read it from
+    // the client — that's admin/owner only via the Admin SDK.
+    match /waitlist/{id} {
+      allow read: if false;
+      allow create: if request.resource.data.keys().hasOnly(['email', 'city', 'createdAt'])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() < 200
+                    && request.resource.data.city is string
+                    && request.resource.data.city.size() < 100;
+      allow update, delete: if false;
+    }
+
+    // ─── users (profiles) ─────────────────────────────────────────────────
+    // Profiles are meant to be visible to other authenticated users for
+    // matching. Email/password live in Firebase Auth, NOT here.
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if isOwner(uid)
+                    && request.resource.data.uid == uid;
+      allow update: if isOwner(uid) && profileUpdateAllowed();
+      allow delete: if isOwner(uid);
+
+      // Daily profile assignments — strictly private, only the owner.
+      match /dailyProfiles/{date} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Any future private subcollections default-deny (catch-all below).
+      match /private/{doc=**} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // ─── swipes ───────────────────────────────────────────────────────────
+    // Append-only audit log. Users can only see their own swipes (to prevent
+    // someone discovering who liked them before a mutual match). Server-side
+    // matching uses Admin SDK to detect mutual likes.
+    match /swipes/{id} {
+      allow read: if signedIn() && resource.data.swiperId == request.auth.uid;
+      allow create: if signedIn()
+                    && request.resource.data.swiperId == request.auth.uid
+                    && request.resource.data.direction in ['like', 'pass'];
+      // Allow swiper to delete their own swipe — used by the "undo pass" feature.
+      allow delete: if signedIn() && resource.data.swiperId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ─── matches ──────────────────────────────────────────────────────────
+    // Only the two participants can read or update.
+    match /matches/{id} {
+      allow read: if isMember(resource.data.users);
+      // Match creation happens via swipe-triggered code paths (client or
+      // server). We require the creator to be one of the two users.
+      allow create: if isMember(request.resource.data.users)
+                    && request.resource.data.users.size() == 2;
+      allow update: if isMember(resource.data.users)
+                    && isMember(request.resource.data.users);
+      allow delete: if false;
+    }
+
+    // ─── dates (meets, including inline chat messages) ────────────────────
+    match /dates/{id} {
+      allow read: if isMember(resource.data.users);
+      allow create: if isMember(request.resource.data.users)
+                    && request.resource.data.users.size() == 2;
+      allow update: if isMember(resource.data.users)
+                    && isMember(request.resource.data.users);
+      allow delete: if false;
+    }
+
+    // ─── cafes (curated spots, public read) ───────────────────────────────
+    match /cafes/{id} {
+      allow read: if signedIn();
+      allow write: if false; // managed via Admin SDK / seed scripts only
+    }
+
+    // ─── reports (safety, write-only from clients) ────────────────────────
+    match /reports/{id} {
+      allow read: if false;
+      allow create: if signedIn()
+                    && request.resource.data.reporterId == request.auth.uid
+                    && request.resource.data.reportedId is string;
+      allow update, delete: if false;
+    }
+
+    // ─── default deny ─────────────────────────────────────────────────────
+    // Any collection NOT explicitly matched above is locked.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

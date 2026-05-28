@@ -115,12 +115,16 @@ export default function TodayPage() {
       {/* Decorative coffee stain — signature BLEND detail */}
       <CoffeeRing variant="drip" className="-top-4 -right-2 w-20 h-20" opacity={0.06} rotate={12} />
 
-      <div className="flex items-center justify-between mb-2 relative z-10">
+      <div className="flex items-center justify-between mb-1.5 relative z-10">
         <h1 className="text-2xl font-display text-ink">Today</h1>
         <span className="text-gray-light text-[10px] font-mono uppercase tracking-[0.2em]">
           {currentIndex + 1} / {total}
         </span>
       </div>
+      {/* Rick: short intro so first-time users instantly grasp the app */}
+      <p className="text-ink-mid text-sm leading-relaxed mb-4 max-w-[340px] relative z-10">
+        Ten people, picked for you today. Tap the heart if you&apos;d like a coffee — we&apos;ll pick the spot.
+      </p>
 
       {/* Visual progression — compact dots */}
       <div className="flex gap-1 mb-6">
