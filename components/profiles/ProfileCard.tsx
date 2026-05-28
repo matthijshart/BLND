@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
-import Image from "next/image";
 import type { User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
@@ -100,7 +99,10 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
         onDragEnd={handleDragEnd}
         animate={swiped ? { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 } : { x: 0 }}
         transition={swiped ? { duration: 0.3, ease: "easeOut" } : { type: "spring", stiffness: 500, damping: 30 }}
-        style={{ rotate: 0 }}
+        // touchAction pan-y lets iOS scroll the page vertically while
+        // we still capture horizontal drags. Prevents the native
+        // back-swipe gesture from competing with the like/pass swipe.
+        style={{ rotate: 0, touchAction: "pan-y" }}
         whileDrag={{ scale: 1.02 }}
         className="rounded-2xl overflow-hidden shadow-lg bg-white cursor-grab active:cursor-grabbing"
       >
@@ -134,7 +136,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
             <button
               onClick={(e) => { e.stopPropagation(); setReportOpen(true); }}
               aria-label="Report or block this person"
-              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-ink/30 backdrop-blur-md flex items-center justify-center z-30 active:scale-95 transition-transform"
+              className="absolute top-3 right-3 w-11 h-11 rounded-full bg-ink/30 backdrop-blur-md flex items-center justify-center z-30 active:scale-95 transition-transform"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-white">
                 <circle cx="5" cy="12" r="1.5" />
