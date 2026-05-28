@@ -15,10 +15,8 @@ const serviceAccount = JSON.parse(
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
-const NEIGHBORHOODS = [
-  "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
-  "Oud-West", "Oud-Zuid", "Westerpark",
-];
+// Rick: demo profiles read more internationally with just "Amsterdam".
+const NEIGHBORHOODS = ["Amsterdam"];
 
 const INTERESTS_POOL = [
   "specialty coffee", "cycling", "art", "vinyl", "reading", "yoga",
@@ -82,16 +80,16 @@ const SPOTIFY_SONGS = [
 
 // 10 NEW profiles — distinct from existing 16
 const NEW_PROFILES = [
-  { name: "Olivia", gender: "woman", age: 27, neighborhood: "Jordaan", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=800&fit=crop", bio: "Illustrator. Canal rat. Always one market away from a new ceramic bowl." },
-  { name: "Mila", gender: "woman", age: 31, neighborhood: "De Pijp", photo: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&h=800&fit=crop", bio: "PR by trade, poet by night. Coffee is my love language." },
-  { name: "Sien", gender: "woman", age: 26, neighborhood: "Noord", photo: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=600&h=800&fit=crop", bio: "Film photographer. Ferry commuter. Believer in the long walk home." },
-  { name: "Noor", gender: "woman", age: 29, neighborhood: "West", photo: "https://images.unsplash.com/photo-1614644147798-f8c0fc9da7f6?w=600&h=800&fit=crop", bio: "Architect. Tattoo collector. Books over bars, always." },
-  { name: "Tess", gender: "woman", age: 34, neighborhood: "Oud-Zuid", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=800&fit=crop", bio: "Moved from Cape Town in 2022. Still learning Dutch. Still losing." },
-  { name: "Sam", gender: "man", age: 28, neighborhood: "Westerpark", photo: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=600&h=800&fit=crop", bio: "UX designer. Runs mornings, cooks evenings. Best pasta in Amsterdam contender." },
-  { name: "Joost", gender: "man", age: 32, neighborhood: "Centrum", photo: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=600&h=800&fit=crop", bio: "Bookseller at Athenaeum. Dutch film nerd. Likes his coffee strong and his playlists stranger." },
-  { name: "Milan", gender: "man", age: 30, neighborhood: "Oost", photo: "https://images.unsplash.com/photo-1545996124-0501ebae84d0?w=600&h=800&fit=crop", bio: "Product manager who'd rather be a potter. Working on it." },
-  { name: "Ruben", gender: "man", age: 26, neighborhood: "De Pijp", photo: "https://images.unsplash.com/photo-1557862921-37829c790f19?w=600&h=800&fit=crop", bio: "Chef at a tiny wine bar (ironic, I know). Off on Mondays. Tell me your guilty pleasure." },
-  { name: "Levi", gender: "man", age: 29, neighborhood: "Jordaan", photo: "https://images.unsplash.com/photo-1492447166138-50c3889fccb1?w=600&h=800&fit=crop", bio: "Photographer. Half Dutch half Spanish. If you see me, I'm probably lost." },
+  { name: "Olivia", gender: "woman", age: 27, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&h=800&fit=crop", bio: "Illustrator. Canal rat. Always one market away from a new ceramic bowl." },
+  { name: "Mila", gender: "woman", age: 31, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&h=800&fit=crop", bio: "PR by trade, poet by night. Coffee is my love language." },
+  { name: "Sien", gender: "woman", age: 26, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=600&h=800&fit=crop", bio: "Film photographer. Ferry commuter. Believer in the long walk home." },
+  { name: "Noor", gender: "woman", age: 29, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1614644147798-f8c0fc9da7f6?w=600&h=800&fit=crop", bio: "Architect. Tattoo collector. Books over bars, always." },
+  { name: "Tess", gender: "woman", age: 34, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=800&fit=crop", bio: "Moved from Cape Town in 2022. Still learning Dutch. Still losing." },
+  { name: "Sam", gender: "man", age: 28, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=600&h=800&fit=crop", bio: "UX designer. Runs mornings, cooks evenings. Best pasta in Amsterdam contender." },
+  { name: "Joost", gender: "man", age: 32, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=600&h=800&fit=crop", bio: "Bookseller at Athenaeum. Dutch film nerd. Likes his coffee strong and his playlists stranger." },
+  { name: "Milan", gender: "man", age: 30, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1545996124-0501ebae84d0?w=600&h=800&fit=crop", bio: "Product manager who'd rather be a potter. Working on it." },
+  { name: "Ruben", gender: "man", age: 26, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1557862921-37829c790f19?w=600&h=800&fit=crop", bio: "Chef at a tiny wine bar (ironic, I know). Off on Mondays. Tell me your guilty pleasure." },
+  { name: "Levi", gender: "man", age: 29, neighborhood: "Amsterdam", photo: "https://images.unsplash.com/photo-1492447166138-50c3889fccb1?w=600&h=800&fit=crop", bio: "Photographer. Half Dutch half Spanish. If you see me, I'm probably lost." },
 ];
 
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }

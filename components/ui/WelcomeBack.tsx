@@ -59,7 +59,6 @@ export function WelcomeBack() {
       document.removeEventListener("visibilitychange", onVisible);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const firstName = profile?.displayName?.split(" ")[0] ?? "";

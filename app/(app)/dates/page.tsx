@@ -4,6 +4,7 @@ import { useDates } from "@/hooks/useDates";
 import Image from "next/image";
 import Link from "next/link";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { CoffeeRing } from "@/components/ui/CoffeeRing";
 
 export default function DatesPage() {
@@ -255,8 +256,11 @@ function DateCard({ date }: { date: ReturnType<typeof useDates>["dates"][number]
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-display text-lg text-ink">
-            {isSecondCup ? "Second cup" : "Coffee"} with {date.otherUser.displayName}
+          <h3 className="font-display text-lg text-ink flex items-center gap-1.5 flex-wrap">
+            <span>{isSecondCup ? "Second cup" : "Coffee"} with {date.otherUser.displayName}</span>
+            {date.otherUser.verificationStatus === "verified" && (
+              <VerifiedBadge size="sm" className="shrink-0" />
+            )}
           </h3>
 
           {isSecondCup ? (

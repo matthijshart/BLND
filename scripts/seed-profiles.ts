@@ -24,10 +24,9 @@ initializeApp({
 
 const db = getFirestore();
 
-const NEIGHBORHOODS = [
-  "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
-  "Oud-West", "Oud-Zuid", "Westerpark",
-];
+// Rick: demo profiles read more internationally with just "Amsterdam".
+// Real users still pick a specific neighborhood at onboarding.
+const NEIGHBORHOODS = ["Amsterdam"];
 
 const INTERESTS_POOL = [
   "specialty coffee", "cycling", "art", "vinyl", "reading", "yoga",

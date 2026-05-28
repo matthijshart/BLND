@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { User } from "@/types";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { CoffeeRing } from "@/components/ui/CoffeeRing";
 
 function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefined): string | null {
@@ -155,8 +156,11 @@ function MatchRow({ match, profile }: { match: ReturnType<typeof useMatches>["ma
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-display text-lg text-ink truncate">
-            {match.otherUser.displayName}, {match.otherUser.age}
+          <h3 className="font-display text-lg text-ink truncate flex items-center gap-1.5">
+            <span className="truncate">{match.otherUser.displayName}, {match.otherUser.age}</span>
+            {match.otherUser.verificationStatus === "verified" && (
+              <VerifiedBadge size="sm" className="shrink-0" />
+            )}
           </h3>
           <p className="text-gray text-sm truncate">{match.otherUser.neighborhood}</p>
         </div>

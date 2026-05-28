@@ -7,6 +7,7 @@ import { createUser } from "@/lib/db";
 import { uploadUserPhoto, validatePhotoFile, PhotoUploadError } from "@/lib/storage";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { DateOfBirthInput } from "@/components/ui/DateOfBirthInput";
+import { LANGUAGES } from "@/lib/userHelpers";
 
 const NEIGHBORHOODS = [
   "Centrum", "Jordaan", "De Pijp", "Oost", "West", "Noord", "Zuid",
@@ -32,12 +33,21 @@ interface OnboardingDraft {
   lookingFor: string;
   bio: string;
   neighborhood: string;
+  hometown: string;
+  heightCm: string;
+  languages: string[];
+  work: string;
+  company: string;
+  education: string;
   interests: string[];
   profilePrompt: string;
   profileSong: string;
   coffeeOrder: string;
   prompts: { question: string; answer: string }[];
 }
+
+/** Min photos per Rick: 1 main + 4 extras = 5 total. */
+const MIN_PHOTOS = 5;
 
 /** Calculate age in years from YYYY-MM-DD. */
 function calcAge(dob: string): number {
@@ -63,6 +73,8 @@ export default function OnboardingPage() {
   // Step 1
   const [displayName, setDisplayName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState(""); // YYYY-MM-DD
+  const [heightCm, setHeightCm] = useState(""); // required
+  const [hometown, setHometown] = useState(""); // optional
   const [gender, setGender] = useState("");
   const [genderPreference, setGenderPreference] = useState<string[]>([]);
   const [lookingFor, setLookingFor] = useState("");
@@ -72,6 +84,10 @@ export default function OnboardingPage() {
   // Step 2
   const [bio, setBio] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [languages, setLanguages] = useState<string[]>([]); // required
+  const [work, setWork] = useState("");
+  const [company, setCompany] = useState("");
+  const [education, setEducation] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
   const [profilePrompt, setProfilePrompt] = useState("");
   const [profileSong, setProfileSong] = useState("");
@@ -94,11 +110,17 @@ export default function OnboardingPage() {
       const draft = JSON.parse(raw) as OnboardingDraft;
       if (draft.displayName) setDisplayName(draft.displayName);
       if (draft.dateOfBirth) setDateOfBirth(draft.dateOfBirth);
+      if (draft.heightCm) setHeightCm(draft.heightCm);
+      if (draft.hometown) setHometown(draft.hometown);
       if (draft.gender) setGender(draft.gender);
       if (draft.genderPreference) setGenderPreference(draft.genderPreference);
       if (draft.lookingFor) setLookingFor(draft.lookingFor);
       if (draft.bio) setBio(draft.bio);
       if (draft.neighborhood) setNeighborhood(draft.neighborhood);
+      if (draft.languages) setLanguages(draft.languages);
+      if (draft.work) setWork(draft.work);
+      if (draft.company) setCompany(draft.company);
+      if (draft.education) setEducation(draft.education);
       if (draft.interests) setInterests(draft.interests);
       if (draft.profilePrompt) setProfilePrompt(draft.profilePrompt);
       if (draft.profileSong) setProfileSong(draft.profileSong);
@@ -119,11 +141,17 @@ export default function OnboardingPage() {
       step,
       displayName,
       dateOfBirth,
+      heightCm,
+      hometown,
       gender,
       genderPreference,
       lookingFor,
       bio,
       neighborhood,
+      languages,
+      work,
+      company,
+      education,
       interests,
       profilePrompt,
       profileSong,
@@ -135,7 +163,7 @@ export default function OnboardingPage() {
     } catch {
       // Storage full — fail silently
     }
-  }, [step, displayName, dateOfBirth, gender, genderPreference, lookingFor, bio, neighborhood, interests, profilePrompt, profileSong, coffeeOrder, prompts]);
+  }, [step, displayName, dateOfBirth, heightCm, hometown, gender, genderPreference, lookingFor, bio, neighborhood, languages, work, company, education, interests, profilePrompt, profileSong, coffeeOrder, prompts]);
 
   // ─── Revoke all preview URLs on unmount to prevent memory leaks ───
   useEffect(() => {
@@ -225,11 +253,15 @@ export default function OnboardingPage() {
   }
 
   function canProceedStep1() {
+    const heightNum = parseInt(heightCm);
     return (
       displayName &&
       dateOfBirth &&
       derivedAge >= 18 &&
       derivedAge <= 120 &&
+      // Rick: lengte verplicht
+      heightNum >= 140 &&
+      heightNum <= 220 &&
       gender &&
       genderPreference.length > 0 &&
       lookingFor
@@ -237,11 +269,13 @@ export default function OnboardingPage() {
   }
 
   function canProceedStep2() {
-    return neighborhood && interests.length >= 3 && prompts.length >= 3;
+    // Rick: talen verplicht
+    return neighborhood && languages.length > 0 && interests.length >= 3 && prompts.length >= 3;
   }
 
   function canFinish() {
-    return photos[0] !== null;
+    // Rick: minimaal 1 hoofdfoto + 4 extra = 5 total
+    return photos.filter(Boolean).length >= MIN_PHOTOS;
   }
 
   async function handleFinish() {
@@ -276,6 +310,8 @@ export default function OnboardingPage() {
         displayName,
         age: derivedAge,
         dateOfBirth, // authoritative — used for age verification + recalculation on birthday
+        heightCm: parseInt(heightCm),
+        languages,
         gender,
         genderPreference,
         lookingFor: lookingFor as "dating" | "friends" | "open",
@@ -284,6 +320,10 @@ export default function OnboardingPage() {
         interests,
         photos: photoUrls,
       };
+      if (hometown) userData.hometown = hometown;
+      if (work) userData.work = work;
+      if (company) userData.company = company;
+      if (education) userData.education = education;
       if (profilePrompt) userData.profilePrompt = profilePrompt;
       if (profileSong) userData.profileSong = profileSong;
       if (coffeeOrder) userData.coffeeOrder = coffeeOrder;
@@ -378,6 +418,39 @@ export default function OnboardingPage() {
                   {derivedAge} years old
                 </p>
               )}
+            </div>
+
+            {/* Height — Rick: verplicht */}
+            <div>
+              <label className="text-cream/60 text-sm mb-2 block">Height (cm)</label>
+              <input
+                type="number"
+                value={heightCm}
+                onChange={(e) => setHeightCm(e.target.value)}
+                placeholder="175"
+                min={140}
+                max={220}
+                inputMode="numeric"
+                className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+              {heightCm && (parseInt(heightCm) < 140 || parseInt(heightCm) > 220) && (
+                <p className="text-coral text-xs mt-2">Enter a height between 140 and 220 cm.</p>
+              )}
+              {heightCm && parseInt(heightCm) >= 140 && parseInt(heightCm) <= 220 && (
+                <p className="text-cream/40 text-xs mt-2">{(parseInt(heightCm) / 100).toFixed(2)} m</p>
+              )}
+            </div>
+
+            {/* Hometown — Rick: optional "Komt uit" — important for expats */}
+            <div>
+              <label className="text-cream/60 text-sm mb-2 block">Where you&apos;re from <span className="text-cream/30">(optional)</span></label>
+              <input
+                type="text"
+                value={hometown}
+                onChange={(e) => setHometown(e.target.value.slice(0, 60))}
+                placeholder="Cape Town, Milan, Utrecht…"
+                className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
             </div>
 
             <div>
@@ -492,6 +565,65 @@ export default function OnboardingPage() {
               </select>
             </div>
 
+            {/* Languages — Rick: verplicht */}
+            <div>
+              <div className="flex items-baseline justify-between mb-2">
+                <p className="text-cream/60 text-sm">Languages you speak</p>
+                <p className={`text-xs ${languages.length > 0 ? "text-cream/40" : "text-cream/70"}`}>
+                  {languages.length === 0 ? "Pick at least one" : `${languages.length} picked`}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {LANGUAGES.map((l) => {
+                  const active = languages.includes(l);
+                  return (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() =>
+                        setLanguages((prev) =>
+                          prev.includes(l) ? prev.filter((v) => v !== l) : [...prev, l]
+                        )
+                      }
+                      className={`px-4 py-2.5 min-h-[44px] rounded-full text-sm transition-colors ${
+                        active
+                          ? "bg-cream text-wine font-medium"
+                          : "border border-cream/20 text-cream/60 hover:bg-cream/10"
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Work & Education — Rick: optional */}
+            <div className="space-y-3">
+              <p className="text-cream/60 text-sm">Work & Education <span className="text-cream/30">(optional)</span></p>
+              <input
+                type="text"
+                value={work}
+                onChange={(e) => setWork(e.target.value.slice(0, 60))}
+                placeholder="What you do (Product designer, chef…)"
+                className="w-full px-5 py-3 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+              <input
+                type="text"
+                value={company}
+                onChange={(e) => setCompany(e.target.value.slice(0, 60))}
+                placeholder="Company"
+                className="w-full px-5 py-3 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+              <input
+                type="text"
+                value={education}
+                onChange={(e) => setEducation(e.target.value.slice(0, 60))}
+                placeholder="Education"
+                className="w-full px-5 py-3 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+              />
+            </div>
+
             <div>
               <div className="flex items-baseline justify-between mb-2">
                 <p className="text-cream/60 text-sm">Interests</p>
@@ -587,7 +719,11 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="space-y-5">
             <h2 className="text-2xl font-display text-cream">Your photos</h2>
-            <p className="text-cream/60 text-sm">First photo is required. Add up to 6.</p>
+            <p className="text-cream/60 text-sm">
+              One main photo (top-left) + at least 4 more. {MIN_PHOTOS - photos.filter(Boolean).length > 0
+                ? `${MIN_PHOTOS - photos.filter(Boolean).length} to go.`
+                : "Looking good ✓"}
+            </p>
 
             <input
               ref={fileInputRef}
@@ -631,13 +767,19 @@ export default function OnboardingPage() {
                       <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-wine/80 text-cream flex items-center justify-center text-xs">
                         x
                       </div>
+                      {/* Rick: één duidelijke hoofdfoto die altijd als eerste staat */}
+                      {index === 0 && (
+                        <div className="absolute top-1 left-1 px-2 py-0.5 rounded-full bg-cream text-wine text-[9px] font-semibold uppercase tracking-wider">
+                          Main
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full">
                       <span className="text-cream/30 text-2xl">+</span>
-                      {index === 0 && (
-                        <span className="text-cream/30 text-[10px] mt-1">required</span>
-                      )}
+                      <span className="text-cream/30 text-[10px] mt-1">
+                        {index === 0 ? "main" : "add"}
+                      </span>
                     </div>
                   )}
                 </button>

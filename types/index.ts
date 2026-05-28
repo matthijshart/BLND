@@ -7,8 +7,18 @@ export interface User {
   /** ISO date string YYYY-MM-DD. Source of truth; `age` is derived. */
   dateOfBirth?: string;
   bio: string;
-  photos: string[]; // Firebase Storage URLs, max 6
-  neighborhood: string; // Amsterdam neighborhood
+  photos: string[]; // Firebase Storage URLs, max 6. photos[0] is always the main/hero photo.
+  neighborhood: string; // Amsterdam neighborhood — "Lives in"
+  /** "Comes from" — hometown or country of origin. Important for expats. */
+  hometown?: string;
+  /** Height in centimeters. Required at onboarding. */
+  heightCm?: number;
+  /** Languages spoken — required at onboarding. ISO-ish codes / display names. */
+  languages?: string[];
+  /** Optional career/education fields */
+  work?: string;
+  company?: string;
+  education?: string;
   interests: string[]; // tags: "specialty coffee", "cycling", "art", etc.
   lookingFor: "dating" | "friends" | "open";
   profilePrompt?: string; // answer to a fun question
@@ -22,6 +32,17 @@ export interface User {
   freezeUntil?: Timestamp;
   /** UIDs this user has blocked. Blocked users never see each other. */
   blockedUsers?: string[];
+  /**
+   * Photo verification status.
+   * - `unverified` (default) — user hasn't submitted yet
+   * - `pending` — selfie submitted, awaiting admin review
+   * - `verified` — confirmed real, shows blue checkmark
+   * - `rejected` — selfie didn't match, user can retry
+   */
+  verificationStatus?: "unverified" | "pending" | "verified" | "rejected";
+  verificationSubmittedAt?: Timestamp;
+  /** Random pose challenge that was issued — keeps selfies hard to fake. */
+  verificationPose?: "peace" | "thumbs_up" | "call_me";
   createdAt: Timestamp;
   lastActive: Timestamp;
 }
