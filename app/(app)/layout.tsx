@@ -63,7 +63,7 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { firebaseUser, hasProfile, loading } = useAuthContext();
+  const { firebaseUser, profile, hasProfile, loading } = useAuthContext();
   const [newBlends, setNewBlends] = useState(0);
 
   useEffect(() => {
@@ -72,8 +72,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       router.push("/login");
     } else if (!hasProfile) {
       router.push("/onboarding");
+    } else if (profile?.bannedAt) {
+      // Banned user can't access the app — bounce to /banned
+      router.replace("/banned");
     }
-  }, [firebaseUser, hasProfile, loading, router]);
+  }, [firebaseUser, hasProfile, loading, profile?.bannedAt, router]);
 
   // Badge = actionable blends (need to plan OR need to confirm proposed date).
   // It reflects real state — no manual reset needed.

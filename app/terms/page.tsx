@@ -52,12 +52,41 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-display text-ink mb-3">5. Cancellation policy</h2>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>You may cancel a confirmed meet once without penalty</li>
-              <li>A second cancellation may result in a 3-day account freeze</li>
-              <li>No-shows reported by the other user may result in account restrictions</li>
+            <h2 className="text-xl font-display text-ink mb-3">5. BLEND Etiquette Code</h2>
+            <p>
+              BLEND only works if people actually show up. We don&apos;t reward swiping — we reward meeting. To protect everyone&apos;s time, the following rules apply to all confirmed meets.
+            </p>
+
+            <h3 className="font-display text-ink mt-5 mb-2">5.1 Cancellations</h3>
+            <p>
+              When you cancel a confirmed meet, the cancellation is recorded as a strike against your account. Strikes are weighted by how close to the meet time you cancel:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 mt-2">
+              <li><strong>More than 24 hours before:</strong> light strike. No immediate consequence.</li>
+              <li><strong>Between 2 and 24 hours before:</strong> medium strike. Three within 60 days = ban.</li>
+              <li><strong>Less than 2 hours before:</strong> heavy strike. Two within 60 days = ban.</li>
             </ul>
+
+            <h3 className="font-display text-ink mt-5 mb-2">5.2 No-shows</h3>
+            <p>
+              Not showing up to a confirmed meet without warning is the most serious breach of BLEND etiquette. <strong>One reported no-show results in an immediate, permanent ban.</strong> The report must come from the other user attending the meet.
+            </p>
+
+            <h3 className="font-display text-ink mt-5 mb-2">5.3 Bans</h3>
+            <p>
+              When your account is banned under this Etiquette Code:
+            </p>
+            <ul className="list-disc pl-5 space-y-1 mt-2">
+              <li>You lose access to BLEND immediately and permanently.</li>
+              <li>All your active matches and upcoming meets are cancelled, so the other parties are not left waiting.</li>
+              <li>Your account record (UID, email) is retained to prevent re-registration. Creating a new account with the same identity is a separate breach of these terms.</li>
+              <li>You may appeal a ban by emailing <a href="mailto:hello@bl-nd.nl" className="text-wine">hello@bl-nd.nl</a>. We review every appeal personally and reverse bans in cases of genuine emergency (hospitalisation, bereavement, etc.).</li>
+            </ul>
+
+            <h3 className="font-display text-ink mt-5 mb-2">5.4 Why this is strict</h3>
+            <p>
+              Other dating apps tolerate flaking because it doesn&apos;t hurt their growth metrics. BLEND can&apos;t be that app. Our entire model depends on the assumption that when two people agree to coffee, they show up. If that breaks, BLEND breaks. So we hold the line — politely, transparently, but firmly.
+            </p>
           </section>
 
           <section>

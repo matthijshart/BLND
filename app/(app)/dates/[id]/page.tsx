@@ -9,6 +9,8 @@ import { db } from "@/lib/firebase";
 import { getUser } from "@/lib/db";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { MiniChat } from "@/components/date/MiniChat";
+import { CancelMeetModal } from "@/components/date/CancelMeetModal";
+import { NoShowPrompt } from "@/components/date/NoShowPrompt";
 import { updateDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DateRecord, User } from "@/types";
@@ -30,6 +32,7 @@ export default function DateDetailPage() {
   const [countdown, setCountdown] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [secondCupSubmitted, setSecondCupSubmitted] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
   // showSecondCupResult now derives from server status (second_cup)
 
   // Real-time date subscription
@@ -325,6 +328,49 @@ export default function DateDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* No-show prompt — appears 2h after meet time for upcoming/chat_open dates */}
+      {profileData && firebaseUser && (
+        <NoShowPrompt
+          dateId={dateData.id}
+          meetTime={dateTime}
+          status={dateData.status}
+          currentUser={profileData}
+          otherUser={otherUser}
+        />
+      )}
+
+      {/* Cancel meet — only visible when meet hasn't happened yet and isn't already cancelled */}
+      {!isCancelled && !isPast && !isSecondCup && profileData && (
+        <div className="mx-4 mb-4">
+          <button
+            onClick={() => setCancelOpen(true)}
+            className="w-full py-3 rounded-2xl text-sm text-coral/80 border border-coral/20 hover:bg-coral/5 transition-colors"
+          >
+            Cancel this meet
+          </button>
+          <p className="text-gray-light text-[11px] mt-2 text-center px-4">
+            Repeated cancellations or a no-show lead to a permanent ban. BLEND only works if everyone shows up.
+          </p>
+        </div>
+      )}
+
+      {/* Cancel modal */}
+      {profileData && (
+        <CancelMeetModal
+          open={cancelOpen}
+          onClose={() => setCancelOpen(false)}
+          onCancelled={(banned) => {
+            if (banned) {
+              // AuthProvider gate will pick this up on next snapshot
+              router.push("/dates");
+            }
+          }}
+          dateId={dateData.id}
+          meetTime={dateTime}
+          currentUser={profileData}
+        />
+      )}
 
       {/* Chat section */}
       {isChatOpen && !isPast && chatOpen ? (
