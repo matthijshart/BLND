@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import Image from "next/image";
+import { Portal } from "@/components/ui/Portal";
 
 interface PhotoViewerProps {
   photos: string[];
@@ -103,7 +104,8 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
   };
 
   return (
-    <motion.div
+    <Portal>
+      <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -257,6 +259,7 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
         )}
       </div>
     </motion.div>
+    </Portal>
   );
 }
 
