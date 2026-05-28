@@ -118,7 +118,8 @@ export function CancelMeetModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="w-full sm:max-w-md bg-cream rounded-t-3xl sm:rounded-3xl p-6 pb-10 max-h-[90vh] overflow-y-auto"
+          className="w-full sm:max-w-md bg-cream rounded-t-3xl sm:rounded-3xl px-6 pt-6 max-h-[90dvh] overflow-y-auto"
+          style={{ paddingBottom: "max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))" }}
         >
           {/* Step 1 — reason */}
           {step === "reason" && (
