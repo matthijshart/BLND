@@ -10,6 +10,7 @@ import { AddToHomescreen } from "@/components/ui/AddToHomescreen";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { WelcomeScreen } from "@/components/ui/WelcomeScreen";
 import { WelcomeBack } from "@/components/ui/WelcomeBack";
+import { AppLoader } from "@/components/ui/AppLoader";
 import { motion } from "framer-motion";
 
 function IconToday({ active }: { active: boolean }) {
@@ -65,6 +66,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { firebaseUser, profile, hasProfile, loading } = useAuthContext();
   const [newBlends, setNewBlends] = useState(0);
+  // Loader: stays mounted until both auth loading completes AND the
+  // greeting phase finishes. `loaderDone` is the gate. Once true, we
+  // unmount the loader so the app is fully interactive underneath.
+  const [loaderDone, setLoaderDone] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -99,18 +104,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, [firebaseUser]);
 
-  if (loading) {
-    return (
-      <div className="min-h-dvh bg-cream flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full bg-wine/20 animate-pulse" />
-      </div>
-    );
+  if (!firebaseUser || (!loading && !hasProfile)) {
+    // No user yet, or no profile yet: redirect is in flight in the
+    // effect above. While that happens, show the loader idle on logo.
+    return <AppLoader onComplete={() => setLoaderDone(true)} />;
   }
 
-  if (!firebaseUser || !hasProfile) return null;
+  // Cold-load loader: wait for the profile name to arrive, then greet.
+  // Once `loaderDone` flips, we render the actual app underneath.
+  const firstName = profile?.displayName?.split(" ")[0];
 
   return (
     <div className="flex flex-col min-h-dvh bg-cream">
+      {/* Cold-load loader — sits on top until greeting completes */}
+      {!loaderDone && (
+        <AppLoader
+          firstName={firstName}
+          onComplete={() => setLoaderDone(true)}
+        />
+      )}
       <main className="flex-1 pb-20">
           <PageTransition>{children}</PageTransition>
         </main>
