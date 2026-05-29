@@ -13,6 +13,7 @@ import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { CoffeeRing } from "@/components/ui/CoffeeRing";
 import { VerificationFlow } from "@/components/verification/VerificationFlow";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
+import { QuickPromptEdit } from "@/components/prompts/QuickPromptEdit";
 import { getProfileNumber, LANGUAGES, formatHeight, HEIGHT_MIN_CM, HEIGHT_MAX_CM } from "@/lib/userHelpers";
 import { SpotifyPlayer, isValidSpotifyUrl } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
@@ -147,6 +148,8 @@ export default function ProfilePage() {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+  // Quick-edit a single prompt from view mode (Matthijs: "tap → swap")
+  const [quickEditIdx, setQuickEditIdx] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -468,18 +471,70 @@ export default function ProfilePage() {
           <input type="text" value={coffeeOrder} onChange={(e) => setCoffeeOrder(e.target.value.slice(0, 50))} placeholder="Oat flat white, espresso, chai latte..." className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
         </section>
 
-        {/* Interests */}
+        {/* Interests — preset pills + custom open-answer add */}
         <section className="px-5 py-4 border-t border-wine/5">
           <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Interests</h3>
+
+          {/* Preset list */}
           <div className="flex flex-wrap gap-2">
             {INTERESTS.map((i) => (
-              <button key={i} onClick={() => {
-                setInterests((prev) => prev.includes(i) ? prev.filter((v) => v !== i) : [...prev, i]);
-              }} className={`px-3 py-1.5 rounded-full text-sm transition-colors ${interests.includes(i) ? "bg-wine text-cream font-medium" : "bg-white text-gray hover:bg-stripe-white"}`}>
+              <button
+                key={i}
+                onClick={() => {
+                  setInterests((prev) =>
+                    prev.includes(i) ? prev.filter((v) => v !== i) : [...prev, i]
+                  );
+                }}
+                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  interests.includes(i)
+                    ? "bg-wine text-cream font-medium"
+                    : "bg-white text-gray hover:bg-stripe-white"
+                }`}
+              >
                 {i}
               </button>
             ))}
           </div>
+
+          {/* Custom interests row — visible when user has any custom additions */}
+          {interests.filter((i) => !INTERESTS.includes(i)).length > 0 && (
+            <>
+              <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-medium mt-5 mb-2">
+                Your own
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {interests
+                  .filter((i) => !INTERESTS.includes(i))
+                  .map((i) => (
+                    <button
+                      key={i}
+                      onClick={() =>
+                        setInterests((prev) => prev.filter((v) => v !== i))
+                      }
+                      className="px-3 py-1.5 rounded-full text-sm bg-wine text-cream font-medium flex items-center gap-1.5"
+                      aria-label={`Remove ${i}`}
+                    >
+                      {i}
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  ))}
+              </div>
+            </>
+          )}
+
+          {/* Add custom interest input — Matthijs: open answer mogelijk */}
+          <CustomInterestInput
+            onAdd={(value) => {
+              const trimmed = value.trim().toLowerCase();
+              if (!trimmed) return;
+              if (trimmed.length > 30) return;
+              if (interests.includes(trimmed)) return;
+              setInterests((prev) => [...prev, trimmed]);
+            }}
+          />
         </section>
 
         {/* Prompts */}
@@ -554,8 +609,12 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-sm mx-auto pb-28 bg-cream relative">
-      {/* ───── Hero photo ───── */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white">
+      {/* ───── Hero photo — wine-framed editorial portrait ─────
+          The wine bg + cream inner padding creates a thin frame around
+          the photo, like a polaroid or art print. Subtle, on-brand. */}
+      <div className="pt-4 px-4">
+        <div className="bg-wine rounded-[1.75rem] p-1.5 shadow-[0_8px_24px_-12px_rgba(107,21,32,0.35)]">
+          <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white rounded-[1.4rem]">
         {validPhotos.length > 0 ? (
           <>
             <ShimmerImage
@@ -617,11 +676,13 @@ export default function ProfilePage() {
 
         <button
           onClick={() => setIsEditMode(true)}
-          className="absolute right-4 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider active:scale-95 transition-transform"
-          style={{ top: "max(1.75rem, calc(env(safe-area-inset-top) + 1.25rem))" }}
+          className="absolute right-3 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider active:scale-95 transition-transform"
+          style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 0.75rem))" }}
         >
           Edit
         </button>
+          </div>
+        </div>
       </div>
 
       {/* Photo viewer — portaled */}
@@ -660,15 +721,18 @@ export default function ProfilePage() {
           <div className="px-5 py-5 grid grid-cols-2 gap-x-4 gap-y-4">
             {profile.hometown && <Vital label="From" value={profile.hometown} />}
             {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
-            {profile.languages && profile.languages.length > 0 && (
-              <Vital
-                label="Languages"
-                value={profile.languages.slice(0, 3).join(", ") + (profile.languages.length > 3 ? ` +${profile.languages.length - 3}` : "")}
-              />
-            )}
             {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
             {profile.education && <Vital label="Education" value={profile.education} />}
             {memberSince && <Vital label="Joined" value={memberSince} />}
+            {/* Languages on their own full-width row — they're typically long
+                and Matthijs flagged the truncation as a visible bug. */}
+            {profile.languages && profile.languages.length > 0 && (
+              <Vital
+                label="Languages"
+                value={profile.languages.join(" · ")}
+                fullWidth
+              />
+            )}
           </div>
         </div>
       </div>
@@ -688,35 +752,89 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ───── Bio — pull quote treatment ───── */}
+      {/* ───── Bio — clean editorial block with left wine accent ───── */}
       {profile.bio && (
         <div className="px-5 pt-6">
-          <div className="relative">
-            {/* Big serif left-quote — editorial flourish */}
-            <span className="absolute -top-2 -left-1 text-wine/15 text-7xl font-display leading-none select-none pointer-events-none">
-              &ldquo;
-            </span>
-            <p className="relative text-ink text-[16px] leading-[1.7] whitespace-pre-wrap break-words pl-5 font-body" dir="auto">
-              {profile.bio}
+          <div className="bg-white rounded-2xl shadow-sm p-5">
+            <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-2">
+              About
             </p>
+            <div className="relative pl-4 border-l-2 border-wine/30">
+              <p
+                className="text-ink text-[16px] leading-[1.7] whitespace-pre-wrap break-words font-body"
+                dir="auto"
+              >
+                {profile.bio}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ───── Prompts — clean card stack, no photos in between ───── */}
+      {/* ───── Prompts — tap any card to quick-edit it ───── */}
       {profile.prompts && profile.prompts.length > 0 && (
-        <div className="px-5 pt-6 space-y-3">
-          {profile.prompts.map((p, i) => (
-            <div key={i} className="bg-white rounded-2xl shadow-sm px-5 py-4">
-              <p className="text-wine/85 text-[10px] font-semibold uppercase tracking-[0.18em] mb-1.5">
-                {p.question}
-              </p>
-              <p className="text-ink text-[16px] leading-snug break-words font-display" dir="auto">
-                {p.answer}
-              </p>
-            </div>
-          ))}
+        <div className="px-5 pt-6">
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold">
+              Prompts
+            </p>
+            <p className="text-[10px] text-gray-light tracking-wide">tap to edit</p>
+          </div>
+          <div className="space-y-3">
+            {profile.prompts.map((p, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setQuickEditIdx(i)}
+                className="block w-full text-left bg-white rounded-2xl shadow-sm px-5 py-4 active:scale-[0.99] hover:shadow-md transition-all"
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-wine/85 text-[10px] font-semibold uppercase tracking-[0.18em] mb-1.5">
+                      {p.question}
+                    </p>
+                    <p className="text-ink text-[16px] leading-snug break-words font-display" dir="auto">
+                      {p.answer}
+                    </p>
+                  </div>
+                  {/* Pencil icon — tells the user this is editable */}
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-wine/40 shrink-0 mt-1"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Quick-edit prompt modal */}
+      {profile.prompts && quickEditIdx !== null && (
+        <QuickPromptEdit
+          open={quickEditIdx !== null}
+          current={profile.prompts[quickEditIdx]}
+          allPrompts={profile.prompts}
+          onSave={async (next) => {
+            if (!firebaseUser) return;
+            const updated = [...(profile.prompts || [])];
+            updated[quickEditIdx] = next;
+            await updateUser(firebaseUser.uid, { prompts: updated });
+            await refreshProfile();
+          }}
+          onClose={() => setQuickEditIdx(null)}
+        />
       )}
 
       {/* ───── Profile song — wine card statement ───── */}
@@ -969,6 +1087,44 @@ export default function ProfilePage() {
   );
 }
 
+// Custom interest input — sits below the preset interest pills in edit mode.
+// Lets users add their own tags (e.g. "vondelpark mornings", "pottery")
+// without polluting the global INTERESTS pool. Submit on Enter or button tap.
+function CustomInterestInput({ onAdd }: { onAdd: (v: string) => void }) {
+  const [value, setValue] = useState("");
+  function submit() {
+    if (!value.trim()) return;
+    onAdd(value);
+    setValue("");
+  }
+  return (
+    <div className="mt-4 flex gap-2">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value.slice(0, 30))}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        placeholder="Add your own — e.g. vondelpark mornings"
+        maxLength={30}
+        className="flex-1 px-4 py-2.5 rounded-full bg-white text-ink text-sm placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20"
+      />
+      <button
+        type="button"
+        onClick={submit}
+        disabled={!value.trim()}
+        className="px-4 py-2.5 rounded-full bg-wine text-cream text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
+      >
+        Add
+      </button>
+    </div>
+  );
+}
+
 // Compact labelled-field helper for the edit form
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -980,11 +1136,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 // Vitals item — lives-in, from, height, etc. on profile view.
-function Vital({ label, value }: { label: string; value: string }) {
+// Long values wrap to multiple lines rather than truncating (Matthijs:
+// "Spanish, English, Dutch" was getting cut to "Spanis…"). Pass
+// `fullWidth` for items that need the whole row, e.g. languages.
+function Vital({
+  label,
+  value,
+  fullWidth,
+}: {
+  label: string;
+  value: string;
+  fullWidth?: boolean;
+}) {
   return (
-    <div>
+    <div className={fullWidth ? "col-span-2" : ""}>
       <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">{label}</p>
-      <p className="text-ink text-[14px] mt-0.5 truncate" title={value}>{value}</p>
+      <p className="text-ink text-[14px] mt-0.5 leading-snug break-words" title={value}>
+        {value}
+      </p>
     </div>
   );
 }

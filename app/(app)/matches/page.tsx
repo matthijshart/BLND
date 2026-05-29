@@ -100,18 +100,32 @@ export default function MatchesPage() {
     );
   }
 
-  // Sort into sections
-  const needsYou = matches.filter((m) => m.status === "date_proposed" || m.status === "scheduling");
-  const planned = matches.filter((m) => m.status === "date_confirmed");
+  // BLEND product logic (Matthijs):
+  //  - Blends page = relationships that need YOUR action
+  //  - Meets page = the actual coffee meets (planned + past)
+  // Once a meet is confirmed it disappears from Blends — you'll see it
+  // on /dates. No duplication, no confusion.
+  const needsYou = matches.filter(
+    (m) => m.status === "date_proposed" || m.status === "scheduling"
+  );
   const secondCups = matches.filter((m) => m.status === "second_cup");
+
+  const hasAction = needsYou.length > 0 || secondCups.length > 0;
 
   return (
     <div className="px-4 pt-8 pb-8 relative">
       <CoffeeRing variant="double" className="-top-6 right-2 w-24 h-24" opacity={0.05} rotate={25} />
-      <h1 className="text-2xl font-display text-ink mb-6 relative z-10">Blends</h1>
+      <h1 className="text-2xl font-display text-ink mb-1 relative z-10">Blends</h1>
+      <p className="text-ink-mid text-sm relative z-10 mb-6 max-w-[320px]">
+        People who matched with you. Plan a coffee — it&apos;ll show up on{" "}
+        <Link href="/dates" className="text-wine underline underline-offset-2">
+          Meets
+        </Link>
+        .
+      </p>
 
       {needsYou.length > 0 && (
-        <Section label="Needs you" color="coral">
+        <Section label="Needs your move" color="coral">
           {needsYou.map((m) => (
             <MatchRow key={m.id} match={m} profile={profile} />
           ))}
@@ -119,19 +133,26 @@ export default function MatchesPage() {
       )}
 
       {secondCups.length > 0 && (
-        <Section label="Second cup" color="wine">
+        <Section label="Second cup ☕☕" color="wine">
           {secondCups.map((m) => (
             <MatchRow key={m.id} match={m} profile={profile} />
           ))}
         </Section>
       )}
 
-      {planned.length > 0 && (
-        <Section label="Upcoming meets" color="gray">
-          {planned.map((m) => (
-            <MatchRow key={m.id} match={m} profile={profile} />
-          ))}
-        </Section>
+      {/* All-quiet state — confirmed meets exist on /dates, nothing to do here */}
+      {!hasAction && (
+        <div className="bg-white rounded-2xl shadow-sm p-8 text-center mt-2">
+          <p className="text-3xl mb-3">☕</p>
+          <p className="font-display text-xl text-ink">All caught up</p>
+          <p className="text-ink-mid text-sm mt-2 max-w-[260px] mx-auto">
+            No new actions on your blends. Any confirmed coffees are waiting on your{" "}
+            <Link href="/dates" className="text-wine underline underline-offset-2">
+              Meets
+            </Link>
+            .
+          </p>
+        </div>
       )}
     </div>
   );
