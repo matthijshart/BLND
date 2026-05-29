@@ -120,8 +120,21 @@ export function CancelMeetModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          // Swipe-down to dismiss (same UX as QuickPromptEdit)
+          drag={step === "submitting" ? false : "y"}
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0, bottom: 0.6 }}
+          dragDirectionLock
+          onDragEnd={(_, info) => {
+            if (info.offset.y > 120 || info.velocity.y > 500) {
+              onClose();
+            }
+          }}
           className="w-full sm:max-w-md bg-cream rounded-t-3xl sm:rounded-3xl px-6 pt-6 max-h-[90dvh] overflow-y-auto"
-          style={{ paddingBottom: "max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))" }}
+          style={{
+            paddingBottom: "max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))",
+            touchAction: "pan-y",
+          }}
         >
           {/* Step 1 — reason */}
           {step === "reason" && (
