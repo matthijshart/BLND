@@ -128,10 +128,29 @@ export function QuickPromptEdit({ open, current, allPrompts, onSave, onClose }: 
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            // Swipe-down to dismiss — Matthijs: "ook dat ik dit venster
+            // naar beneden kan swipen". Drag is constrained so the sheet
+            // can't move upward, only down, and snaps back unless the
+            // gesture exceeds a meaningful threshold.
+            drag={step === "saving" ? false : "y"}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            dragDirectionLock
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 120 || info.velocity.y > 500) {
+                handleClose();
+              }
+            }}
             className="w-full sm:max-w-md bg-cream rounded-t-3xl sm:rounded-3xl px-6 pt-6 max-h-[90dvh] overflow-y-auto"
-            style={{ paddingBottom: "max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))" }}
+            style={{
+              paddingBottom: "max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))",
+              // touchAction: pan-y lets the user scroll the sheet content
+              // AND swipe-down to dismiss without iOS hijacking the gesture
+              touchAction: "pan-y",
+            }}
           >
-            <div className="w-12 h-1 rounded-full bg-ink/15 mx-auto mb-4" />
+            {/* Drag handle — visible affordance that the sheet can be swiped */}
+            <div className="w-12 h-1 rounded-full bg-ink/20 mx-auto mb-4" />
 
             {/* Step 1: pick a question */}
             {step === "pick" && (
