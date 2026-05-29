@@ -752,21 +752,26 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ───── Bio — clean editorial block with left wine accent ───── */}
+      {/* ───── Bio — magazine drop-cap, edge to edge, no card ─────
+          Editorial treatment instead of yet another rounded card. The
+          first letter is rendered huge in display serif wine, floated
+          left, with body text flowing around it like a New Yorker
+          column. A thin wine rule above the section anchors it. */}
       {profile.bio && (
-        <div className="px-5 pt-6">
-          <div className="bg-white rounded-2xl shadow-sm p-5">
-            <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-2">
+        <div className="px-5 pt-10 relative">
+          {/* Section marker: thin rule + label */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="h-px w-6 bg-wine/30" />
+            <p className="text-[10px] text-wine uppercase tracking-[0.3em] font-mono">
               About
             </p>
-            <div className="relative pl-4 border-l-2 border-wine/30">
-              <p
-                className="text-ink text-[16px] leading-[1.7] whitespace-pre-wrap break-words font-body"
-                dir="auto"
-              >
-                {profile.bio}
-              </p>
-            </div>
+            <span className="h-px flex-1 bg-wine/10" />
+          </div>
+          <div className="font-body text-ink text-[17px] leading-[1.7] break-words" dir="auto">
+            <span className="float-left mr-2 mt-1 font-display text-wine text-6xl leading-[0.85] uppercase">
+              {profile.bio.trim().charAt(0)}
+            </span>
+            <span className="whitespace-pre-wrap">{profile.bio.trim().slice(1)}</span>
           </div>
         </div>
       )}
