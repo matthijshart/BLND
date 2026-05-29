@@ -10,6 +10,7 @@ import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { CoffeeRing } from "@/components/ui/CoffeeRing";
 import { VerificationFlow } from "@/components/verification/VerificationFlow";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { getProfileNumber, LANGUAGES, formatHeight, HEIGHT_MIN_CM, HEIGHT_MAX_CM } from "@/lib/userHelpers";
@@ -538,11 +539,13 @@ export default function ProfilePage() {
     );
   }
 
-  // ─── VIEW MODE (default) — Hinge-style interleaved layout ───
-  // Photos and prompt cards alternate so the page scrolls like a story:
-  // hero photo → vitals → bio → photo → prompt → photo → prompt → …
-  const extraPhotos = validPhotos.slice(1);
-  const viewPrompts = profile.prompts || [];
+  // ─── VIEW MODE (default) — your own BLEND home ───
+  // Personal identity page. NOT a preview of your photos — tap the hero to
+  // see them all in the viewer. Editorial, BLEND-themed, warm.
+  const profileNumber = firebaseUser ? getProfileNumber(firebaseUser.uid) : "";
+  const memberSince = profile.createdAt?.toDate
+    ? profile.createdAt.toDate().toLocaleDateString("en-GB", { month: "short", year: "numeric" })
+    : "";
 
   function openViewerAt(idx: number) {
     setPhotoIndex(idx);
@@ -550,7 +553,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-sm mx-auto pb-28 bg-cream">
+    <div className="max-w-sm mx-auto pb-28 bg-cream relative">
       {/* ───── Hero photo ───── */}
       <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white">
         {validPhotos.length > 0 ? (
@@ -564,19 +567,16 @@ export default function ProfilePage() {
               draggable={false}
             />
 
-            {/* Tap target — z-10 covers everything below name overlay */}
             <button
               type="button"
-              className="absolute inset-0 z-10 active:bg-ink/5 transition-colors"
+              className="absolute inset-0 z-10"
               onClick={() => openViewerAt(0)}
               aria-label="View photo fullscreen"
               style={{ WebkitTapHighlightColor: "transparent" }}
             />
 
-            {/* Gradient — pointer-events-none so it never blocks taps */}
             <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent z-10 pointer-events-none" />
 
-            {/* Name + meta overlay */}
             <div className="absolute bottom-0 inset-x-0 p-6 pb-7 z-10 pointer-events-none">
               <h1 className="text-[2rem] font-display text-white leading-tight flex items-center gap-2 flex-wrap">
                 <span>{profile.displayName}, {profile.age}</span>
@@ -584,19 +584,21 @@ export default function ProfilePage() {
                   <VerifiedBadge size="lg" />
                 )}
               </h1>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/65">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span className="text-white/65 text-sm">{profile.neighborhood}</span>
-                </div>
-                <span className="text-white/50 text-xs font-mono tracking-wider">
-                  · {firebaseUser ? getProfileNumber(firebaseUser.uid) : ""}
-                </span>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/65">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span className="text-white/65 text-sm">{profile.neighborhood}</span>
               </div>
             </div>
+
+            {/* Subtle "tap to view photos" hint — only if >1 photo */}
+            {validPhotos.length > 1 && (
+              <div className="absolute top-4 left-4 z-20 px-2.5 py-1 rounded-full bg-ink/35 backdrop-blur-md text-white text-[10px] font-medium pointer-events-none">
+                ☕ {validPhotos.length} photos
+              </div>
+            )}
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-3">
@@ -613,7 +615,6 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Edit — floating top-right */}
         <button
           onClick={() => setIsEditMode(true)}
           className="absolute right-4 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider active:scale-95 transition-transform"
@@ -623,8 +624,7 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* Fullscreen photo viewer — Portaled so it always escapes the
-          PageTransition wrapper's containing block */}
+      {/* Photo viewer — portaled */}
       <AnimatePresence>
         {photoViewerOpen && validPhotos.length > 0 && (
           <PhotoViewer
@@ -635,9 +635,47 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* ───── Coffee order pill — first thing under the hero, signature ───── */}
+      {/* ───── BLEND member card — signature BLEND moment ─────
+          A "membership" card feel. Wine on cream, two-tone logo dots,
+          profile number on the right, joined date underneath. Tells the
+          user: you are part of something curated. */}
+      <div className="px-5 pt-6 relative">
+        <CoffeeRing variant="ring" className="-top-2 -right-3 w-24 h-24" opacity={0.05} rotate={18} />
+        <div className="relative bg-white rounded-2xl shadow-sm overflow-hidden">
+          {/* Top stripe: BLEND wordmark + profile number */}
+          <div className="bg-wine text-cream px-5 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {/* Two overlapping circles — the BLEND logo, condensed */}
+              <svg width="22" height="14" viewBox="0 0 80 60" aria-hidden="true">
+                <circle cx="28" cy="30" r="22" fill="#e8dfd1" opacity="0.85" />
+                <circle cx="52" cy="30" r="22" fill="#e8dfd1" opacity="0.55" />
+              </svg>
+              <span className="font-display text-base tracking-wide">BLEND</span>
+            </div>
+            <span className="font-mono text-[11px] tracking-[0.2em] text-cream/80">
+              {profileNumber}
+            </span>
+          </div>
+          {/* Body — vitals in a clean grid */}
+          <div className="px-5 py-5 grid grid-cols-2 gap-x-4 gap-y-4">
+            {profile.hometown && <Vital label="From" value={profile.hometown} />}
+            {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
+            {profile.languages && profile.languages.length > 0 && (
+              <Vital
+                label="Languages"
+                value={profile.languages.slice(0, 3).join(", ") + (profile.languages.length > 3 ? ` +${profile.languages.length - 3}` : "")}
+              />
+            )}
+            {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
+            {profile.education && <Vital label="Education" value={profile.education} />}
+            {memberSince && <Vital label="Joined" value={memberSince} />}
+          </div>
+        </div>
+      </div>
+
+      {/* ───── Coffee order — signature element on its own ───── */}
       {profile.coffeeOrder && (
-        <div className="px-5 pt-5">
+        <div className="px-5 pt-4">
           <div className="flex items-center gap-3 p-4 rounded-2xl bg-white shadow-sm">
             <div className="w-10 h-10 rounded-full bg-wine/8 flex items-center justify-center shrink-0">
               <span className="text-lg">☕</span>
@@ -650,78 +688,38 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ───── Vitals card ───── */}
-      {(profile.neighborhood || profile.hometown || profile.heightCm || profile.languages?.length || profile.work || profile.education) && (
-        <div className="px-5 pt-3">
-          <div className="bg-white rounded-2xl shadow-sm p-5 grid grid-cols-2 gap-x-4 gap-y-4">
-            {profile.neighborhood && <Vital label="Lives in" value={profile.neighborhood} />}
-            {profile.hometown && <Vital label="From" value={profile.hometown} />}
-            {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
-            {profile.languages && profile.languages.length > 0 && (
-              <Vital
-                label="Languages"
-                value={profile.languages.slice(0, 3).join(", ") + (profile.languages.length > 3 ? ` +${profile.languages.length - 3}` : "")}
-              />
-            )}
-            {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
-            {profile.education && <Vital label="Education" value={profile.education} />}
-          </div>
-        </div>
-      )}
-
-      {/* ───── Bio ───── */}
+      {/* ───── Bio — pull quote treatment ───── */}
       {profile.bio && (
-        <div className="px-5 pt-5">
-          <div className="bg-white rounded-2xl shadow-sm p-5">
-            <p className="text-ink text-[15px] leading-[1.65] whitespace-pre-wrap break-words" dir="auto">
+        <div className="px-5 pt-6">
+          <div className="relative">
+            {/* Big serif left-quote — editorial flourish */}
+            <span className="absolute -top-2 -left-1 text-wine/15 text-7xl font-display leading-none select-none pointer-events-none">
+              &ldquo;
+            </span>
+            <p className="relative text-ink text-[16px] leading-[1.7] whitespace-pre-wrap break-words pl-5 font-body" dir="auto">
               {profile.bio}
             </p>
           </div>
         </div>
       )}
 
-      {/* ───── Interleaved photo + prompt sections ─────
-           The order is: photo, prompt, photo, prompt, … so the page
-           scrolls like an editorial — like Hinge / Instagram explore */}
-      {Array.from({
-        length: Math.max(extraPhotos.length, viewPrompts.length),
-      }).map((_, i) => {
-        const photo = extraPhotos[i];
-        const prompt = viewPrompts[i];
-        return (
-          <div key={i} className="space-y-3 mt-5 px-5">
-            {photo && (
-              <button
-                type="button"
-                onClick={() => openViewerAt(i + 1)}
-                className="block w-full relative aspect-[4/5] rounded-2xl overflow-hidden shadow-sm bg-stripe-white active:opacity-90 transition-opacity"
-                aria-label={`View photo ${i + 2}`}
-                style={{ WebkitTapHighlightColor: "transparent" }}
-              >
-                <ShimmerImage
-                  src={photo}
-                  alt={`${profile.displayName} photo ${i + 2}`}
-                  fill
-                  className="object-cover"
-                  draggable={false}
-                />
-              </button>
-            )}
-            {prompt && (
-              <div className="bg-white rounded-2xl shadow-sm px-5 py-4">
-                <p className="text-wine/80 text-[10px] font-semibold uppercase tracking-[0.18em] mb-1.5">
-                  {prompt.question}
-                </p>
-                <p className="text-ink text-[15px] leading-snug break-words font-display" dir="auto">
-                  {prompt.answer}
-                </p>
-              </div>
-            )}
-          </div>
-        );
-      })}
+      {/* ───── Prompts — clean card stack, no photos in between ───── */}
+      {profile.prompts && profile.prompts.length > 0 && (
+        <div className="px-5 pt-6 space-y-3">
+          {profile.prompts.map((p, i) => (
+            <div key={i} className="bg-white rounded-2xl shadow-sm px-5 py-4">
+              <p className="text-wine/85 text-[10px] font-semibold uppercase tracking-[0.18em] mb-1.5">
+                {p.question}
+              </p>
+              <p className="text-ink text-[16px] leading-snug break-words font-display" dir="auto">
+                {p.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* ───── Profile song — wine-card statement ───── */}
+      {/* ───── Profile song — wine card statement ───── */}
       {profile.profileSong && (
         <div className="px-5 pt-5">
           <div className="bg-wine rounded-2xl p-5 relative overflow-hidden">
@@ -734,9 +732,9 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ───── Interests ───── */}
+      {/* ───── Interests — tag row with a label ───── */}
       {profile.interests && profile.interests.length > 0 && (
-        <div className="px-5 pt-5">
+        <div className="px-5 pt-6">
           <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-3">Interests</p>
           <div className="flex flex-wrap gap-2">
             {profile.interests.map((interest) => (
@@ -745,6 +743,21 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      {/* ───── Editorial tagline — BLEND signature close ───── */}
+      <div className="px-5 pt-10 pb-2 relative">
+        <CoffeeRing variant="drip" className="-bottom-4 -left-3 w-20 h-20" opacity={0.05} rotate={-12} />
+        <div className="relative text-center">
+          <p className="text-[10px] text-gray uppercase tracking-[0.35em] font-mono mb-2">
+            ☕  ☕
+          </p>
+          <p className="text-ink font-display text-lg leading-snug max-w-[260px] mx-auto">
+            Less swiping.
+            <br />
+            More sipping.
+          </p>
+        </div>
+      </div>
 
       {/* Share + actions */}
       <div className="px-5 pb-5 flex gap-3">
