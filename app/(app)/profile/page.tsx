@@ -13,6 +13,7 @@ import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { CoffeeRing } from "@/components/ui/CoffeeRing";
 import { VerificationFlow } from "@/components/verification/VerificationFlow";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
+import { QuickPromptEdit } from "@/components/prompts/QuickPromptEdit";
 import { getProfileNumber, LANGUAGES, formatHeight, HEIGHT_MIN_CM, HEIGHT_MAX_CM } from "@/lib/userHelpers";
 import { SpotifyPlayer, isValidSpotifyUrl } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
@@ -147,6 +148,8 @@ export default function ProfilePage() {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+  // Quick-edit a single prompt from view mode (Matthijs: "tap → swap")
+  const [quickEditIdx, setQuickEditIdx] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -691,35 +694,89 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ───── Bio — pull quote treatment ───── */}
+      {/* ───── Bio — clean editorial block with left wine accent ───── */}
       {profile.bio && (
         <div className="px-5 pt-6">
-          <div className="relative">
-            {/* Big serif left-quote — editorial flourish */}
-            <span className="absolute -top-2 -left-1 text-wine/15 text-7xl font-display leading-none select-none pointer-events-none">
-              &ldquo;
-            </span>
-            <p className="relative text-ink text-[16px] leading-[1.7] whitespace-pre-wrap break-words pl-5 font-body" dir="auto">
-              {profile.bio}
+          <div className="bg-white rounded-2xl shadow-sm p-5">
+            <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-2">
+              About
             </p>
+            <div className="relative pl-4 border-l-2 border-wine/30">
+              <p
+                className="text-ink text-[16px] leading-[1.7] whitespace-pre-wrap break-words font-body"
+                dir="auto"
+              >
+                {profile.bio}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ───── Prompts — clean card stack, no photos in between ───── */}
+      {/* ───── Prompts — tap any card to quick-edit it ───── */}
       {profile.prompts && profile.prompts.length > 0 && (
-        <div className="px-5 pt-6 space-y-3">
-          {profile.prompts.map((p, i) => (
-            <div key={i} className="bg-white rounded-2xl shadow-sm px-5 py-4">
-              <p className="text-wine/85 text-[10px] font-semibold uppercase tracking-[0.18em] mb-1.5">
-                {p.question}
-              </p>
-              <p className="text-ink text-[16px] leading-snug break-words font-display" dir="auto">
-                {p.answer}
-              </p>
-            </div>
-          ))}
+        <div className="px-5 pt-6">
+          <div className="flex items-baseline justify-between mb-3">
+            <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold">
+              Prompts
+            </p>
+            <p className="text-[10px] text-gray-light tracking-wide">tap to edit</p>
+          </div>
+          <div className="space-y-3">
+            {profile.prompts.map((p, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setQuickEditIdx(i)}
+                className="block w-full text-left bg-white rounded-2xl shadow-sm px-5 py-4 active:scale-[0.99] hover:shadow-md transition-all"
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-wine/85 text-[10px] font-semibold uppercase tracking-[0.18em] mb-1.5">
+                      {p.question}
+                    </p>
+                    <p className="text-ink text-[16px] leading-snug break-words font-display" dir="auto">
+                      {p.answer}
+                    </p>
+                  </div>
+                  {/* Pencil icon — tells the user this is editable */}
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-wine/40 shrink-0 mt-1"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Quick-edit prompt modal */}
+      {profile.prompts && quickEditIdx !== null && (
+        <QuickPromptEdit
+          open={quickEditIdx !== null}
+          current={profile.prompts[quickEditIdx]}
+          allPrompts={profile.prompts}
+          onSave={async (next) => {
+            if (!firebaseUser) return;
+            const updated = [...(profile.prompts || [])];
+            updated[quickEditIdx] = next;
+            await updateUser(firebaseUser.uid, { prompts: updated });
+            await refreshProfile();
+          }}
+          onClose={() => setQuickEditIdx(null)}
+        />
       )}
 
       {/* ───── Profile song — wine card statement ───── */}
