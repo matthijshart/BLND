@@ -120,7 +120,6 @@ export function CancelMeetModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          // Swipe-down to dismiss (same UX as QuickPromptEdit)
           drag={step === "submitting" ? false : "y"}
           dragConstraints={{ top: 0, bottom: 0 }}
           dragElastic={{ top: 0, bottom: 0.6 }}
@@ -130,16 +129,27 @@ export function CancelMeetModal({
               onClose();
             }
           }}
-          className="w-full sm:max-w-md bg-cream rounded-t-3xl sm:rounded-3xl px-6 pt-6 max-h-[90dvh] overflow-y-auto"
-          style={{
-            paddingBottom: "max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))",
-            touchAction: "pan-y",
-          }}
+          className="w-full sm:max-w-md bg-cream rounded-t-3xl sm:rounded-3xl flex flex-col max-h-[90dvh]"
         >
+          {/* Drag handle area — captures the swipe even if content scrolls */}
+          <div
+            className="pt-3 pb-2 px-6 flex-none cursor-grab active:cursor-grabbing"
+            style={{ touchAction: "none" }}
+          >
+            <div className="w-12 h-1.5 rounded-full bg-ink/25 mx-auto" />
+          </div>
+
+          {/* Scrollable content */}
+          <div
+            className="flex-1 overflow-y-auto px-6 pt-3"
+            style={{
+              paddingBottom: "max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem))",
+              overscrollBehavior: "contain",
+            }}
+          >
           {/* Step 1 — reason */}
           {step === "reason" && (
             <>
-              <div className="w-12 h-1 rounded-full bg-ink/15 mx-auto mb-4" />
               <h2 className="font-display text-2xl text-ink">Cancel your meet</h2>
               <p className="text-ink-mid text-sm mt-1">
                 We get it — life happens. Pick the reason that fits best.
@@ -182,7 +192,6 @@ export function CancelMeetModal({
           {/* Step 2 — confirm + strike preview */}
           {step === "confirm" && (
             <>
-              <div className="w-12 h-1 rounded-full bg-ink/15 mx-auto mb-4" />
               <h2 className="font-display text-2xl text-ink">
                 {wouldBan ? "This will ban your account" : "Before you cancel…"}
               </h2>
@@ -273,6 +282,7 @@ export function CancelMeetModal({
               </button>
             </div>
           )}
+          </div>
         </motion.div>
       </motion.div>
       </AnimatePresence>
