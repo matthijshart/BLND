@@ -660,15 +660,18 @@ export default function ProfilePage() {
           <div className="px-5 py-5 grid grid-cols-2 gap-x-4 gap-y-4">
             {profile.hometown && <Vital label="From" value={profile.hometown} />}
             {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
-            {profile.languages && profile.languages.length > 0 && (
-              <Vital
-                label="Languages"
-                value={profile.languages.slice(0, 3).join(", ") + (profile.languages.length > 3 ? ` +${profile.languages.length - 3}` : "")}
-              />
-            )}
             {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
             {profile.education && <Vital label="Education" value={profile.education} />}
             {memberSince && <Vital label="Joined" value={memberSince} />}
+            {/* Languages on their own full-width row — they're typically long
+                and Matthijs flagged the truncation as a visible bug. */}
+            {profile.languages && profile.languages.length > 0 && (
+              <Vital
+                label="Languages"
+                value={profile.languages.join(" · ")}
+                fullWidth
+              />
+            )}
           </div>
         </div>
       </div>
@@ -980,11 +983,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 // Vitals item — lives-in, from, height, etc. on profile view.
-function Vital({ label, value }: { label: string; value: string }) {
+// Long values wrap to multiple lines rather than truncating (Matthijs:
+// "Spanish, English, Dutch" was getting cut to "Spanis…"). Pass
+// `fullWidth` for items that need the whole row, e.g. languages.
+function Vital({
+  label,
+  value,
+  fullWidth,
+}: {
+  label: string;
+  value: string;
+  fullWidth?: boolean;
+}) {
   return (
-    <div>
+    <div className={fullWidth ? "col-span-2" : ""}>
       <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">{label}</p>
-      <p className="text-ink text-[14px] mt-0.5 truncate" title={value}>{value}</p>
+      <p className="text-ink text-[14px] mt-0.5 leading-snug break-words" title={value}>
+        {value}
+      </p>
     </div>
   );
 }
