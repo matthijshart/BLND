@@ -238,11 +238,7 @@ export default function ProfilePage() {
   async function saveAll() {
     if (!firebaseUser) return;
     // Guardrails — block save on known invalid states
-    if (prompts.length < 3) {
-      setUploadError("Pick at least 3 prompts before saving.");
-      setTimeout(() => setUploadError(null), 4000);
-      return;
-    }
+    // Rick: prompts blijven optioneel — geen minimum-validatie meer.
     if (profileSong && !isValidSpotifyUrl(profileSong)) {
       setUploadError("Your Spotify link isn't valid. Remove it or fix it first.");
       setTimeout(() => setUploadError(null), 4000);
@@ -542,13 +538,21 @@ export default function ProfilePage() {
     );
   }
 
-  // ─── VIEW MODE (default) — looks like how others see you ───
+  // ─── VIEW MODE (default) — Hinge-style interleaved layout ───
+  // Photos and prompt cards alternate so the page scrolls like a story:
+  // hero photo → vitals → bio → photo → prompt → photo → prompt → …
+  const extraPhotos = validPhotos.slice(1);
+  const viewPrompts = profile.prompts || [];
+
+  function openViewerAt(idx: number) {
+    setPhotoIndex(idx);
+    setPhotoViewerOpen(true);
+  }
+
   return (
-    <div className="max-w-sm mx-auto pb-28">
-      {/* Photo hero — single main photo, stacked extras shown below */}
-      <div
-        className="relative aspect-[4/5] overflow-hidden bg-stripe-white"
-      >
+    <div className="max-w-sm mx-auto pb-28 bg-cream">
+      {/* ───── Hero photo ───── */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white">
         {validPhotos.length > 0 ? (
           <>
             <ShimmerImage
@@ -560,20 +564,19 @@ export default function ProfilePage() {
               draggable={false}
             />
 
-            {/* Tap to open fullscreen viewer */}
+            {/* Tap target — z-10 covers everything below name overlay */}
             <button
-              className="absolute inset-0 z-10"
-              onClick={() => {
-                setPhotoIndex(0);
-                setPhotoViewerOpen(true);
-              }}
-              aria-label="View fullscreen"
+              type="button"
+              className="absolute inset-0 z-10 active:bg-ink/5 transition-colors"
+              onClick={() => openViewerAt(0)}
+              aria-label="View photo fullscreen"
+              style={{ WebkitTapHighlightColor: "transparent" }}
             />
 
-            {/* Gradient overlay */}
+            {/* Gradient — pointer-events-none so it never blocks taps */}
             <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent z-10 pointer-events-none" />
 
-            {/* Name + neighborhood + profile number overlay */}
+            {/* Name + meta overlay */}
             <div className="absolute bottom-0 inset-x-0 p-6 pb-7 z-10 pointer-events-none">
               <h1 className="text-[2rem] font-display text-white leading-tight flex items-center gap-2 flex-wrap">
                 <span>{profile.displayName}, {profile.age}</span>
@@ -589,7 +592,6 @@ export default function ProfilePage() {
                   </svg>
                   <span className="text-white/65 text-sm">{profile.neighborhood}</span>
                 </div>
-                {/* Profile number — Rick: voeg een profielnummer toe */}
                 <span className="text-white/50 text-xs font-mono tracking-wider">
                   · {firebaseUser ? getProfileNumber(firebaseUser.uid) : ""}
                 </span>
@@ -611,17 +613,18 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Edit button — floating, positioned below safe area */}
+        {/* Edit — floating top-right */}
         <button
           onClick={() => setIsEditMode(true)}
-          className="absolute right-4 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider"
+          className="absolute right-4 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider active:scale-95 transition-transform"
           style={{ top: "max(1.75rem, calc(env(safe-area-inset-top) + 1.25rem))" }}
         >
           Edit
         </button>
       </div>
 
-      {/* Fullscreen photo viewer */}
+      {/* Fullscreen photo viewer — Portaled so it always escapes the
+          PageTransition wrapper's containing block */}
       <AnimatePresence>
         {photoViewerOpen && validPhotos.length > 0 && (
           <PhotoViewer
@@ -632,60 +635,95 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* Coffee order — signature element, edge to edge */}
+      {/* ───── Coffee order pill — first thing under the hero, signature ───── */}
       {profile.coffeeOrder && (
-        <div className="flex items-center gap-4 px-6 py-5 bg-white border-b border-cream">
-          <div className="w-11 h-11 rounded-full bg-wine/8 flex items-center justify-center shrink-0">
-            <span className="text-lg">☕</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Go-to coffee</p>
-            <p className="text-ink font-medium text-[15px] mt-0.5" dir="auto">{profile.coffeeOrder}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Vitals strip — Rick: lives in / comes from / height / work */}
-      {(profile.hometown || profile.heightCm || profile.work || profile.languages?.length || profile.education) && (
-        <div className="px-6 py-5 grid grid-cols-2 gap-x-4 gap-y-4 border-b border-cream bg-white">
-          {profile.neighborhood && (
-            <Vital label="Lives in" value={profile.neighborhood} />
-          )}
-          {profile.hometown && <Vital label="From" value={profile.hometown} />}
-          {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
-          {profile.languages && profile.languages.length > 0 && (
-            <Vital
-              label="Languages"
-              value={profile.languages.slice(0, 3).join(", ") + (profile.languages.length > 3 ? ` +${profile.languages.length - 3}` : "")}
-            />
-          )}
-          {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
-          {profile.education && <Vital label="Education" value={profile.education} />}
-        </div>
-      )}
-
-      {/* Bio */}
-      {profile.bio && (
-        <div className="px-6 py-6">
-          <p className="text-ink-mid text-[15px] leading-[1.65] whitespace-pre-wrap break-words" dir="auto">{profile.bio}</p>
-        </div>
-      )}
-
-      {/* Prompts — compact dilemma cards per Rick (less "stuko") */}
-      {profile.prompts && profile.prompts.length > 0 && (
-        <div className="px-5 pb-5 space-y-2">
-          {profile.prompts.map((p, i) => (
-            <div key={i} className="bg-stripe-white rounded-xl px-4 py-3">
-              <p className="text-wine/80 text-[10px] font-medium uppercase tracking-[0.15em] mb-0.5">{p.question}</p>
-              <p className="text-ink text-[14px] leading-snug break-words" dir="auto">{p.answer}</p>
+        <div className="px-5 pt-5">
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white shadow-sm">
+            <div className="w-10 h-10 rounded-full bg-wine/8 flex items-center justify-center shrink-0">
+              <span className="text-lg">☕</span>
             </div>
-          ))}
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Go-to coffee</p>
+              <p className="text-ink font-medium text-[15px]" dir="auto">{profile.coffeeOrder}</p>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Profile song — premium player */}
+      {/* ───── Vitals card ───── */}
+      {(profile.neighborhood || profile.hometown || profile.heightCm || profile.languages?.length || profile.work || profile.education) && (
+        <div className="px-5 pt-3">
+          <div className="bg-white rounded-2xl shadow-sm p-5 grid grid-cols-2 gap-x-4 gap-y-4">
+            {profile.neighborhood && <Vital label="Lives in" value={profile.neighborhood} />}
+            {profile.hometown && <Vital label="From" value={profile.hometown} />}
+            {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
+            {profile.languages && profile.languages.length > 0 && (
+              <Vital
+                label="Languages"
+                value={profile.languages.slice(0, 3).join(", ") + (profile.languages.length > 3 ? ` +${profile.languages.length - 3}` : "")}
+              />
+            )}
+            {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
+            {profile.education && <Vital label="Education" value={profile.education} />}
+          </div>
+        </div>
+      )}
+
+      {/* ───── Bio ───── */}
+      {profile.bio && (
+        <div className="px-5 pt-5">
+          <div className="bg-white rounded-2xl shadow-sm p-5">
+            <p className="text-ink text-[15px] leading-[1.65] whitespace-pre-wrap break-words" dir="auto">
+              {profile.bio}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ───── Interleaved photo + prompt sections ─────
+           The order is: photo, prompt, photo, prompt, … so the page
+           scrolls like an editorial — like Hinge / Instagram explore */}
+      {Array.from({
+        length: Math.max(extraPhotos.length, viewPrompts.length),
+      }).map((_, i) => {
+        const photo = extraPhotos[i];
+        const prompt = viewPrompts[i];
+        return (
+          <div key={i} className="space-y-3 mt-5 px-5">
+            {photo && (
+              <button
+                type="button"
+                onClick={() => openViewerAt(i + 1)}
+                className="block w-full relative aspect-[4/5] rounded-2xl overflow-hidden shadow-sm bg-stripe-white active:opacity-90 transition-opacity"
+                aria-label={`View photo ${i + 2}`}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                <ShimmerImage
+                  src={photo}
+                  alt={`${profile.displayName} photo ${i + 2}`}
+                  fill
+                  className="object-cover"
+                  draggable={false}
+                />
+              </button>
+            )}
+            {prompt && (
+              <div className="bg-white rounded-2xl shadow-sm px-5 py-4">
+                <p className="text-wine/80 text-[10px] font-semibold uppercase tracking-[0.18em] mb-1.5">
+                  {prompt.question}
+                </p>
+                <p className="text-ink text-[15px] leading-snug break-words font-display" dir="auto">
+                  {prompt.answer}
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* ───── Profile song — wine-card statement ───── */}
       {profile.profileSong && (
-        <div className="px-5 pb-5">
+        <div className="px-5 pt-5">
           <div className="bg-wine rounded-2xl p-5 relative overflow-hidden">
             <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-burgundy/30" />
             <div className="relative">
@@ -696,41 +734,15 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Interests — Rick wants a clear header above the tags */}
+      {/* ───── Interests ───── */}
       {profile.interests && profile.interests.length > 0 && (
-        <div className="px-6 pb-6">
+        <div className="px-5 pt-5">
           <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-3">Interests</p>
           <div className="flex flex-wrap gap-2">
             {profile.interests.map((interest) => (
               <span key={interest} className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-[13px] font-medium border border-wine/10">{interest}</span>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* More photos — Rick: foto's onder elkaar, met lijn rond de fotorand */}
-      {validPhotos.length > 1 && (
-        <div className="px-5 pb-6 space-y-4">
-          <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold">More photos</p>
-          {validPhotos.slice(1).map((url, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setPhotoIndex(i + 1);
-                setPhotoViewerOpen(true);
-              }}
-              className="block w-full relative aspect-[4/5] rounded-2xl overflow-hidden border border-ink/10 shadow-sm bg-stripe-white"
-              aria-label={`View photo ${i + 2}`}
-            >
-              <ShimmerImage
-                src={url}
-                alt={`${profile.displayName} photo ${i + 2}`}
-                fill
-                className="object-cover"
-                draggable={false}
-              />
-            </button>
-          ))}
         </div>
       )}
 

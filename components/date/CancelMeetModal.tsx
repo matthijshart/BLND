@@ -12,6 +12,7 @@ import {
 } from "@/lib/strikes";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Portal } from "@/components/ui/Portal";
 import type { User } from "@/types";
 import type { Timestamp } from "firebase/firestore";
 
@@ -103,7 +104,8 @@ export function CancelMeetModal({
       : STRIKE_THRESHOLDS.far;
 
   return (
-    <AnimatePresence>
+    <Portal>
+      <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -260,6 +262,7 @@ export function CancelMeetModal({
           )}
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+      </AnimatePresence>
+    </Portal>
   );
 }

@@ -1,8 +1,10 @@
+import Link from "next/link";
+
 export default function TermsPage() {
   return (
     <div className="min-h-dvh bg-cream">
       <div className="max-w-2xl mx-auto px-6 py-16">
-        <a href="/" className="text-wine text-sm font-medium">← Back to BLEND</a>
+        <Link href="/" className="text-wine text-sm font-medium">← Back to BLEND</Link>
 
         <h1 className="text-4xl font-display text-ink mt-8 mb-2">Terms of Service</h1>
         <p className="text-gray text-sm mb-12">Last updated: March 27, 2026</p>

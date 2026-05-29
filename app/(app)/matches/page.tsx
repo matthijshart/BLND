@@ -21,6 +21,25 @@ function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefi
   return null;
 }
 
+/**
+ * Compact, friendly meet-date label used on the upcoming-meets row.
+ * Examples: "Today 17:00", "Tomorrow 14:30", "Fri 24 May · 16:00"
+ */
+function formatMeetDate(d: Date): string {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const dayDiff = Math.round((dayStart - startOfToday) / dayMs);
+  if (dayDiff === 0) return `Today · ${time}`;
+  if (dayDiff === 1) return `Tomorrow · ${time}`;
+  if (dayDiff >= 2 && dayDiff < 7) {
+    return `${d.toLocaleDateString("en-GB", { weekday: "long" })} · ${time}`;
+  }
+  return `${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${time}`;
+}
+
 function getSharedCount(me: User | null, them: User): number {
   if (!me) return 0;
   return (me.interests || []).filter((i) => (them.interests || []).includes(i)).length;
@@ -108,7 +127,7 @@ export default function MatchesPage() {
       )}
 
       {planned.length > 0 && (
-        <Section label="Planned" color="gray">
+        <Section label="Upcoming meets" color="gray">
           {planned.map((m) => (
             <MatchRow key={m.id} match={m} profile={profile} />
           ))}
@@ -162,7 +181,15 @@ function MatchRow({ match, profile }: { match: ReturnType<typeof useMatches>["ma
               <VerifiedBadge size="sm" className="shrink-0" />
             )}
           </h3>
-          <p className="text-gray text-sm truncate">{match.otherUser.neighborhood}</p>
+          {/* Show the meet's actual date/time when one is planned — Matthijs:
+              "Planned" without context was confusing. */}
+          {match.status === "date_confirmed" && match.dateTime ? (
+            <p className="text-wine text-xs font-medium truncate mt-0.5">
+              {formatMeetDate(match.dateTime.toDate())}
+            </p>
+          ) : (
+            <p className="text-gray text-sm truncate">{match.otherUser.neighborhood}</p>
+          )}
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${s.style}`}>
           {s.label}

@@ -74,6 +74,20 @@ export function useMatches() {
             continue; // Don't show it in the list anymore
           }
 
+          // Hide date_confirmed matches whose meet time is already 4h+ ago.
+          // The actual completion lives on the /dates doc — the match stays
+          // at date_confirmed but doesn't belong in the "Planned" section
+          // once the coffee is over. Matthijs explicitly flagged this.
+          const meetMs = match.dateTime?.toMillis?.();
+          const MEET_GRACE_MS = 4 * 60 * 60 * 1000;
+          if (
+            match.status === "date_confirmed" &&
+            meetMs &&
+            meetMs + MEET_GRACE_MS < now
+          ) {
+            continue;
+          }
+
           const otherUid = match.users.find((uid) => uid !== firebaseUser.uid);
           if (!otherUid) continue;
 

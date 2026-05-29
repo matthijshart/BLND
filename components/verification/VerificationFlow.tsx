@@ -9,6 +9,7 @@ import {
   VerificationError,
 } from "@/lib/verification";
 import { triggerHaptic } from "@/lib/sounds";
+import { Portal } from "@/components/ui/Portal";
 
 type Step = "intro" | "pose" | "submitting" | "done" | "error";
 
@@ -56,11 +57,13 @@ export function VerificationFlow({
   }
 
   return (
-    <motion.div
+    <Portal>
+      <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[110] bg-cream"
+      style={{ height: "100dvh" }}
     >
       <button
         onClick={onClose}
@@ -242,5 +245,6 @@ export function VerificationFlow({
         )}
       </AnimatePresence>
     </motion.div>
+    </Portal>
   );
 }

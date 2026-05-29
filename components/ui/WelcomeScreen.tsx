@@ -1,21 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 const WELCOME_KEY = "blend_welcomed";
 
 export function WelcomeScreen() {
-  const [show, setShow] = useState(false);
+  // Use lazy initializer so the localStorage read happens once on mount.
+  // The `false` initial guards against SSR (window undefined).
+  const [show, setShow] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return !localStorage.getItem(WELCOME_KEY);
+  });
   const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    // Only show once per user
-    if (!localStorage.getItem(WELCOME_KEY)) {
-      setShow(true);
-    }
-  }, []);
 
   function dismiss() {
     localStorage.setItem(WELCOME_KEY, "true");

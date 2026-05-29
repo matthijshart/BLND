@@ -3,6 +3,7 @@
 import { useDates } from "@/hooks/useDates";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { CoffeeRing } from "@/components/ui/CoffeeRing";
@@ -10,7 +11,15 @@ import { CoffeeRing } from "@/components/ui/CoffeeRing";
 export default function DatesPage() {
   const { dates, loading } = useDates();
 
-  const now = Date.now();
+  // `now` lives in state so the dates auto-shuffle between "upcoming" and
+  // "past" buckets as the clock crosses meet times — no manual refresh needed.
+  // Tick every 60s; React rule disallows Date.now() during render.
+  const [now, setNow] = useState<number>(() => Date.now());
+  useEffect(() => {
+    const tick = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(tick);
+  }, []);
+
   const MEET_BUFFER_MS = 2 * 60 * 60 * 1000; // 2h grace window after meet time
 
   // Second cup = own section, no dateTime-based grouping
