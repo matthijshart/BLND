@@ -471,18 +471,70 @@ export default function ProfilePage() {
           <input type="text" value={coffeeOrder} onChange={(e) => setCoffeeOrder(e.target.value.slice(0, 50))} placeholder="Oat flat white, espresso, chai latte..." className="w-full px-4 py-3 rounded-xl bg-white text-ink placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20" />
         </section>
 
-        {/* Interests */}
+        {/* Interests — preset pills + custom open-answer add */}
         <section className="px-5 py-4 border-t border-wine/5">
           <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Interests</h3>
+
+          {/* Preset list */}
           <div className="flex flex-wrap gap-2">
             {INTERESTS.map((i) => (
-              <button key={i} onClick={() => {
-                setInterests((prev) => prev.includes(i) ? prev.filter((v) => v !== i) : [...prev, i]);
-              }} className={`px-3 py-1.5 rounded-full text-sm transition-colors ${interests.includes(i) ? "bg-wine text-cream font-medium" : "bg-white text-gray hover:bg-stripe-white"}`}>
+              <button
+                key={i}
+                onClick={() => {
+                  setInterests((prev) =>
+                    prev.includes(i) ? prev.filter((v) => v !== i) : [...prev, i]
+                  );
+                }}
+                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  interests.includes(i)
+                    ? "bg-wine text-cream font-medium"
+                    : "bg-white text-gray hover:bg-stripe-white"
+                }`}
+              >
                 {i}
               </button>
             ))}
           </div>
+
+          {/* Custom interests row — visible when user has any custom additions */}
+          {interests.filter((i) => !INTERESTS.includes(i)).length > 0 && (
+            <>
+              <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-medium mt-5 mb-2">
+                Your own
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {interests
+                  .filter((i) => !INTERESTS.includes(i))
+                  .map((i) => (
+                    <button
+                      key={i}
+                      onClick={() =>
+                        setInterests((prev) => prev.filter((v) => v !== i))
+                      }
+                      className="px-3 py-1.5 rounded-full text-sm bg-wine text-cream font-medium flex items-center gap-1.5"
+                      aria-label={`Remove ${i}`}
+                    >
+                      {i}
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  ))}
+              </div>
+            </>
+          )}
+
+          {/* Add custom interest input — Matthijs: open answer mogelijk */}
+          <CustomInterestInput
+            onAdd={(value) => {
+              const trimmed = value.trim().toLowerCase();
+              if (!trimmed) return;
+              if (trimmed.length > 30) return;
+              if (interests.includes(trimmed)) return;
+              setInterests((prev) => [...prev, trimmed]);
+            }}
+          />
         </section>
 
         {/* Prompts */}
@@ -557,8 +609,12 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-sm mx-auto pb-28 bg-cream relative">
-      {/* ───── Hero photo ───── */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white">
+      {/* ───── Hero photo — wine-framed editorial portrait ─────
+          The wine bg + cream inner padding creates a thin frame around
+          the photo, like a polaroid or art print. Subtle, on-brand. */}
+      <div className="pt-4 px-4">
+        <div className="bg-wine rounded-[1.75rem] p-1.5 shadow-[0_8px_24px_-12px_rgba(107,21,32,0.35)]">
+          <div className="relative aspect-[4/5] overflow-hidden bg-stripe-white rounded-[1.4rem]">
         {validPhotos.length > 0 ? (
           <>
             <ShimmerImage
@@ -620,11 +676,13 @@ export default function ProfilePage() {
 
         <button
           onClick={() => setIsEditMode(true)}
-          className="absolute right-4 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider active:scale-95 transition-transform"
-          style={{ top: "max(1.75rem, calc(env(safe-area-inset-top) + 1.25rem))" }}
+          className="absolute right-3 z-30 bg-white/95 backdrop-blur-md text-wine px-5 py-2.5 rounded-full text-xs font-semibold shadow-lg uppercase tracking-wider active:scale-95 transition-transform"
+          style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 0.75rem))" }}
         >
           Edit
         </button>
+          </div>
+        </div>
       </div>
 
       {/* Photo viewer — portaled */}
@@ -1025,6 +1083,44 @@ export default function ProfilePage() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// Custom interest input — sits below the preset interest pills in edit mode.
+// Lets users add their own tags (e.g. "vondelpark mornings", "pottery")
+// without polluting the global INTERESTS pool. Submit on Enter or button tap.
+function CustomInterestInput({ onAdd }: { onAdd: (v: string) => void }) {
+  const [value, setValue] = useState("");
+  function submit() {
+    if (!value.trim()) return;
+    onAdd(value);
+    setValue("");
+  }
+  return (
+    <div className="mt-4 flex gap-2">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value.slice(0, 30))}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        placeholder="Add your own — e.g. vondelpark mornings"
+        maxLength={30}
+        className="flex-1 px-4 py-2.5 rounded-full bg-white text-ink text-sm placeholder:text-gray-light focus:outline-none focus:ring-1 focus:ring-wine/20"
+      />
+      <button
+        type="button"
+        onClick={submit}
+        disabled={!value.trim()}
+        className="px-4 py-2.5 rounded-full bg-wine text-cream text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
+      >
+        Add
+      </button>
     </div>
   );
 }

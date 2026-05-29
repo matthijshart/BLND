@@ -647,6 +647,38 @@ export default function OnboardingPage() {
                   </button>
                 ))}
               </div>
+
+              {/* Custom interests — visible chips */}
+              {interests.filter((i) => !INTERESTS.includes(i)).length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {interests
+                    .filter((i) => !INTERESTS.includes(i))
+                    .map((i) => (
+                      <button
+                        key={i}
+                        onClick={() => toggleInterest(i)}
+                        className="px-4 py-2.5 min-h-[44px] rounded-full text-sm bg-cream text-wine font-medium flex items-center gap-1.5"
+                        aria-label={`Remove ${i}`}
+                      >
+                        {i}
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    ))}
+                </div>
+              )}
+
+              {/* Add custom interest */}
+              <OnboardingCustomInterestInput
+                onAdd={(value) => {
+                  const trimmed = value.trim().toLowerCase();
+                  if (!trimmed || trimmed.length > 30) return;
+                  if (interests.includes(trimmed)) return;
+                  setInterests((prev) => [...prev, trimmed]);
+                }}
+              />
             </div>
 
             {/* Coffee order */}
@@ -823,6 +855,43 @@ export default function OnboardingPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// Custom interest input — dark theme variant, sits under the preset
+// interest pills in onboarding. Same UX as the profile-edit variant.
+function OnboardingCustomInterestInput({ onAdd }: { onAdd: (v: string) => void }) {
+  const [value, setValue] = useState("");
+  function submit() {
+    if (!value.trim()) return;
+    onAdd(value);
+    setValue("");
+  }
+  return (
+    <div className="mt-3 flex gap-2">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value.slice(0, 30))}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        placeholder="Add your own — e.g. vondelpark mornings"
+        maxLength={30}
+        className="flex-1 px-4 py-2.5 rounded-full bg-cream/10 text-cream text-sm border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
+      />
+      <button
+        type="button"
+        onClick={submit}
+        disabled={!value.trim()}
+        className="px-4 py-2.5 rounded-full bg-cream text-wine text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
+      >
+        Add
+      </button>
     </div>
   );
 }
