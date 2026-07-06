@@ -4,6 +4,7 @@ import { useDailyProfiles } from "@/hooks/useDailyProfiles";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { DoneForToday } from "@/components/profiles/DoneForToday";
 import { useAuthContext } from "@/components/providers/AuthProvider";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CoffeeBeans } from "@/components/ui/CoffeeBeans";
@@ -13,6 +14,7 @@ import { playBlendSound, triggerHaptic } from "@/lib/sounds";
 const MATCH_MODAL_DELAY_MS = 450; // Wait for ProfileCard exit animation to finish
 
 export default function TodayPage() {
+  const router = useRouter();
   const { profile: currentUser } = useAuthContext();
   const {
     currentProfile,
@@ -26,6 +28,7 @@ export default function TodayPage() {
   } = useDailyProfiles();
 
   const [matchedUid, setMatchedUid] = useState<string | null>(null);
+  const [matchedId, setMatchedId] = useState<string | null>(null);
   const [showUndo, setShowUndo] = useState(false);
   const undoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -56,6 +59,7 @@ export default function TodayPage() {
       // Delay match modal so the card exit animation can finish first
       setTimeout(() => {
         setMatchedUid(result.matchedUid);
+        setMatchedId(result.matchId);
         playBlendSound();
         triggerHaptic();
       }, MATCH_MODAL_DELAY_MS);
@@ -238,12 +242,30 @@ export default function TodayPage() {
               transition={{ delay: 1.0 }}
               className="flex flex-col gap-3 w-full max-w-xs mt-10"
             >
+              {/* Primary CTA — strike while the match is hot. Straight to
+                  the scheduling flow instead of hoping they find it later. */}
+              {matchedId && (
+                <button
+                  onClick={() => {
+                    triggerHaptic();
+                    router.push(`/matches/${matchedId}`);
+                  }}
+                  className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors active:scale-[0.98]"
+                >
+                  ☕ Plan your coffee
+                </button>
+              )}
               <button
                 onClick={() => {
                   triggerHaptic();
                   setMatchedUid(null);
+                  setMatchedId(null);
                 }}
-                className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors active:scale-[0.98]"
+                className={`w-full py-4 rounded-full font-medium text-lg transition-colors active:scale-[0.98] ${
+                  matchedId
+                    ? "border border-cream/30 text-cream hover:bg-cream/10"
+                    : "bg-cream text-wine hover:bg-stripe-white"
+                }`}
               >
                 Keep browsing
               </button>

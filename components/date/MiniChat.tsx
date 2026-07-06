@@ -3,7 +3,23 @@
 import { useState, useEffect, useRef } from "react";
 import { sendMessage, subscribeToMessages } from "@/lib/chat";
 import { useAuthContext } from "@/components/providers/AuthProvider";
+import { triggerHaptic } from "@/lib/sounds";
 import type { Message } from "@/types";
+
+/** "Today", "Yesterday", or "Mon 26 May" — for chat day dividers. */
+function dayLabel(d: Date): string {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diff = Math.round((startOfToday - dayStart) / (24 * 60 * 60 * 1000));
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function msgDate(m: Message): Date {
+  return m.createdAt?.toDate?.() || new Date(m.createdAt as unknown as string);
+}
 
 interface MiniChatProps {
   dateId: string;
@@ -62,6 +78,7 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
     setSending(true);
     const msg = text.trim();
     setText("");
+    triggerHaptic();
 
     try {
       await sendMessage(dateId, firebaseUser.uid, msg);
@@ -129,6 +146,9 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
             const isLastInGroup = !next || next.senderId !== msg.senderId;
             // Only last message in a consecutive group shows the timestamp
             const showTime = isLastInGroup;
+            // Day divider when the calendar day changes between messages
+            const showDayDivider =
+              !prev || dayLabel(msgDate(prev)) !== dayLabel(msgDate(msg));
 
             // Asymmetric corners for proper iMessage-style tail
             const tailCorners = isMine
@@ -138,8 +158,17 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
                 `rounded-tr-2xl ${isFirstInGroup ? "rounded-tl-2xl" : "rounded-tl-md"} rounded-br-2xl ${isLastInGroup ? "rounded-bl-[4px]" : "rounded-bl-2xl"}`;
 
             return (
+              <div key={msg.id}>
+                {showDayDivider && (
+                  <div className="flex items-center gap-3 my-4">
+                    <div className="flex-1 h-px bg-ink/8" />
+                    <span className="text-gray-light text-[10px] font-mono uppercase tracking-[0.2em]">
+                      {dayLabel(msgDate(msg))}
+                    </span>
+                    <div className="flex-1 h-px bg-ink/8" />
+                  </div>
+                )}
               <div
-                key={msg.id}
                 className={`flex ${isMine ? "justify-end" : "justify-start"} ${isFirstInGroup ? "mt-2" : "mt-0.5"}`}
               >
                 <div
@@ -160,6 +189,7 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
                     </p>
                   )}
                 </div>
+              </div>
               </div>
             );
           })}

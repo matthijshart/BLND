@@ -8,6 +8,8 @@ import {
   markProfileAction,
   completeDailyBatch,
   fetchCandidateProfiles,
+  isBeforeDrop,
+  todayString,
 } from "@/lib/daily";
 import { recordSwipe, getUser } from "@/lib/db";
 import { checkForMatch, createMatch } from "@/lib/matching";
@@ -60,6 +62,14 @@ export function useDailyProfiles() {
           remaining.map((uid: string) => getUser(uid))
         );
         setProfiles(fullProfiles.filter(Boolean) as User[]);
+      } else if (isBeforeDrop()) {
+        // The 11:00 ritual — no new batch before the daily drop. An
+        // unfinished batch from earlier today (branch above) stays
+        // accessible; only NEW batches wait for 11:00. DoneForToday
+        // shows the countdown to today's drop.
+        setIsComplete(true);
+        setLoading(false);
+        return;
       } else {
         const candidates = await fetchCandidateProfiles(
           firebaseUser.uid,
@@ -100,7 +110,8 @@ export function useDailyProfiles() {
     actionInFlightRef.current = true;
 
     const targetProfile = profiles[currentIndex];
-    const date = new Date().toISOString().split("T")[0];
+    // LOCAL date — must match the dailyProfiles doc key in lib/daily.ts
+    const date = todayString();
 
     let matchedUid: string | null = null;
     let matchId: string | null = null;
@@ -161,7 +172,8 @@ export function useDailyProfiles() {
 
     actionInFlightRef.current = true;
     try {
-      const date = new Date().toISOString().split("T")[0];
+      // LOCAL date — must match the dailyProfiles doc key in lib/daily.ts
+      const date = todayString();
 
       // Delete the most recent swipe record and remove from passed array
       const { db } = await import("@/lib/firebase");
