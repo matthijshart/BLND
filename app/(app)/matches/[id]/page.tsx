@@ -15,8 +15,10 @@ import type { Match, User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import { ReportSheet } from "@/components/ui/ReportSheet";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { formatHeight } from "@/lib/userHelpers";
+import { triggerHaptic } from "@/lib/sounds";
 import { AnimatePresence } from "framer-motion";
-// import { calculateVibeMatch, getCoffeeCompatibility } from "@/lib/compatibility";
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -28,7 +30,6 @@ export default function MatchDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [showSlotPicker, setShowSlotPicker] = useState(false);
-  const [noOverlap, setNoOverlap] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 
@@ -59,13 +60,11 @@ export default function MatchDetailPage() {
     if (!firebaseUser || !match) return;
     setSubmitting(true);
     try {
-      const result = await submitAvailability(match.id, firebaseUser.uid, slots);
+      await submitAvailability(match.id, firebaseUser.uid, slots);
+      triggerHaptic();
       setShowSlotPicker(false);
-      if (result.dateProposed) {
-        // Date was proposed — match will update via onSnapshot
-      } else if (match.availability[firebaseUser.uid]) {
-        // We submitted but no overlap yet
-      }
+      // Result state (date proposed / waiting / no overlap) flows in
+      // through the onSnapshot subscription — no local state needed.
     } catch (err) {
       console.error("Submit availability error:", err);
     }
@@ -75,6 +74,7 @@ export default function MatchDetailPage() {
   async function handleConfirm() {
     if (!firebaseUser || !match || !profile || !otherUser) return;
     setConfirming(true);
+    triggerHaptic();
     try {
       const result = await confirmDate(
         match.id,
@@ -140,6 +140,13 @@ export default function MatchDetailPage() {
   const iConfirmed = firebaseUser
     ? (match.confirmedBy || []).includes(firebaseUser.uid)
     : false;
+  // Both submitted availability but status never advanced to date_proposed:
+  // that means zero overlapping slots. Without this check, both users see
+  // "Waiting on <name>" forever — a dead-end. Derived, not stored.
+  const bothSubmittedNoOverlap =
+    match.status === "scheduling" &&
+    !!myAvailability?.length &&
+    !!otherAvailability?.length;
 
   return (
     <div className="max-w-sm mx-auto pb-28">
@@ -178,8 +185,11 @@ export default function MatchDetailPage() {
         />
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 to-transparent" />
         <div className="absolute bottom-0 inset-x-0 p-6 text-left">
-          <h2 className="text-3xl font-display text-white">
-            {otherUser.displayName}, {otherUser.age}
+          <h2 className="text-3xl font-display text-white flex items-center gap-2 flex-wrap">
+            <span>{otherUser.displayName}, {otherUser.age}</span>
+            {otherUser.verificationStatus === "verified" && (
+              <VerifiedBadge size="md" className="shrink-0" />
+            )}
           </h2>
           <p className="text-white/70 text-sm mt-1">{otherUser.neighborhood}</p>
         </div>
@@ -205,6 +215,46 @@ export default function MatchDetailPage() {
       {/* Bio */}
       <div className="px-6 mt-6">
         <p className="text-ink-mid leading-relaxed whitespace-pre-wrap break-words" dir="auto">{otherUser.bio}</p>
+
+        {/* Vitals — same fields as the redesigned profile view */}
+        {(otherUser.hometown || otherUser.heightCm || otherUser.languages?.length || otherUser.work || otherUser.education) && (
+          <div className="mt-4 bg-white rounded-xl shadow-sm p-4 grid grid-cols-2 gap-x-4 gap-y-3">
+            {otherUser.hometown && (
+              <div>
+                <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">From</p>
+                <p className="text-ink text-[14px] mt-0.5 break-words">{otherUser.hometown}</p>
+              </div>
+            )}
+            {otherUser.heightCm && (
+              <div>
+                <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Height</p>
+                <p className="text-ink text-[14px] mt-0.5">{formatHeight(otherUser.heightCm)}</p>
+              </div>
+            )}
+            {otherUser.work && (
+              <div>
+                <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Work</p>
+                <p className="text-ink text-[14px] mt-0.5 break-words">
+                  {otherUser.work}{otherUser.company ? ` @ ${otherUser.company}` : ""}
+                </p>
+              </div>
+            )}
+            {otherUser.education && (
+              <div>
+                <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Education</p>
+                <p className="text-ink text-[14px] mt-0.5 break-words">{otherUser.education}</p>
+              </div>
+            )}
+            {otherUser.languages && otherUser.languages.length > 0 && (
+              <div className="col-span-2">
+                <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Languages</p>
+                <p className="text-ink text-[14px] mt-0.5 leading-snug break-words">
+                  {otherUser.languages.join(" · ")}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Coffee order */}
         {otherUser.coffeeOrder && (
@@ -253,7 +303,9 @@ export default function MatchDetailPage() {
         )}
 
         {otherUser.interests && otherUser.interests.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="mt-5">
+          <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-2.5">Interests</p>
+          <div className="flex flex-wrap gap-2">
             {[...otherUser.interests]
               .sort((a, b) => (sharedInterests.has(a) ? 0 : 1) - (sharedInterests.has(b) ? 0 : 1))
               .map((interest) => {
@@ -269,6 +321,7 @@ export default function MatchDetailPage() {
                   </span>
                 );
               })}
+          </div>
           </div>
         )}
       </div>
@@ -308,8 +361,30 @@ export default function MatchDetailPage() {
           </div>
         )}
 
-        {/* Submitted, waiting for other person */}
-        {match.status === "scheduling" && myAvailability && !showSlotPicker && (
+        {/* Both submitted, zero overlap — needs action, NOT a waiting state */}
+        {bothSubmittedNoOverlap && !showSlotPicker && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm text-center border border-coral/20">
+            <div className="w-12 h-12 rounded-full bg-coral/10 mx-auto mb-4 flex items-center justify-center">
+              <span className="text-2xl">🗓️</span>
+            </div>
+            <h3 className="font-display text-xl text-ink mb-2">No overlap yet</h3>
+            <p className="text-gray text-sm mb-5">
+              You both picked times, but none of them line up. Add a few more slots — {otherUser.displayName} will see the update instantly.
+            </p>
+            <button
+              onClick={() => {
+                triggerHaptic();
+                setShowSlotPicker(true);
+              }}
+              className="w-full py-4 rounded-full bg-wine text-cream font-medium hover:bg-burgundy transition-colors active:scale-[0.98]"
+            >
+              Pick more times
+            </button>
+          </div>
+        )}
+
+        {/* Submitted, genuinely waiting for other person */}
+        {match.status === "scheduling" && myAvailability && !otherAvailability?.length && !showSlotPicker && (
           <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
             <div className="w-12 h-12 rounded-full bg-stripe-white mx-auto mb-4 flex items-center justify-center">
               <span className="text-2xl">⏳</span>
@@ -400,23 +475,6 @@ export default function MatchDetailPage() {
           </div>
         )}
 
-        {/* No overlap */}
-        {noOverlap && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm text-center mt-4">
-            <p className="text-gray text-sm">
-              No overlapping slots found. Try picking more times!
-            </p>
-            <button
-              onClick={() => {
-                setNoOverlap(false);
-                setShowSlotPicker(true);
-              }}
-              className="mt-3 text-wine font-medium text-sm"
-            >
-              Try again
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Report / block bottom sheet */}

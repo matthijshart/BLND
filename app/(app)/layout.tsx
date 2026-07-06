@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { WelcomeScreen } from "@/components/ui/WelcomeScreen";
 import { WelcomeBack } from "@/components/ui/WelcomeBack";
 import { AppLoader } from "@/components/ui/AppLoader";
+import { triggerHaptic } from "@/lib/sounds";
 import { motion } from "framer-motion";
 
 function IconToday({ active }: { active: boolean }) {
@@ -135,9 +136,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex-1 flex flex-col items-center gap-1 text-[10px] font-medium tracking-wide uppercase transition-colors relative py-1 ${
+                onClick={() => {
+                  if (!isActive) triggerHaptic();
+                }}
+                className={`flex-1 flex flex-col items-center gap-1 text-[10px] font-medium tracking-wide uppercase transition-colors relative py-1 active:scale-95 ${
                   isActive ? "text-wine" : "text-gray-light"
                 }`}
+                style={{ WebkitTapHighlightColor: "transparent" }}
               >
                 <div className="relative">
                   <item.Icon active={isActive} />

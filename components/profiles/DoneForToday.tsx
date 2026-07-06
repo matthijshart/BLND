@@ -51,13 +51,27 @@ let globalSlideIndex = 0;
 export function DoneForToday() {
   const [timeLeft, setTimeLeft] = useState(getTimeUntil11());
   const [slideIndex, setSlideIndex] = useState(globalSlideIndex);
+  // Before today's 11:00 drop, the copy is "brewing" — the user hasn't
+  // seen anything yet, so "that's a wrap" would be a lie.
+  const [beforeDrop, setBeforeDrop] = useState(() => new Date().getHours() < 11);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeLeft(getTimeUntil11());
+      setBeforeDrop(new Date().getHours() < 11);
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // The drop moment: if the user is sitting on this screen when the
+  // countdown hits zero, fetch the fresh batch instead of leaving them
+  // staring at 00:00:00.
+  useEffect(() => {
+    if (timeLeft > 0 && timeLeft <= 1500) {
+      const t = setTimeout(() => window.location.reload(), 1600);
+      return () => clearTimeout(t);
+    }
+  }, [timeLeft]);
 
   // Auto-advance slideshow every 4 seconds — persists across re-mounts
   useEffect(() => {
@@ -103,13 +117,15 @@ export function DoneForToday() {
             className="text-3xl font-display text-white"
             style={{ textShadow: "0 2px 12px rgba(0,0,0,0.55)" }}
           >
-            That&apos;s a wrap.
+            {beforeDrop ? "Today's drop is brewing." : "That's a wrap."}
           </h2>
           <p
             className="text-white/90 text-sm mt-2 max-w-[280px] leading-relaxed"
             style={{ textShadow: "0 1px 6px rgba(0,0,0,0.45)" }}
           >
-            You&apos;ve seen today&apos;s profiles. New ones drop tomorrow.
+            {beforeDrop
+              ? "Fresh profiles at 11:00 — grab a coffee first."
+              : "You've seen today's profiles. New ones drop tomorrow."}
           </p>
         </div>
 
@@ -138,7 +154,7 @@ export function DoneForToday() {
           </div>
         </div>
         <p className="text-gray text-xs text-center mt-4">
-          Tomorrow at 11:00 — be there.
+          {beforeDrop ? "Today at 11:00 — be there." : "Tomorrow at 11:00 — be there."}
         </p>
       </div>
 

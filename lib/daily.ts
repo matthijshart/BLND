@@ -14,8 +14,23 @@ import {
 import { db } from "./firebase";
 import type { User } from "@/types";
 
+/** The hour (local time) at which the daily batch drops. Core BLEND ritual. */
+export const DROP_HOUR = 11;
+
+/**
+ * LOCAL date string (YYYY-MM-DD) — the day flips at local midnight, so the
+ * 11:00 drop gate works in the user's own timezone. (Previously used
+ * toISOString() which is UTC — in Amsterdam that made "tomorrow" start at
+ * 02:00 and the promised 11:00 ritual didn't exist at all.)
+ */
 function todayString() {
-  return new Date().toISOString().split("T")[0];
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** True when today's drop hasn't happened yet (local time). */
+export function isBeforeDrop(now: Date = new Date()): boolean {
+  return now.getHours() < DROP_HOUR;
 }
 
 export async function getDailyDoc(uid: string) {

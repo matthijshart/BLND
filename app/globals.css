@@ -33,6 +33,22 @@ body {
   background: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-body), system-ui, sans-serif;
+  /* Kill the grey iOS tap flash app-wide — buttons use active:scale
+     and color transitions for press feedback instead. Native-app feel. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS PWA: prevent long-press callout + accidental text selection on
+   interactive elements (photos, cards, nav). Text content stays selectable. */
+button, a, [role="button"] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  /* 16px floor prevents iOS Safari from auto-zooming on focus */
+  font-size: max(16px, 1em);
 }
 
 h1, h2, h3, h4, h5, h6 {

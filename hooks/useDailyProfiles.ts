@@ -8,6 +8,7 @@ import {
   markProfileAction,
   completeDailyBatch,
   fetchCandidateProfiles,
+  isBeforeDrop,
 } from "@/lib/daily";
 import { recordSwipe, getUser } from "@/lib/db";
 import { checkForMatch, createMatch } from "@/lib/matching";
@@ -60,6 +61,14 @@ export function useDailyProfiles() {
           remaining.map((uid: string) => getUser(uid))
         );
         setProfiles(fullProfiles.filter(Boolean) as User[]);
+      } else if (isBeforeDrop()) {
+        // The 11:00 ritual — no new batch before the daily drop. An
+        // unfinished batch from earlier today (branch above) stays
+        // accessible; only NEW batches wait for 11:00. DoneForToday
+        // shows the countdown to today's drop.
+        setIsComplete(true);
+        setLoading(false);
+        return;
       } else {
         const candidates = await fetchCandidateProfiles(
           firebaseUser.uid,
