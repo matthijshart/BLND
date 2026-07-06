@@ -32,6 +32,7 @@ export default function MatchDetailPage() {
   const [showSlotPicker, setShowSlotPicker] = useState(false);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Real-time match subscription
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function MatchDetailPage() {
   async function handleSubmitAvailability(slots: string[]) {
     if (!firebaseUser || !match) return;
     setSubmitting(true);
+    setActionError(null);
     try {
       await submitAvailability(match.id, firebaseUser.uid, slots);
       triggerHaptic();
@@ -67,6 +69,7 @@ export default function MatchDetailPage() {
       // through the onSnapshot subscription — no local state needed.
     } catch (err) {
       console.error("Submit availability error:", err);
+      setActionError("Couldn't save your times. Check your connection and try again.");
     }
     setSubmitting(false);
   }
@@ -74,6 +77,7 @@ export default function MatchDetailPage() {
   async function handleConfirm() {
     if (!firebaseUser || !match || !profile || !otherUser) return;
     setConfirming(true);
+    setActionError(null);
     triggerHaptic();
     try {
       const result = await confirmDate(
@@ -87,6 +91,7 @@ export default function MatchDetailPage() {
       }
     } catch (err) {
       console.error("Confirm date error:", err);
+      setActionError("Couldn't confirm the meet. Check your connection and try again.");
     }
     setConfirming(false);
   }
@@ -330,6 +335,12 @@ export default function MatchDetailPage() {
 
       {/* Date Planning Section */}
       <div className="px-4 mt-8">
+        {/* Inline action error — visible, dismisses on retry */}
+        {actionError && (
+          <div className="mb-3 bg-coral/10 border border-coral/30 rounded-2xl px-4 py-3">
+            <p className="text-coral text-sm">{actionError}</p>
+          </div>
+        )}
         {/* Status: scheduling — no one submitted yet */}
         {match.status === "scheduling" && !myAvailability && !showSlotPicker && (
           <div className="bg-white rounded-2xl p-6 shadow-sm">

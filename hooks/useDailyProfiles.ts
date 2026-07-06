@@ -9,6 +9,7 @@ import {
   completeDailyBatch,
   fetchCandidateProfiles,
   isBeforeDrop,
+  todayString,
 } from "@/lib/daily";
 import { recordSwipe, getUser } from "@/lib/db";
 import { checkForMatch, createMatch } from "@/lib/matching";
@@ -109,7 +110,8 @@ export function useDailyProfiles() {
     actionInFlightRef.current = true;
 
     const targetProfile = profiles[currentIndex];
-    const date = new Date().toISOString().split("T")[0];
+    // LOCAL date — must match the dailyProfiles doc key in lib/daily.ts
+    const date = todayString();
 
     let matchedUid: string | null = null;
     let matchId: string | null = null;
@@ -170,7 +172,8 @@ export function useDailyProfiles() {
 
     actionInFlightRef.current = true;
     try {
-      const date = new Date().toISOString().split("T")[0];
+      // LOCAL date — must match the dailyProfiles doc key in lib/daily.ts
+      const date = todayString();
 
       // Delete the most recent swipe record and remove from passed array
       const { db } = await import("@/lib/firebase");

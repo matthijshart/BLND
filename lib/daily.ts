@@ -23,7 +23,7 @@ export const DROP_HOUR = 11;
  * toISOString() which is UTC — in Amsterdam that made "tomorrow" start at
  * 02:00 and the promised 11:00 ritual didn't exist at all.)
  */
-function todayString() {
+export function todayString() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
