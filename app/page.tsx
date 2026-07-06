@@ -69,6 +69,7 @@ export default function LandingPage() {
           >
             {[
               { label: "How it works", href: "#how" },
+              { label: "The standard", href: "#standard" },
               { label: "Pricing", href: "#pricing" },
               { label: "For everyone", href: "#everyone" },
               { label: "A glimpse", href: "#glimpse" },
@@ -323,6 +324,71 @@ export default function LandingPage() {
               ))}
             </StaggerContainer>
           </div>
+        </div>
+      </section>
+
+      {/* ─── THE BLEND STANDARD: trust as the product ─── */}
+      <section id="standard" className="bg-stripe-white py-24 sm:py-28 px-6 scroll-mt-12">
+        <div className="max-w-lg mx-auto">
+          <ScrollReveal variant="fade">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-4 text-center">
+              The BLEND standard
+            </p>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.1}>
+            <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug text-center">
+              Dating apps tolerate flakes.
+              <br />
+              <span className="text-wine">We don&apos;t.</span>
+            </h2>
+          </ScrollReveal>
+
+          <StaggerContainer className="mt-14 space-y-4" staggerDelay={0.12}>
+            {[
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1l2.4 2.5 3.4-.4 1.3 3.2 3 1.7-.7 3.4L23 13l-2.5 2.4.4 3.4-3.2 1.3-1.7 3-3.4-.7L9.6 23l-2.4-2.5-3.4.4-1.3-3.2-3-1.7.7-3.4L1 11l2.5-2.4-.4-3.4 3.2-1.3 1.7-3 3.4.7L12 1z" fill="#6b1520" stroke="none" opacity="0.12" />
+                    <path d="M9.5 12.5l2 2 4-4.5" />
+                  </svg>
+                ),
+                title: "Verified faces",
+                desc: "Selfie verification with a random pose. Catfishing doesn't survive a live camera.",
+              },
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" opacity="0.25" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                ),
+                title: "Zero-flake policy",
+                desc: "Cancel last-minute twice, or no-show once, and your account is gone. Permanently. People show up on BLEND.",
+              },
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 8h1a4 4 0 110 8h-1" />
+                    <path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" />
+                  </svg>
+                ),
+                title: "Curated spots",
+                desc: "Hand-picked Amsterdam cafés — good light, good coffee, easy to find. We choose, so nobody has to negotiate.",
+              },
+            ].map((item, i) => (
+              <StaggerItem key={i}>
+                <div className="flex items-start gap-4 bg-cream rounded-2xl p-5">
+                  <div className="w-11 h-11 rounded-full bg-wine/8 flex items-center justify-center shrink-0">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-display text-lg text-ink">{item.title}</h3>
+                    <p className="text-ink-mid text-sm mt-1 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
         </div>
       </section>
 

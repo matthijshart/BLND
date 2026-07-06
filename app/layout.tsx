@@ -20,6 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://bl-nd.nl"),
   title: "BLEND — Casual coffee dates in Amsterdam.",
   description:
     "No swiping, no endless chat. Just coffee, at a spot we pick. 60 minutes, daytime, face to face.",
@@ -28,6 +29,12 @@ export const metadata: Metadata = {
     description: "No swiping, no endless chat. Just coffee, at a spot we pick. 60 minutes, daytime, face to face.",
     siteName: "BLEND",
     type: "website",
+    url: "https://bl-nd.nl",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BLEND — Casual coffee dates in Amsterdam.",
+    description: "Skip the chat. Meet for real. Verified profiles, zero-flake policy, curated spots.",
   },
   manifest: "/manifest.json",
   appleWebApp: {
