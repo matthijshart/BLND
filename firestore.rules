@@ -42,7 +42,7 @@ service cloud.firestore {
     // the client — that's admin/owner only via the Admin SDK.
     match /waitlist/{id} {
       allow read: if false;
-      allow create: if request.resource.data.keys().hasOnly(['email', 'city', 'createdAt'])
+      allow create: if request.resource.data.keys().hasOnly(['email', 'city', 'source', 'createdAt'])
                     && request.resource.data.email is string
                     && request.resource.data.email.size() < 200
                     && request.resource.data.city is string
@@ -72,11 +72,17 @@ service cloud.firestore {
     }
 
     // ─── swipes ───────────────────────────────────────────────────────────
-    // Append-only audit log. Users can only see their own swipes (to prevent
-    // someone discovering who liked them before a mutual match). Server-side
-    // matching uses Admin SDK to detect mutual likes.
+    // Append-only log. You can read swipes you made AND swipes made ON you —
+    // the second is required because match detection runs client-side
+    // (checkForMatch queries "did they like me?"). Trade-off: a technically
+    // savvy user could enumerate their likers before liking back. Acceptable
+    // at beta scale with App Check on; the long-term fix is a Cloud Function
+    // that detects mutual likes server-side, after which this read rule can
+    // tighten back to swiperId-only.
     match /swipes/{id} {
-      allow read: if signedIn() && resource.data.swiperId == request.auth.uid;
+      allow read: if signedIn()
+                  && (resource.data.swiperId == request.auth.uid
+                      || resource.data.swipedId == request.auth.uid);
       allow create: if signedIn()
                     && request.resource.data.swiperId == request.auth.uid
                     && request.resource.data.direction in ['like', 'pass'];
