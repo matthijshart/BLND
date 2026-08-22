@@ -18,7 +18,7 @@ const NEIGHBORHOODS = [
 const INTERESTS = [
   "specialty coffee", "cycling", "art", "vinyl", "reading", "yoga",
   "cooking", "live music", "running", "photography", "design", "travel",
-  "natural wine", "cinema", "museums", "climbing", "festivals", "podcasts",
+  "markets", "cinema", "museums", "climbing", "festivals", "podcasts",
   "sports", "tennis", "padel", "football", "surfing", "skating",
 ];
 
@@ -474,7 +474,7 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <p className="text-cream/60 text-sm mb-2">Interested in</p>
+              <p className="text-cream/60 text-sm mb-2">Show me</p>
               <div className="flex gap-2">
                 {["Men", "Women", "Everyone"].map((g) => (
                   <button
@@ -493,24 +493,25 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <p className="text-cream/60 text-sm mb-2">Looking for</p>
+              <p className="text-cream/60 text-sm mb-2">Open to</p>
               <div className="grid grid-cols-2 gap-2">
-                {["Dating", "Friends", "Open to anything"].map((l) => {
-                  const val = l === "Open to anything" ? "open" : l.toLowerCase();
-                  return (
-                    <button
-                      key={l}
-                      onClick={() => setLookingFor(val)}
-                      className={`py-3 rounded-full text-sm font-medium transition-colors ${
-                        lookingFor === val
-                          ? "bg-cream text-wine"
-                          : "border border-cream/20 text-cream/60 hover:bg-cream/10"
-                      }`}
-                    >
-                      {l}
-                    </button>
-                  );
-                })}
+                {[
+                  { value: "dating", label: "Open to romance" },
+                  { value: "friends", label: "Friends" },
+                  { value: "open", label: "Either" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setLookingFor(opt.value)}
+                    className={`py-3 rounded-full text-sm font-medium transition-colors ${
+                      lookingFor === opt.value
+                        ? "bg-cream text-wine"
+                        : "border border-cream/20 text-cream/60 hover:bg-cream/10"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -542,7 +543,7 @@ export default function OnboardingPage() {
                     setBio(v);
                   }
                 }}
-                placeholder="Write a short bio..."
+                placeholder="A few lines. Not a CV."
                 rows={3}
                 aria-label="Short bio, up to 300 characters"
                 className="w-full px-5 py-4 rounded-2xl bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors resize-none"
@@ -709,7 +710,7 @@ export default function OnboardingPage() {
 
             {/* Fun prompts */}
             <div>
-              <p className="text-cream/60 text-sm mb-2">Pick up to 3 prompts</p>
+              <p className="text-cream/60 text-sm mb-2">Pick 3 prompts</p>
               <PromptPicker
                 existingPrompts={prompts}
                 onSave={(p) => setPrompts(p)}
@@ -719,7 +720,7 @@ export default function OnboardingPage() {
 
             {/* Profile song */}
             <div>
-              <p className="text-cream/60 text-sm mb-2">Your date soundtrack</p>
+              <p className="text-cream/60 text-sm mb-2">One song</p>
               <input
                 type="url"
                 value={profileSong}

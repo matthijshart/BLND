@@ -212,7 +212,7 @@ export default function LandingPage() {
           <ScrollReveal variant="scale" delay={0.15} duration={1} className="relative aspect-[3/4] overflow-hidden">
             <Image
               src="/images/_.jpeg"
-              alt="Coffee date"
+              alt="Two people talking over coffee at a café table"
               fill
               className="object-cover"
               priority

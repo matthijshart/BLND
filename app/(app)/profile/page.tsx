@@ -545,7 +545,7 @@ export default function ProfilePage() {
 
         {/* Profile song */}
         <section className="px-5 py-4 border-t border-wine/5">
-          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Your Song</h3>
+          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">One song</h3>
           <input
             type="url"
             value={profileSong}
@@ -576,7 +576,7 @@ export default function ProfilePage() {
           >
             <div>
               <p className="text-ink font-medium text-sm">Preferences</p>
-              <p className="text-gray-light text-[11px] mt-0.5">Who you&apos;d like to meet, age range, dating or friends mode</p>
+              <p className="text-gray-light text-[11px] mt-0.5">Who you&apos;d like to meet, age range, what you&apos;re open to</p>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wine">
               <polyline points="9 18 15 12 9 6" />

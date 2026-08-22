@@ -133,7 +133,7 @@ export function MiniChat({ dateId, otherName, calmerMessage }: MiniChatProps) {
             <div className="text-center py-12">
               <p className="text-gray text-sm">No messages yet.</p>
               <p className="text-gray-light text-xs mt-1">
-                Say hi! Keep it short — you&apos;ll meet soon.
+                Say hi. Keep it short — you&apos;ll meet soon.
               </p>
             </div>
           )}

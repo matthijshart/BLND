@@ -73,7 +73,7 @@ export default function DatesPage() {
           <div className="absolute bottom-0 inset-x-0 p-6">
             <h2 className="text-2xl font-display text-white">No meets yet</h2>
             <p className="text-white/70 text-sm mt-2 max-w-[260px] leading-relaxed">
-              Your first coffee meet is one blend away. We pick the spot, you bring the charm.
+              Your first coffee is one blend away. We pick the spot and the hour. You show up.
             </p>
           </div>
         </div>

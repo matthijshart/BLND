@@ -42,7 +42,7 @@ export function WelcomeScreen() {
             <div className="absolute inset-0">
               <Image
                 src="/images/coffe couple.jpeg"
-                alt="Coffee date"
+                alt="Two people with coffee outside a café"
                 fill
                 className="object-cover"
                 priority
@@ -68,7 +68,7 @@ export function WelcomeScreen() {
                 transition={{ delay: 0.7, duration: 0.5 }}
                 className="text-cream/60 text-lg mt-4 max-w-xs leading-relaxed"
               >
-                No endless swiping. No awkward texting. Just coffee, at a spot we pick for you.
+                No endless swiping. No awkward texting. Just coffee with someone new — an hour, not a night.
               </motion.p>
 
               <motion.button
@@ -102,9 +102,9 @@ export function WelcomeScreen() {
 
             <div className="space-y-6">
               {[
-                { num: "01", text: "Every day at 11:00, you get a fresh set of profiles." },
+                { num: "01", text: "Every morning at 11:00, 8–12 people. Then today is done." },
                 { num: "02", text: "Like someone? If they like you back — it's a blend." },
-                { num: "03", text: "We pick the spot. You both show up. 60 minutes." },
+                { num: "03", text: "We pick the spot. You both show up. 60 minutes, in daylight." },
               ].map((item, i) => (
                 <motion.div
                   key={i}

@@ -58,7 +58,7 @@ export default function PreferencesPage() {
   }
 
   const modes: { value: "dating" | "friends" | "open"; label: string; desc: string }[] = [
-    { value: "dating", label: "Dating", desc: "Open to romance, slow burn or otherwise." },
+    { value: "dating", label: "Open to romance", desc: "If the hour goes that way, good." },
     { value: "friends", label: "Friends", desc: "New people in your city, no agenda." },
     { value: "open", label: "Both", desc: "See what brews. Let coffee decide." },
   ];

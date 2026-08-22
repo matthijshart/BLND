@@ -118,7 +118,7 @@ export function pickCafé(
 ): (typeof AMSTERDAM_CAFES)[number] {
   // Safety net: AMSTERDAM_CAFES should always have entries but guard anyway
   if (AMSTERDAM_CAFES.length === 0) {
-    throw new Error("No cafés configured — cannot schedule a date");
+    throw new Error("No cafés configured — cannot schedule a meet");
   }
 
   // Same neighborhood → prefer a café there

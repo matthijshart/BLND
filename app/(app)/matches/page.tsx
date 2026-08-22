@@ -13,10 +13,10 @@ function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefi
   if (!myOrder || !theirOrder) return null;
   const my = myOrder.toLowerCase();
   const their = theirOrder.toLowerCase();
-  if (my === their) return "Perfect match — same order!";
+  if (my === their) return "Same order. No notes.";
   if (my.includes("espresso") && their.includes("espresso")) return "Double espresso energy";
-  if ((my.includes("oat") && their.includes("oat")) || (my.includes("flat white") && their.includes("flat white"))) return "Oat milk soulmates";
-  if ((my.includes("chai") || their.includes("chai")) && (my.includes("espresso") || their.includes("espresso"))) return "Opposites attract";
+  if ((my.includes("oat") && their.includes("oat")) || (my.includes("flat white") && their.includes("flat white"))) return "Both oat milk. Of course.";
+  if ((my.includes("chai") || their.includes("chai")) && (my.includes("espresso") || their.includes("espresso"))) return "One chai, one espresso.";
   if (my.includes("matcha") || their.includes("matcha")) return "One of you is the healthy one";
   return null;
 }
@@ -77,7 +77,7 @@ export default function MatchesPage() {
         <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
           <ShimmerImage
             src="/images/coffe couple.jpeg"
-            alt="Coffee date"
+            alt="Two people with coffee outside a café"
             fill
             className="object-cover"
           />
@@ -85,7 +85,7 @@ export default function MatchesPage() {
           <div className="absolute bottom-0 inset-x-0 p-6">
             <h2 className="text-2xl font-display text-white">No blends yet</h2>
             <p className="text-white/70 text-sm mt-2 max-w-[260px] leading-relaxed">
-              Your daily profiles drop at 11:00. Like someone, they like you back, and this could be you.
+              Your profiles drop at 11:00. Like someone, they like you back, and that&apos;s a blend.
             </p>
           </div>
         </div>
@@ -174,8 +174,8 @@ function Section({ label, color, children }: { label: string; color: "coral" | "
 
 function MatchRow({ match, profile }: { match: ReturnType<typeof useMatches>["matches"][number]; profile: User | null }) {
   const statusMap: Record<string, { label: string; style: string }> = {
-    scheduling: { label: "Plan meet", style: "bg-coral/10 text-coral" },
-    date_proposed: { label: "Confirm meet", style: "bg-coral text-white" },
+    scheduling: { label: "Plan coffee", style: "bg-coral/10 text-coral" },
+    date_proposed: { label: "Confirm coffee", style: "bg-coral text-white" },
     date_confirmed: { label: "Planned ✓", style: "bg-wine/10 text-wine" },
     second_cup: { label: "☕☕", style: "bg-wine text-cream" },
   };
