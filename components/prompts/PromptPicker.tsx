@@ -100,7 +100,7 @@ export function PromptPicker({ existingPrompts, onSave, saving, dark }: PromptPi
           {answered.length === 0 && "Pick at least 3 prompts to continue"}
           {answered.length === 1 && "2 more to go"}
           {answered.length === 2 && "1 more to go"}
-          {answered.length >= 3 && "All done! Save your answers below."}
+          {answered.length >= 3 && "That's three. Save them below."}
         </p>
       </div>
 

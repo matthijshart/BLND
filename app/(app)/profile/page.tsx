@@ -151,6 +151,7 @@ export default function ProfilePage() {
   // Quick-edit a single prompt from view mode (Matthijs: "tap → swap")
   const [quickEditIdx, setQuickEditIdx] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -545,7 +546,7 @@ export default function ProfilePage() {
 
         {/* Profile song */}
         <section className="px-5 py-4 border-t border-wine/5">
-          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">Your Song</h3>
+          <h3 className="text-xs text-gray uppercase tracking-wider font-medium mb-3">One song</h3>
           <input
             type="url"
             value={profileSong}
@@ -576,7 +577,7 @@ export default function ProfilePage() {
           >
             <div>
               <p className="text-ink font-medium text-sm">Preferences</p>
-              <p className="text-gray-light text-[11px] mt-0.5">Who you&apos;d like to meet, age range, dating or friends mode</p>
+              <p className="text-gray-light text-[11px] mt-0.5">Who you&apos;d like to meet, age range, what you&apos;re open to</p>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wine">
               <polyline points="9 18 15 12 9 6" />
@@ -1053,12 +1054,20 @@ export default function ProfilePage() {
                   onClick={async () => {
                     if (!firebaseUser) return;
                     setDeleting(true);
+                    setDeleteError(null);
                     try {
                       const { deleteAccount } = await import("@/lib/deleteAccount");
                       await deleteAccount(firebaseUser.uid);
                       router.push("/");
                     } catch (err) {
                       console.error("Delete error:", err);
+                      // Nothing was deleted when this throws — the check runs
+                      // before any destructive work.
+                      setDeleteError(
+                        err instanceof Error && err.name === "ReauthRequiredError"
+                          ? "For your security, sign out and sign back in first, then delete your account. Nothing has been deleted."
+                          : "Couldn't delete your account. Check your connection and try again."
+                      );
                       setDeleting(false);
                     }
                   }}
@@ -1068,6 +1077,9 @@ export default function ProfilePage() {
                   {deleting ? "Deleting..." : "Delete forever"}
                 </button>
               </div>
+              {deleteError && (
+                <p className="text-red text-xs leading-relaxed mt-4">{deleteError}</p>
+              )}
             </motion.div>
           </motion.div>
         )}

@@ -262,7 +262,7 @@ export default function PublicProfilePage() {
               Want to meet {profile.displayName}?
             </h2>
             <p className="text-cream/60 text-sm mb-5">
-              Join BLEND — where dates begin over coffee.
+              Join BLEND — coffee with someone new, at eleven in the morning.
             </p>
             <Link
               href="/signup"

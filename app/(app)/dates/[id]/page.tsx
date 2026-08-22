@@ -80,7 +80,7 @@ export default function DateDetailPage() {
       const diff = dateTime.getTime() - now.getTime();
 
       if (diff <= 0) {
-        setCountdown("Now!");
+        setCountdown("Now.");
         return;
       }
 
@@ -201,12 +201,12 @@ export default function DateDetailPage() {
             <p className="text-cream/80 text-sm mt-2">
               with {otherUser.displayName}
             </p>
-            <p className="text-cream/50 text-xs mt-3">Chat is open — plan your next coffee!</p>
+            <p className="text-cream/50 text-xs mt-3">Chat is open. Plan the next one.</p>
           </>
         ) : (
           <>
             <p className="text-cream/60 text-sm">
-              {isPast ? "Date was" : "Date in"}
+              {isPast ? "Coffee was" : "Coffee in"}
             </p>
             <p className="text-5xl font-display text-cream mt-2 mb-3">
               {isPast ? "Done" : countdown}
@@ -478,7 +478,7 @@ export default function DateDetailPage() {
           ) : (
             <div className="text-center">
               <p className="text-gray text-sm">
-                Chat opens 2 hours before your date
+                Chat opens 2 hours before your coffee
                 <br />
                 <span className="text-ink-mid font-medium">
                   {chatOpenAt.toLocaleDateString("en-US", {
@@ -537,9 +537,9 @@ function SecondCup({
           <div className="w-20 h-20 rounded-full bg-wine/10 mx-auto mb-4 flex items-center justify-center">
             <span className="text-4xl">☕☕</span>
           </div>
-          <h3 className="font-display text-2xl text-ink mb-2">You both want a second cup!</h3>
+          <h3 className="font-display text-2xl text-ink mb-2">You both want a second cup.</h3>
           <p className="text-gray text-sm mb-5 max-w-[260px] mx-auto">
-            Looks like there&apos;s something brewing. The chat is now permanently open.
+            The chat stays open now. The rest is up to you.
           </p>
           <p className="text-wine text-xs font-mono tracking-wider uppercase">
             The best things start with coffee.
@@ -555,10 +555,10 @@ function SecondCup({
         <div className="w-12 h-12 rounded-full bg-stripe-white mx-auto mb-3 flex items-center justify-center">
           <span className="text-xl">✓</span>
         </div>
-        <p className="text-ink font-medium mb-1">Thanks!</p>
+        <p className="text-ink font-medium mb-1">Thanks.</p>
         <p className="text-gray text-sm">
           {myRating?.secondCup
-            ? `We'll let you know if ${otherUser.displayName} feels the same.`
+            ? `We'll let you know if ${otherUser.displayName} says the same.`
             : "No worries. New profiles drop tomorrow at 11:00."}
         </p>
       </div>

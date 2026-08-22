@@ -130,7 +130,7 @@ export const PROFILE_PROMPTS: ProfilePromptConfig[] = [
   },
   {
     id: "first_date",
-    question: "Best first date spot in Amsterdam?",
+    question: "Where do you take someone who's new in town?",
     type: "open",
   },
 ];

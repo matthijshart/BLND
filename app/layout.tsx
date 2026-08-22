@@ -21,11 +21,11 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bl-nd.nl"),
-  title: "BLEND — Casual coffee dates in Amsterdam.",
+  title: "BLEND — Coffee with someone new in Amsterdam.",
   description:
     "No swiping, no endless chat. Just coffee, at a spot we pick. 60 minutes, daytime, face to face.",
   openGraph: {
-    title: "BLEND — Casual coffee dates in Amsterdam.",
+    title: "BLEND — Coffee with someone new in Amsterdam.",
     description: "No swiping, no endless chat. Just coffee, at a spot we pick. 60 minutes, daytime, face to face.",
     siteName: "BLEND",
     type: "website",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "BLEND — Casual coffee dates in Amsterdam.",
+    title: "BLEND — Coffee with someone new in Amsterdam.",
     description: "Skip the chat. Meet for real. Verified profiles, zero-flake policy, curated spots.",
   },
   manifest: "/manifest.json",

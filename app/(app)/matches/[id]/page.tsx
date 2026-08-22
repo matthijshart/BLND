@@ -344,7 +344,7 @@ export default function MatchDetailPage() {
         {/* Status: scheduling — no one submitted yet */}
         {match.status === "scheduling" && !myAvailability && !showSlotPicker && (
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="font-display text-xl text-ink mb-2">Plan your date</h3>
+            <h3 className="font-display text-xl text-ink mb-2">Plan your coffee</h3>
             <p className="text-gray text-sm mb-5">
               Select when you&apos;re free this week. When both of you submit, we&apos;ll find the best time.
             </p>
@@ -362,7 +362,7 @@ export default function MatchDetailPage() {
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h3 className="font-display text-xl text-ink mb-1">When are you free?</h3>
             <p className="text-gray text-sm mb-5">
-              Pick as many slots as you can — more flexibility = faster match.
+              Pick as many as you can. More options, sooner coffee.
             </p>
             <SlotPicker
               onSubmit={handleSubmitAvailability}
@@ -408,7 +408,7 @@ export default function MatchDetailPage() {
               onClick={() => setShowSlotPicker(true)}
               className="text-sm text-wine font-medium"
             >
-              Update your availability
+              Change your times
             </button>
           </div>
         )}
@@ -416,7 +416,7 @@ export default function MatchDetailPage() {
         {/* Date proposed — needs confirmation */}
         {match.status === "date_proposed" && match.proposedSlot && (
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="font-display text-xl text-ink mb-2">Date found!</h3>
+            <h3 className="font-display text-xl text-ink mb-2">Found a coffee.</h3>
             <p className="text-gray text-sm mb-5">
               You both have time. Confirm to lock it in.
             </p>
@@ -437,7 +437,7 @@ export default function MatchDetailPage() {
                 })}
                 {" — "}
                 {new Date(
-                  match.proposedSlot.toDate().getTime() + 45 * 60 * 1000
+                  match.proposedSlot.toDate().getTime() + 60 * 60 * 1000
                 ).toLocaleTimeString("en-US", {
                   hour: "numeric",
                   minute: "2-digit",
@@ -445,7 +445,7 @@ export default function MatchDetailPage() {
                 })}
               </p>
               <p className="text-gray text-xs mt-2">
-                Café will be assigned after you both confirm
+                We&apos;ll pick the café once you both confirm
               </p>
             </div>
 
@@ -461,7 +461,7 @@ export default function MatchDetailPage() {
                 disabled={confirming}
                 className="w-full py-4 rounded-full bg-wine text-cream font-medium text-lg hover:bg-burgundy transition-colors disabled:opacity-50"
               >
-                {confirming ? "Confirming..." : "☕ Confirm date"}
+                {confirming ? "Confirming..." : "☕ Confirm the coffee"}
               </button>
             )}
           </div>
@@ -473,7 +473,7 @@ export default function MatchDetailPage() {
             <div className="w-12 h-12 rounded-full bg-wine/10 mx-auto mb-4 flex items-center justify-center">
               <span className="text-2xl">☕</span>
             </div>
-            <h3 className="font-display text-xl text-ink mb-2">Meet confirmed!</h3>
+            <h3 className="font-display text-xl text-ink mb-2">Your coffee is set.</h3>
             <p className="text-gray text-sm mb-4">
               Check the Meets tab for details and your spot.
             </p>

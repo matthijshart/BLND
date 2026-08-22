@@ -105,7 +105,7 @@ export function SlotPicker({ onSubmit, submitting, existingSlots }: SlotPickerPr
           className="w-full py-4 rounded-full bg-wine text-cream font-medium text-lg hover:bg-burgundy transition-colors disabled:opacity-30 flex items-center justify-center gap-2 active:scale-[0.98]"
         >
           {submitting && <span className="w-4 h-4 rounded-full border-2 border-cream border-t-transparent animate-spin" />}
-          {submitting ? "Submitting..." : "Submit availability"}
+          {submitting ? "Sending..." : "Send these times"}
         </button>
       </div>
     </div>

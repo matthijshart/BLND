@@ -95,7 +95,7 @@ function LoginForm() {
         {showReset ? (
           <form onSubmit={handleReset} className="space-y-4">
             <p className="text-cream/70 text-sm text-center mb-2">
-              Enter your email and we&apos;ll send you a link to reset your password.
+              Enter your email. If it has a password account, we&apos;ll send a reset link.
             </p>
             <input
               type="email"
@@ -115,7 +115,7 @@ function LoginForm() {
             {resetSent ? (
               <div className="text-center space-y-3">
                 <p className="text-cream text-sm">
-                  ✓ Reset link sent! Check your inbox.
+                  ✓ If that email has a password account, a reset link is on its way.
                 </p>
                 <button
                   type="button"

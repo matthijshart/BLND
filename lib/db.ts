@@ -23,13 +23,26 @@ export async function getUser(uid: string) {
 }
 
 export async function createUser(uid: string, data: Partial<User>) {
-  return setDoc(doc(db, "users", uid), {
-    ...data,
-    uid,
-    dateTokens: 0,
-    createdAt: serverTimestamp(),
-    lastActive: serverTimestamp(),
-  });
+  const userRef = doc(db, "users", uid);
+
+  // Onboarding is reachable again after it has been completed (back button,
+  // a bookmark, a redirect that fires on a slow profile read). A plain setDoc
+  // there replaces the whole document, resetting dateTokens to 0 and wiping
+  // the profile. Preserve anything that must survive a re-run.
+  const existing = await getDoc(userRef);
+  const prior = existing.exists() ? existing.data() : null;
+
+  return setDoc(
+    userRef,
+    {
+      ...data,
+      uid,
+      dateTokens: prior?.dateTokens ?? 0,
+      createdAt: prior?.createdAt ?? serverTimestamp(),
+      lastActive: serverTimestamp(),
+    },
+    { merge: true }
+  );
 }
 
 export async function updateUser(uid: string, data: Partial<User>) {

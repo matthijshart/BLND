@@ -225,7 +225,7 @@ export default function TodayPage() {
               transition={{ delay: 0.4 }}
               className="text-5xl font-display text-cream text-center"
             >
-              It&apos;s a blend!
+              It&apos;s a blend.
             </motion.h2>
             <motion.p
               initial={{ opacity: 0 }}
@@ -267,7 +267,7 @@ export default function TodayPage() {
                     : "bg-cream text-wine hover:bg-stripe-white"
                 }`}
               >
-                Keep browsing
+                Back to today
               </button>
             </motion.div>
           </motion.div>
