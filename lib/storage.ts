@@ -113,6 +113,14 @@ async function compressImage(file: File): Promise<Blob> {
  * Upload a photo to Firebase Storage with retry on network errors.
  * Throws PhotoUploadError on failure.
  */
+/** Collision-proof object name for a photo upload. */
+function photoFileName(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export async function uploadUserPhoto(
   uid: string,
   file: File,
@@ -122,7 +130,12 @@ export async function uploadUserPhoto(
   options?.onProgress?.("validating");
   validatePhotoFile(file);
 
-  const storageRef = ref(storage, `users/${uid}/photos/${index}.jpg`);
+  // The display index must NOT be the filename. The photos array is
+  // reorderable and filter()s on delete, so index N stops pointing at
+  // photos/N.jpg the moment anyone reorders or removes one — after which
+  // deleting a photo destroys a different one and an upload silently
+  // overwrites a live file. Every upload gets its own name instead.
+  const storageRef = ref(storage, `users/${uid}/photos/${photoFileName()}.jpg`);
 
   // Try to compress; fall back to original if compression fails
   let payload: Blob | File = file;
@@ -176,14 +189,16 @@ export async function uploadUserPhoto(
   );
 }
 
-export async function deleteUserPhoto(
-  uid: string,
-  index: number
-): Promise<void> {
-  const storageRef = ref(storage, `users/${uid}/photos/${index}.jpg`);
+export async function deleteUserPhoto(downloadUrl: string): Promise<void> {
+  // Delete the exact object the URL points at. Deriving the path from a
+  // display index instead is what let a reorder send this at the wrong file.
+  if (!downloadUrl || !downloadUrl.includes("firebasestorage")) {
+    // Seed/stock photos and anything not in our bucket: nothing to remove.
+    return;
+  }
   try {
-    await deleteObject(storageRef);
+    await deleteObject(ref(storage, downloadUrl));
   } catch {
-    // Ignore if file doesn't exist
+    // Already gone, or never ours — either way there is nothing to clean up.
   }
 }

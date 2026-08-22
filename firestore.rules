@@ -104,7 +104,7 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ─── dates (meets, including inline chat messages) ────────────────────
+    // ─── dates (meets) ────────────────────────────────────────────────────
     match /dates/{id} {
       allow read: if isMember(resource.data.users);
       allow create: if isMember(request.resource.data.users)
@@ -112,6 +112,28 @@ service cloud.firestore {
       allow update: if isMember(resource.data.users)
                     && isMember(request.resource.data.users);
       allow delete: if false;
+
+      // Chat messages are a SUBcollection (lib/chat.ts writes to
+      // dates/{id}/messages), not fields on the date document. A rule on
+      // /dates/{id} does not extend to it, so without this block every
+      // message read and write falls through to the default deny at the
+      // bottom of this file — deploying would silently kill all chat.
+      //
+      // senderId is enforced against the caller here because lib/chat.ts
+      // takes it as a parameter, so a client could otherwise post as the
+      // other person.
+      match /messages/{messageId} {
+        function participants() {
+          return get(/databases/$(database)/documents/dates/$(id)).data.users;
+        }
+        allow read: if isMember(participants());
+        allow create: if isMember(participants())
+                      && request.resource.data.senderId == request.auth.uid
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() > 0
+                      && request.resource.data.text.size() <= 1000;
+        allow update, delete: if false;
+      }
     }
 
     // ─── cafes (curated spots, public read) ───────────────────────────────
