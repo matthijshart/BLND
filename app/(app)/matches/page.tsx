@@ -5,6 +5,9 @@ import { useAuthContext } from "@/components/providers/AuthProvider";
 import Image from "next/image";
 import Link from "next/link";
 import type { User } from "@/types";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { CoffeeRing } from "@/components/ui/CoffeeRing";
 
 function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefined): string | null {
   if (!myOrder || !theirOrder) return null;
@@ -16,6 +19,25 @@ function getCoffeeCombo(myOrder: string | undefined, theirOrder: string | undefi
   if ((my.includes("chai") || their.includes("chai")) && (my.includes("espresso") || their.includes("espresso"))) return "Opposites attract";
   if (my.includes("matcha") || their.includes("matcha")) return "One of you is the healthy one";
   return null;
+}
+
+/**
+ * Compact, friendly meet-date label used on the upcoming-meets row.
+ * Examples: "Today 17:00", "Tomorrow 14:30", "Fri 24 May · 16:00"
+ */
+function formatMeetDate(d: Date): string {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const dayDiff = Math.round((dayStart - startOfToday) / dayMs);
+  if (dayDiff === 0) return `Today · ${time}`;
+  if (dayDiff === 1) return `Tomorrow · ${time}`;
+  if (dayDiff >= 2 && dayDiff < 7) {
+    return `${d.toLocaleDateString("en-GB", { weekday: "long" })} · ${time}`;
+  }
+  return `${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${time}`;
 }
 
 function getSharedCount(me: User | null, them: User): number {
@@ -31,7 +53,7 @@ export default function MatchesPage() {
     return (
       <div className="px-4 pt-8">
         <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-stripe-white animate-pulse">
               <div className="w-14 h-14 rounded-full bg-cream" />
@@ -53,7 +75,7 @@ export default function MatchesPage() {
 
         {/* Mood image */}
         <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
-          <Image
+          <ShimmerImage
             src="/images/coffe couple.jpeg"
             alt="Coffee date"
             fill
@@ -78,79 +100,143 @@ export default function MatchesPage() {
     );
   }
 
-  return (
-    <div className="px-4 pt-8">
-      <h1 className="text-2xl font-display text-ink mb-6">Blends</h1>
-      <div className="space-y-3">
-        {matches.map((match) => (
-          <Link
-            key={match.id}
-            href={`/matches/${match.id}`}
-            className="block p-4 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center gap-4">
-              <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
-                <Image
-                  src={match.otherUser.photos[0] || "/images/sipping.png"}
-                  alt={match.otherUser.displayName}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-display text-lg text-ink">
-                  {match.otherUser.displayName}, {match.otherUser.age}
-                </h3>
-                <p className="text-gray text-sm">{match.otherUser.neighborhood}</p>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${
-                  match.status === "scheduling"
-                    ? "bg-wine/10 text-wine"
-                    : match.status === "date_confirmed"
-                    ? "bg-blue/10 text-blue"
-                    : match.status === "date_proposed"
-                    ? "bg-coral/10 text-coral"
-                    : match.status === "second_cup"
-                    ? "bg-wine/15 text-wine"
-                    : "bg-stripe-white text-gray"
-                }`}
-              >
-                {match.status === "scheduling"
-                  ? "Plan meet"
-                  : match.status === "date_proposed"
-                  ? "Confirm meet"
-                  : match.status === "date_confirmed"
-                  ? "Meet planned ✓"
-                  : match.status === "second_cup"
-                  ? "☕☕ Second cup"
-                  : match.status}
-              </span>
-            </div>
+  // BLEND product logic (Matthijs):
+  //  - Blends page = relationships that need YOUR action
+  //  - Meets page = the actual coffee meets (planned + past)
+  // Once a meet is confirmed it disappears from Blends — you'll see it
+  // on /dates. No duplication, no confusion.
+  const needsYou = matches.filter(
+    (m) => m.status === "date_proposed" || m.status === "scheduling"
+  );
+  const secondCups = matches.filter((m) => m.status === "second_cup");
 
-            {/* Coffee combo + shared interests */}
-            {(() => {
-              const combo = getCoffeeCombo(profile?.coffeeOrder, match.otherUser.coffeeOrder);
-              const shared = getSharedCount(profile, match.otherUser);
-              if (!combo && shared === 0) return null;
-              return (
-                <div className="mt-3 pt-3 border-t border-cream flex items-center gap-3 flex-wrap">
-                  {combo && (
-                    <span className="flex items-center gap-1.5 text-[11px] text-wine font-medium">
-                      <span>☕</span> {combo}
-                    </span>
-                  )}
-                  {shared > 0 && (
-                    <span className="text-[11px] text-gray">
-                      {shared} shared interest{shared > 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
-              );
-            })()}
-          </Link>
-        ))}
-      </div>
+  const hasAction = needsYou.length > 0 || secondCups.length > 0;
+
+  return (
+    <div className="px-4 pt-8 pb-8 relative">
+      <CoffeeRing variant="double" className="-top-6 right-2 w-24 h-24" opacity={0.05} rotate={25} />
+      <h1 className="text-2xl font-display text-ink mb-1 relative z-10">Blends</h1>
+      <p className="text-ink-mid text-sm relative z-10 mb-6 max-w-[320px]">
+        People who matched with you. Plan a coffee — it&apos;ll show up on{" "}
+        <Link href="/dates" className="text-wine underline underline-offset-2">
+          Meets
+        </Link>
+        .
+      </p>
+
+      {needsYou.length > 0 && (
+        <Section label="Needs your move" color="coral">
+          {needsYou.map((m) => (
+            <MatchRow key={m.id} match={m} profile={profile} />
+          ))}
+        </Section>
+      )}
+
+      {secondCups.length > 0 && (
+        <Section label="Second cup ☕☕" color="wine">
+          {secondCups.map((m) => (
+            <MatchRow key={m.id} match={m} profile={profile} />
+          ))}
+        </Section>
+      )}
+
+      {/* All-quiet state — confirmed meets exist on /dates, nothing to do here */}
+      {!hasAction && (
+        <div className="bg-white rounded-2xl shadow-sm p-8 text-center mt-2">
+          <p className="text-3xl mb-3">☕</p>
+          <p className="font-display text-xl text-ink">All caught up</p>
+          <p className="text-ink-mid text-sm mt-2 max-w-[260px] mx-auto">
+            No new actions on your blends. Any confirmed coffees are waiting on your{" "}
+            <Link href="/dates" className="text-wine underline underline-offset-2">
+              Meets
+            </Link>
+            .
+          </p>
+        </div>
+      )}
     </div>
+  );
+}
+
+function Section({ label, color, children }: { label: string; color: "coral" | "wine" | "gray"; children: React.ReactNode }) {
+  const colorClass = color === "coral" ? "text-coral" : color === "wine" ? "text-wine" : "text-gray";
+  const dotClass = color === "coral" ? "bg-coral" : color === "wine" ? "bg-wine" : "bg-gray-light";
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-2 mb-3 px-1">
+        <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+        <p className={`text-[10px] font-mono uppercase tracking-[0.25em] ${colorClass}`}>{label}</p>
+      </div>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+
+function MatchRow({ match, profile }: { match: ReturnType<typeof useMatches>["matches"][number]; profile: User | null }) {
+  const statusMap: Record<string, { label: string; style: string }> = {
+    scheduling: { label: "Plan meet", style: "bg-coral/10 text-coral" },
+    date_proposed: { label: "Confirm meet", style: "bg-coral text-white" },
+    date_confirmed: { label: "Planned ✓", style: "bg-wine/10 text-wine" },
+    second_cup: { label: "☕☕", style: "bg-wine text-cream" },
+  };
+  const s = statusMap[match.status] || { label: match.status, style: "bg-stripe-white text-gray" };
+
+  return (
+    <Link
+      href={`/matches/${match.id}`}
+      className="block p-4 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow active:scale-[0.99]"
+    >
+      <div className="flex items-center gap-4">
+        <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-wine/10">
+          <ShimmerImage
+            src={match.otherUser.photos[0] || "/images/sipping.png"}
+            alt={match.otherUser.displayName}
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-display text-lg text-ink truncate flex items-center gap-1.5">
+            <span className="truncate">{match.otherUser.displayName}, {match.otherUser.age}</span>
+            {match.otherUser.verificationStatus === "verified" && (
+              <VerifiedBadge size="sm" className="shrink-0" />
+            )}
+          </h3>
+          {/* Show the meet's actual date/time when one is planned — Matthijs:
+              "Planned" without context was confusing. */}
+          {match.status === "date_confirmed" && match.dateTime ? (
+            <p className="text-wine text-xs font-medium truncate mt-0.5">
+              {formatMeetDate(match.dateTime.toDate())}
+            </p>
+          ) : (
+            <p className="text-gray text-sm truncate">{match.otherUser.neighborhood}</p>
+          )}
+        </div>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium shrink-0 ${s.style}`}>
+          {s.label}
+        </span>
+      </div>
+
+      {/* Coffee combo + shared interests */}
+      {(() => {
+        const combo = getCoffeeCombo(profile?.coffeeOrder, match.otherUser.coffeeOrder);
+        const shared = getSharedCount(profile, match.otherUser);
+        if (!combo && shared === 0) return null;
+        return (
+          <div className="mt-3 pt-3 border-t border-cream flex items-center gap-3 flex-wrap">
+            {combo && (
+              <span className="flex items-center gap-1.5 text-[11px] text-wine font-medium">
+                <span>☕</span> {combo}
+              </span>
+            )}
+            {shared > 0 && (
+              <span className="text-[11px] text-gray">
+                {shared} shared interest{shared > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+        );
+      })()}
+    </Link>
   );
 }

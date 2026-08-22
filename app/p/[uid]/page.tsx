@@ -127,6 +127,8 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [photoIndex, setPhotoIndex] = useState(0);
 
+  const [slowLoad, setSlowLoad] = useState(false);
+
   useEffect(() => {
     async function load() {
       if (!params.uid) return;
@@ -137,10 +139,22 @@ export default function PublicProfilePage() {
     load();
   }, [params.uid]);
 
+  // Show "taking a while" message after 5 seconds of loading
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => setSlowLoad(true), 5000);
+    return () => clearTimeout(t);
+  }, [loading]);
+
   if (loading) {
     return (
-      <div className="min-h-dvh bg-cream flex items-center justify-center">
+      <div className="min-h-dvh bg-cream flex flex-col items-center justify-center gap-4">
         <div className="w-8 h-8 rounded-full bg-wine/20 animate-pulse" />
+        {slowLoad && (
+          <p className="text-gray text-sm px-6 text-center max-w-xs">
+            Taking a while... check your connection.
+          </p>
+        )}
       </div>
     );
   }
@@ -193,7 +207,7 @@ export default function PublicProfilePage() {
         {/* Bio */}
         {profile.bio && (
           <div className="px-6 mt-6">
-            <p className="text-ink-mid leading-relaxed">{profile.bio}</p>
+            <p className="text-ink-mid leading-relaxed whitespace-pre-wrap break-words" dir="auto">{profile.bio}</p>
           </div>
         )}
 
@@ -203,7 +217,7 @@ export default function PublicProfilePage() {
             <span className="text-xl">☕</span>
             <div>
               <p className="text-[10px] text-gray uppercase tracking-wider">Their order</p>
-              <p className="text-ink text-[15px] font-medium">{profile.coffeeOrder}</p>
+              <p className="text-ink text-[15px] font-medium" dir="auto">{profile.coffeeOrder}</p>
             </div>
           </div>
         )}
@@ -214,7 +228,7 @@ export default function PublicProfilePage() {
             {profile.prompts.map((p, i) => (
               <div key={i} className="bg-wine/5 rounded-xl p-4">
                 <p className="text-wine text-xs font-medium italic mb-1">{p.question}</p>
-                <p className="text-ink text-[15px]">{p.answer}</p>
+                <p className="text-ink text-[15px] break-words" dir="auto">{p.answer}</p>
               </div>
             ))}
           </div>

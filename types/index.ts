@@ -4,9 +4,21 @@ export interface User {
   uid: string;
   displayName: string;
   age: number;
+  /** ISO date string YYYY-MM-DD. Source of truth; `age` is derived. */
+  dateOfBirth?: string;
   bio: string;
-  photos: string[]; // Firebase Storage URLs, max 6
-  neighborhood: string; // Amsterdam neighborhood
+  photos: string[]; // Firebase Storage URLs, max 6. photos[0] is always the main/hero photo.
+  neighborhood: string; // Amsterdam neighborhood — "Lives in"
+  /** "Comes from" — hometown or country of origin. Important for expats. */
+  hometown?: string;
+  /** Height in centimeters. Required at onboarding. */
+  heightCm?: number;
+  /** Languages spoken — required at onboarding. ISO-ish codes / display names. */
+  languages?: string[];
+  /** Optional career/education fields */
+  work?: string;
+  company?: string;
+  education?: string;
   interests: string[]; // tags: "specialty coffee", "cycling", "art", etc.
   lookingFor: "dating" | "friends" | "open";
   profilePrompt?: string; // answer to a fun question
@@ -18,8 +30,66 @@ export interface User {
   ageRange: [number, number];
   dateTokens: number;
   freezeUntil?: Timestamp;
+  /** UIDs this user has blocked. Blocked users never see each other. */
+  blockedUsers?: string[];
+  /**
+   * Photo verification status.
+   * - `unverified` (default) — user hasn't submitted yet
+   * - `pending` — selfie submitted, awaiting admin review
+   * - `verified` — confirmed real, shows blue checkmark
+   * - `rejected` — selfie didn't match, user can retry
+   */
+  verificationStatus?: "unverified" | "pending" | "verified" | "rejected";
+  verificationSubmittedAt?: Timestamp;
+  /** Random pose challenge that was issued — keeps selfies hard to fake. */
+  verificationPose?: "peace" | "thumbs_up" | "call_me";
+  /**
+   * BLEND Etiquette tracking — last-minute cancellations and no-shows.
+   * Profile becomes banned when thresholds are crossed (see lib/strikes.ts).
+   */
+  strikes?: Strike[];
+  /** When set, user is permanently banned and cannot use the app. */
+  bannedAt?: Timestamp;
+  banReason?: "repeated_cancellations" | "no_show" | "manual";
   createdAt: Timestamp;
   lastActive: Timestamp;
+}
+
+/**
+ * A single meet-etiquette incident. Stored as an array on the User doc
+ * because (a) we always query the user anyway, and (b) the array stays
+ * small (4-5 entries) since bans kick in early.
+ */
+export interface Strike {
+  type: "cancellation" | "no_show";
+  /** How close to the meet time the cancellation happened. */
+  timing?: "far" | "close" | "last_minute";
+  /** Free-text or canonical reason (e.g. "work_emergency", "sick"). */
+  reason?: string;
+  /** Date doc this incident happened on — for audit + admin undo. */
+  dateId: string;
+  /** For no-shows: who marked this user as no-show. Null for self-cancels. */
+  reportedBy?: string;
+  createdAt: Timestamp;
+}
+
+export type ReportReason =
+  | "inappropriate_photos"
+  | "fake_profile"
+  | "harassment"
+  | "minor" // suspected under 18
+  | "spam"
+  | "other";
+
+export interface Report {
+  id: string;
+  reporterId: string;
+  reportedId: string;
+  reason: ReportReason;
+  context: "today" | "blend" | "meet" | "chat" | "profile";
+  notes?: string;
+  resolved?: boolean;
+  createdAt: Timestamp;
 }
 
 export interface DailyProfile {

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { CoffeeRing } from "@/components/ui/CoffeeRing";
 
 const SLIDESHOW_PHOTOS = [
   "/images/coffe couple.jpeg",
@@ -50,13 +51,27 @@ let globalSlideIndex = 0;
 export function DoneForToday() {
   const [timeLeft, setTimeLeft] = useState(getTimeUntil11());
   const [slideIndex, setSlideIndex] = useState(globalSlideIndex);
+  // Before today's 11:00 drop, the copy is "brewing" — the user hasn't
+  // seen anything yet, so "that's a wrap" would be a lie.
+  const [beforeDrop, setBeforeDrop] = useState(() => new Date().getHours() < 11);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeLeft(getTimeUntil11());
+      setBeforeDrop(new Date().getHours() < 11);
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // The drop moment: if the user is sitting on this screen when the
+  // countdown hits zero, fetch the fresh batch instead of leaving them
+  // staring at 00:00:00.
+  useEffect(() => {
+    if (timeLeft > 0 && timeLeft <= 1500) {
+      const t = setTimeout(() => window.location.reload(), 1600);
+      return () => clearTimeout(t);
+    }
+  }, [timeLeft]);
 
   // Auto-advance slideshow every 4 seconds — persists across re-mounts
   useEffect(() => {
@@ -95,24 +110,34 @@ export function DoneForToday() {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent z-10" />
-        <div className="absolute bottom-0 inset-x-0 p-6 z-10">
-          <h2 className="text-3xl font-display text-white">
-            That&apos;s a wrap.
+        {/* Stronger gradient + plate so headline always reads — Rick: contrast fix */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/55 to-ink/15 z-10" />
+        <div className="absolute bottom-0 inset-x-0 z-10 px-6 pb-7 pt-12 bg-gradient-to-t from-ink/95 via-ink/65 to-transparent">
+          <h2
+            className="text-3xl font-display text-white"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.55)" }}
+          >
+            {beforeDrop ? "Today's drop is brewing." : "That's a wrap."}
           </h2>
-          <p className="text-white/70 text-sm mt-2 max-w-[260px] leading-relaxed">
-            You&apos;ve seen today&apos;s profiles. New ones drop tomorrow.
+          <p
+            className="text-white/90 text-sm mt-2 max-w-[280px] leading-relaxed"
+            style={{ textShadow: "0 1px 6px rgba(0,0,0,0.45)" }}
+          >
+            {beforeDrop
+              ? "Fresh profiles at 11:00 — grab a coffee first."
+              : "You've seen today's profiles. New ones drop tomorrow."}
           </p>
         </div>
 
       </div>
 
       {/* Countdown */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm mb-4">
-        <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-gray text-center mb-4">
+      <div className="bg-white rounded-2xl p-6 shadow-sm mb-4 relative overflow-hidden">
+        <CoffeeRing variant="ring" className="-bottom-8 -right-6 w-28 h-28" opacity={0.05} rotate={-18} />
+        <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-gray text-center mb-4 relative z-10">
           Next drop
         </p>
-        <div className="flex justify-center items-center gap-3">
+        <div className="flex justify-center items-center gap-3 relative z-10">
           <div className="flex flex-col items-center">
             <span className="text-4xl font-display text-ink tabular-nums">{hours}</span>
             <span className="text-[9px] font-mono uppercase tracking-wider text-gray-light mt-1">hrs</span>
@@ -129,7 +154,7 @@ export function DoneForToday() {
           </div>
         </div>
         <p className="text-gray text-xs text-center mt-4">
-          Tomorrow at 11:00 — be there.
+          {beforeDrop ? "Today at 11:00 — be there." : "Tomorrow at 11:00 — be there."}
         </p>
       </div>
 

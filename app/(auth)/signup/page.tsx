@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [errorType, setErrorType] = useState<"general" | "email_in_use" | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -19,17 +20,24 @@ export default function SignupPage() {
     if (loading) return;
     setLoading(true);
     setError("");
+    setErrorType(null);
     try {
       await signUp(email, password);
       router.push("/onboarding");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
       if (code === "auth/email-already-in-use") {
-        setError("This email is already registered. Try signing in.");
+        setError("This email is already registered.");
+        setErrorType("email_in_use");
       } else if (code === "auth/weak-password") {
         setError("Password must be at least 6 characters.");
+        setErrorType("general");
+      } else if (code === "auth/invalid-email") {
+        setError("That doesn't look like a valid email.");
+        setErrorType("general");
       } else {
         setError("Something went wrong. Try again.");
+        setErrorType("general");
       }
     } finally {
       setLoading(false);
@@ -71,6 +79,8 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
+            autoComplete="email"
+            aria-label="Email address"
             className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
           />
           <input
@@ -80,18 +90,28 @@ export default function SignupPage() {
             placeholder="Password (min. 6 characters)"
             required
             minLength={6}
+            autoComplete="new-password"
+            aria-label="Password, at least 6 characters"
             className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
           />
 
           {error && (
-            <p className="text-coral text-sm text-center">{error}</p>
+            <div className="text-center">
+              <p className="text-coral text-sm">{error}</p>
+              {errorType === "email_in_use" && (
+                <Link href={`/login?email=${encodeURIComponent(email)}`} className="inline-block mt-1 text-cream text-sm font-medium underline">
+                  Sign in instead →
+                </Link>
+              )}
+            </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
+            className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {loading && <span className="w-4 h-4 rounded-full border-2 border-wine border-t-transparent animate-spin" />}
             {loading ? "Creating account..." : "Sign up"}
           </button>
         </form>

@@ -66,7 +66,7 @@ export function SlotPicker({ onSubmit, submitting, existingSlots }: SlotPickerPr
                   <button
                     key={slot}
                     onClick={() => toggleSlot(slot)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`px-4 py-2.5 min-h-[44px] rounded-full text-sm font-medium transition-all active:scale-95 ${
                       isSelected
                         ? "bg-wine text-cream shadow-sm"
                         : "bg-stripe-white text-ink-mid hover:bg-cream"
@@ -82,16 +82,29 @@ export function SlotPicker({ onSubmit, submitting, existingSlots }: SlotPickerPr
       </div>
 
       <div className="mt-6">
-        <p className="text-gray text-xs mb-3 text-center">
-          {selected.size === 0
-            ? "Select your available time slots"
-            : `${selected.size} slot${selected.size > 1 ? "s" : ""} selected`}
-        </p>
+        <div className="flex items-center justify-between mb-3 min-h-[1rem]">
+          <p className="text-gray text-xs">
+            {selected.size === 0
+              ? "Select all the times you're free"
+              : selected.size < 3
+              ? `${selected.size} selected — pick 3+ for best match odds`
+              : `${selected.size} slots — nice, good overlap odds`}
+          </p>
+          {selected.size > 0 && (
+            <button
+              onClick={() => setSelected(new Set())}
+              className="text-gray text-xs underline"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <button
           onClick={() => onSubmit(Array.from(selected))}
           disabled={selected.size === 0 || submitting}
-          className="w-full py-4 rounded-full bg-wine text-cream font-medium text-lg hover:bg-burgundy transition-colors disabled:opacity-30"
+          className="w-full py-4 rounded-full bg-wine text-cream font-medium text-lg hover:bg-burgundy transition-colors disabled:opacity-30 flex items-center justify-center gap-2 active:scale-[0.98]"
         >
+          {submitting && <span className="w-4 h-4 rounded-full border-2 border-cream border-t-transparent animate-spin" />}
           {submitting ? "Submitting..." : "Submit availability"}
         </button>
       </div>

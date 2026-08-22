@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { doc, onSnapshot } from "firebase/firestore";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getUser } from "@/lib/db";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { MiniChat } from "@/components/date/MiniChat";
+import { CancelMeetModal } from "@/components/date/CancelMeetModal";
+import { NoShowPrompt } from "@/components/date/NoShowPrompt";
 import { updateDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DateRecord, User } from "@/types";
@@ -29,7 +32,8 @@ export default function DateDetailPage() {
   const [countdown, setCountdown] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [secondCupSubmitted, setSecondCupSubmitted] = useState(false);
-  const [showSecondCupResult, setShowSecondCupResult] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  // showSecondCupResult now derives from server status (second_cup)
 
   // Real-time date subscription
   useEffect(() => {
@@ -48,11 +52,22 @@ export default function DateDetailPage() {
           if (user) setOtherUser(user);
         }
         setLoading(false);
+
+        // Auto-transition status to "chat_open" once we've passed chatOpenAt.
+        // First participant to load the detail page triggers it — keeps data clean.
+        if (data.status === "upcoming" && data.chatOpenAt) {
+          const openAt = data.chatOpenAt.toDate?.() || new Date(data.chatOpenAt as unknown as string);
+          if (Date.now() >= openAt.getTime()) {
+            updateDoc(doc(db, "dates", data.id), { status: "chat_open" }).catch(() => {
+              // If another client beat us to it, that's fine
+            });
+          }
+        }
       }
     );
 
     return unsubscribe;
-  }, [firebaseUser, params.id]);
+  }, [firebaseUser, params.id, otherUser]);
 
   // Countdown timer
   useEffect(() => {
@@ -83,8 +98,23 @@ export default function DateDetailPage() {
     }
 
     updateCountdown();
-    const interval = setInterval(updateCountdown, 60000);
-    return () => clearInterval(interval);
+    // Smart polling: 1s when close (<10min), 10s when <1h, 60s otherwise
+    let timer: ReturnType<typeof setTimeout>;
+    function schedule() {
+      const dt = dateData!.dateTime?.toDate?.() || new Date(dateData!.dateTime as unknown as string);
+      const diff = dt.getTime() - Date.now();
+      const delay =
+        diff <= 0 ? 60000 :
+        diff < 10 * 60 * 1000 ? 1000 :
+        diff < 60 * 60 * 1000 ? 10000 :
+        60000;
+      timer = setTimeout(() => {
+        updateCountdown();
+        schedule();
+      }, delay);
+    }
+    schedule();
+    return () => clearTimeout(timer);
   }, [dateData]);
 
   if (loading) {
@@ -115,7 +145,8 @@ export default function DateDetailPage() {
   const chatOpenAt = dateData.chatOpenAt?.toDate?.()
     || new Date(dateData.chatOpenAt as unknown as string);
   const isSecondCup = dateData.status === "second_cup";
-  const isChatOpen = isSecondCup || new Date() >= chatOpenAt;
+  const isCancelled = dateData.status === "cancelled" || dateData.status === "no_show";
+  const isChatOpen = !isCancelled && (isSecondCup || new Date() >= chatOpenAt);
   const isPast = dateTime < new Date() && !isSecondCup;
 
   // Pre-meet calmer message
@@ -145,6 +176,20 @@ export default function DateDetailPage() {
           ← Back
         </button>
       </div>
+
+      {/* Cancellation banner — honest when things went wrong */}
+      {isCancelled && (
+        <div className="mx-4 mb-4 bg-coral/10 border border-coral/30 rounded-2xl px-4 py-3">
+          <p className="text-coral text-sm font-medium">
+            {dateData.status === "no_show" ? "Meet was missed" : "Meet was cancelled"}
+          </p>
+          <p className="text-ink-mid text-xs mt-1">
+            {dateData.status === "no_show"
+              ? "One of you didn't show up. Chat is closed."
+              : "This meet was cancelled. Chat is closed."}
+          </p>
+        </div>
+      )}
 
       {/* Countdown hero */}
       <div className="mx-4 bg-wine rounded-2xl p-8 text-center mb-6">
@@ -193,6 +238,9 @@ export default function DateDetailPage() {
             "END:VCALENDAR",
           ].join("\r\n");
           const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+          // iOS opens the .ics file in the system calendar handler when we
+          // navigate to a blob URL — the only reliable way to do this on Safari.
+          // eslint-disable-next-line react-hooks/immutability
           window.location.href = URL.createObjectURL(blob);
         }}
         className="mx-4 bg-white rounded-2xl p-5 shadow-sm mb-4 w-[calc(100%-2rem)] text-left"
@@ -239,7 +287,7 @@ export default function DateDetailPage() {
           </div>
           <div className="flex-1">
             <p className="font-display text-lg text-ink">
-              {dateData.caféName || "Café TBD"}
+              {dateData.caféName || "Spot being picked..."}
             </p>
             {dateData.caféAddress && (
               <p className="text-ink-mid text-sm mt-0.5">{dateData.caféAddress}</p>
@@ -268,7 +316,7 @@ export default function DateDetailPage() {
       <div className="mx-4 bg-white rounded-2xl p-5 shadow-sm mb-4">
         <div className="flex items-center gap-4">
           <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0">
-            <Image
+            <ShimmerImage
               src={otherUser.photos[0] || "/images/sipping.png"}
               alt={otherUser.displayName}
               fill
@@ -284,10 +332,53 @@ export default function DateDetailPage() {
         </div>
       </div>
 
+      {/* No-show prompt — appears 2h after meet time for upcoming/chat_open dates */}
+      {profileData && firebaseUser && (
+        <NoShowPrompt
+          dateId={dateData.id}
+          meetTime={dateTime}
+          status={dateData.status}
+          currentUser={profileData}
+          otherUser={otherUser}
+        />
+      )}
+
+      {/* Cancel meet — only visible when meet hasn't happened yet and isn't already cancelled */}
+      {!isCancelled && !isPast && !isSecondCup && profileData && (
+        <div className="mx-4 mb-4">
+          <button
+            onClick={() => setCancelOpen(true)}
+            className="w-full py-3 rounded-2xl text-sm text-coral/80 border border-coral/20 hover:bg-coral/5 transition-colors"
+          >
+            Cancel this meet
+          </button>
+          <p className="text-gray-light text-[11px] mt-2 text-center px-4">
+            Repeated cancellations or a no-show lead to a permanent ban. BLEND only works if everyone shows up.
+          </p>
+        </div>
+      )}
+
+      {/* Cancel modal */}
+      {profileData && (
+        <CancelMeetModal
+          open={cancelOpen}
+          onClose={() => setCancelOpen(false)}
+          onCancelled={(banned) => {
+            if (banned) {
+              // AuthProvider gate will pick this up on next snapshot
+              router.push("/dates");
+            }
+          }}
+          dateId={dateData.id}
+          meetTime={dateTime}
+          currentUser={profileData}
+        />
+      )}
+
       {/* Chat section */}
       {isChatOpen && !isPast && chatOpen ? (
         /* Full chat view */
-        <div className="fixed inset-0 z-50 bg-cream flex flex-col">
+        <div className="fixed inset-0 z-50 bg-cream flex flex-col" style={{ height: "100dvh" }}>
           {/* Chat header with back — safe area respected */}
           <div className="bg-white border-b border-stripe-white" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
             <div className="flex items-center gap-3 px-4 py-3">
@@ -339,27 +430,49 @@ export default function DateDetailPage() {
               otherUser={otherUser}
               firebaseUser={firebaseUser}
               submitted={secondCupSubmitted}
-              showResult={showSecondCupResult}
+              showResult={dateData.status === "second_cup"}
               onSubmit={async (wantSecondCup: boolean) => {
                 if (!firebaseUser || !dateData) return;
-                const ratings = dateData.ratings || {};
+                const ratings = { ...(dateData.ratings || {}) };
                 ratings[firebaseUser.uid] = {
                   ...ratings[firebaseUser.uid],
                   rating: wantSecondCup ? 5 : 3,
                   shareContact: wantSecondCup,
                   secondCup: wantSecondCup,
                 } as typeof ratings[string];
-                await updateDoc(doc(db, "dates", dateData.id), { ratings, status: "completed" });
-                setSecondCupSubmitted(true);
 
-                // Check if both submitted and both want second cup
+                // Check if both users now agree on second cup
                 const otherUid = dateData.users.find((u) => u !== firebaseUser.uid);
                 const otherRating = otherUid ? ratings[otherUid] : null;
-                if (otherRating && (otherRating as Record<string, unknown>).secondCup && wantSecondCup) {
-                  setShowSecondCupResult(true);
-                } else if (otherRating && (!(otherRating as Record<string, unknown>).secondCup || !wantSecondCup)) {
-                  // One said no — show nothing, no rejection visible
+                const bothWantSecondCup =
+                  wantSecondCup &&
+                  !!otherRating &&
+                  !!(otherRating as Record<string, unknown>).secondCup;
+
+                // Server-driven status so both clients see the same thing via onSnapshot
+                const nextStatus = bothWantSecondCup ? "second_cup" : "completed";
+                const updates: Record<string, unknown> = { ratings, status: nextStatus };
+
+                // If we're entering second_cup, reopen chat now (chatOpenAt may be in the past)
+                if (bothWantSecondCup) {
+                  updates.chatOpenAt = Timestamp.fromDate(new Date());
                 }
+
+                await updateDoc(doc(db, "dates", dateData.id), updates);
+
+                // Also update the match status so Blends list surfaces it correctly
+                if (bothWantSecondCup && dateData.matchId) {
+                  try {
+                    await updateDoc(doc(db, "matches", dateData.matchId), {
+                      status: "second_cup",
+                    });
+                  } catch {
+                    // Match may have been cleaned up — not fatal
+                  }
+                }
+
+                setSecondCupSubmitted(true);
+                // onSnapshot will push the status change; no need for client-side showResult state
               }}
             />
           ) : (

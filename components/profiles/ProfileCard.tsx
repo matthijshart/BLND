@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
-import Image from "next/image";
 import type { User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
+import { ShimmerImage } from "@/components/ui/ShimmerImage";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { ReportSheet } from "@/components/ui/ReportSheet";
 
 interface ProfileCardProps {
   profile: User;
@@ -44,11 +46,15 @@ function getOverlaps(currentUser: User | undefined, profile: User) {
 }
 
 export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser }: ProfileCardProps) {
+  // Rick: foto's onder elkaar i.p.v. carousel. We open the fullscreen
+  // viewer on tap and let users scroll the page to see additional photos.
   const [photoIndex, setPhotoIndex] = useState(0);
   const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const [exitX, setExitX] = useState(0);
   const [swiped, setSwiped] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const photos = profile.photos?.length > 0 ? profile.photos : ["/images/sipping.png"];
   const overlaps = getOverlaps(currentUser, profile);
@@ -77,12 +83,9 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
     else setDragDirection(null);
   }
 
-  function nextPhoto() {
-    if (photoIndex < photos.length - 1) setPhotoIndex(photoIndex + 1);
-  }
-
-  function prevPhoto() {
-    if (photoIndex > 0) setPhotoIndex(photoIndex - 1);
+  function openViewerAt(i: number) {
+    setPhotoIndex(i);
+    setViewerOpen(true);
   }
 
   return (
@@ -96,38 +99,51 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
         onDragEnd={handleDragEnd}
         animate={swiped ? { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 } : { x: 0 }}
         transition={swiped ? { duration: 0.3, ease: "easeOut" } : { type: "spring", stiffness: 500, damping: 30 }}
-        style={{ rotate: 0 }}
+        // touchAction pan-y lets iOS scroll the page vertically while
+        // we still capture horizontal drags. Prevents the native
+        // back-swipe gesture from competing with the like/pass swipe.
+        style={{ rotate: 0, touchAction: "pan-y" }}
         whileDrag={{ scale: 1.02 }}
         className="rounded-2xl overflow-hidden shadow-lg bg-white cursor-grab active:cursor-grabbing"
       >
-        {/* Photo section — shorter to show content below */}
+        {/* Main photo — Rick: single hero, additional photos stacked below */}
         <div className="relative aspect-[4/5]">
-          <Image
-            src={photos[photoIndex]}
+          <ShimmerImage
+            src={photos[0]}
             alt={profile.displayName}
             fill
             className="object-cover pointer-events-none"
             priority
           />
 
-          {/* Photo navigation — tap left/right, center to enlarge */}
-          {photos.length > 1 ? (
-            <>
-              <button onClick={prevPhoto} className="absolute inset-y-0 left-0 w-1/3 z-10" />
-              <button onClick={() => setViewerOpen(true)} className="absolute inset-y-0 left-1/3 w-1/3 z-10" />
-              <button onClick={nextPhoto} className="absolute inset-y-0 right-0 w-1/3 z-10" />
-              {/* Progress dots */}
-              <div className="absolute top-3 inset-x-0 flex gap-1 px-3 z-20">
-                {photos.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`flex-1 h-[2.5px] rounded-full ${i === photoIndex ? "bg-white/90" : "bg-white/30"}`}
-                  />
-                ))}
-              </div>
-            </>
-          ) : (
-            <button onClick={() => setViewerOpen(true)} className="absolute inset-0 z-10" />
+          {/* Single tap-to-fullscreen — no competing left/right zones,
+              which fixes Rick's "swipen werkt niet goed bij klikken" bug */}
+          <button
+            onClick={() => openViewerAt(0)}
+            className="absolute inset-0 z-10"
+            aria-label="View photo"
+          />
+
+          {/* Photo counter chip — tells users there are more photos below */}
+          {photos.length > 1 && (
+            <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-full bg-ink/45 backdrop-blur-md text-white text-[11px] font-medium pointer-events-none">
+              {photos.length} photos
+            </div>
+          )}
+
+          {/* Report/block menu — subtle 3-dot button */}
+          {!previewMode && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setReportOpen(true); }}
+              aria-label="Report or block this person"
+              className="absolute top-3 right-3 w-11 h-11 rounded-full bg-ink/30 backdrop-blur-md flex items-center justify-center z-30 active:scale-95 transition-transform"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+                <circle cx="5" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="19" cy="12" r="1.5" />
+              </svg>
+            </button>
           )}
 
           {/* Drag indicator — large and clear */}
@@ -153,28 +169,31 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
           {/* Gradient + name overlay */}
           <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent z-10" />
           <div className="absolute inset-x-0 bottom-0 p-5 z-10">
-            <h3 className="text-2xl font-display text-white">
-              {profile.displayName}, {profile.age}
+            <h3 className="text-2xl font-display text-white truncate flex items-center gap-1.5" title={`${profile.displayName}, ${profile.age}`}>
+              <span className="truncate">{profile.displayName}, {profile.age}</span>
+              {profile.verificationStatus === "verified" && (
+                <VerifiedBadge size="md" className="shrink-0" />
+              )}
             </h3>
-            <div className="flex items-center gap-1.5 mt-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
+            <div className="flex items-center gap-1.5 mt-1 min-w-0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60 shrink-0">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              <span className="text-white/60 text-sm">{profile.neighborhood}</span>
+              <span className="text-white/60 text-sm truncate">{profile.neighborhood}</span>
             </div>
           </div>
         </div>
 
         {/* Content below photo — always visible, scroll to see */}
-        <div className="p-5 space-y-4">
+        <div className="p-6 space-y-5">
           {/* Coffee order as signature */}
           {profile.coffeeOrder && (
             <div className={`flex items-center gap-3 -mt-1 ${overlaps.sameCoffee ? "bg-wine/8 -mx-5 px-5 py-2.5 rounded-xl" : ""}`}>
               <span className="text-lg">☕</span>
               <div className="flex-1">
                 <p className="text-[9px] text-gray uppercase tracking-[0.2em]">Go-to coffee</p>
-                <p className="text-ink font-medium text-sm">{profile.coffeeOrder}</p>
+                <p className="text-ink font-medium text-sm" dir="auto">{profile.coffeeOrder}</p>
               </div>
               {overlaps.sameCoffee && (
                 <span className="text-[10px] text-wine font-medium bg-wine/10 px-2 py-0.5 rounded-full">Same!</span>
@@ -184,19 +203,19 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
 
           {/* Bio */}
           {profile.bio && (
-            <p className="text-ink-mid text-[15px] leading-relaxed">{profile.bio}</p>
+            <p className="text-ink-mid text-[15px] leading-relaxed whitespace-pre-wrap break-words" dir="auto">{profile.bio}</p>
           )}
 
-          {/* Prompts — compact, with overlap highlights */}
+          {/* Prompts — compact dilemma cards per Rick (less "stuko") */}
           {profile.prompts && profile.prompts.length > 0 && (
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {profile.prompts.map((p, i) => {
                 const isSameQuestion = overlaps.promptQuestions.has(p.question);
                 const isSameAnswer = overlaps.sameAnswer.has(p.question);
                 return (
-                  <div key={i} className={`rounded-xl px-4 py-3.5 ${isSameAnswer ? "bg-wine/10 border border-wine/20" : isSameQuestion ? "bg-wine/5 border border-wine/10" : "bg-cream"}`}>
+                  <div key={i} className={`rounded-xl px-4 py-3 ${isSameAnswer ? "bg-wine/10 border border-wine/20" : isSameQuestion ? "bg-wine/5 border border-wine/10" : "bg-cream"}`}>
                     <div className="flex items-center justify-between">
-                      <p className="text-wine text-[10px] font-medium uppercase tracking-wider mb-1">{p.question}</p>
+                      <p className="text-wine/80 text-[10px] font-medium uppercase tracking-[0.15em] mb-0.5">{p.question}</p>
                       {isSameAnswer && (
                         <span className="text-[9px] text-wine font-medium bg-wine/15 px-2 py-0.5 rounded-full">Same answer!</span>
                       )}
@@ -204,7 +223,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
                         <span className="text-[9px] text-wine/70 font-medium">You too</span>
                       )}
                     </div>
-                    <p className="text-ink text-[15px] leading-snug">{p.answer}</p>
+                    <p className="text-ink text-[14px] leading-snug break-words" dir="auto">{p.answer}</p>
                   </div>
                 );
               })}
@@ -215,7 +234,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
           {profile.profilePrompt && !profile.prompts?.length && (
             <div className="bg-wine/5 rounded-xl p-4">
               <p className="text-wine text-xs font-medium italic mb-1">Fun fact</p>
-              <p className="text-ink text-[15px]">{profile.profilePrompt}</p>
+              <p className="text-ink text-[15px] break-words" dir="auto">{profile.profilePrompt}</p>
             </div>
           )}
 
@@ -233,53 +252,112 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
             </div>
           )}
 
-          {/* Interests — shared ones highlighted */}
+          {/* Interests — Rick: kopje boven de tags */}
           {profile.interests && profile.interests.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {/* Shared interests first */}
-              {profile.interests
-                .sort((a, b) => {
-                  const aShared = overlaps.interests.has(a) ? 0 : 1;
-                  const bShared = overlaps.interests.has(b) ? 0 : 1;
-                  return aShared - bShared;
-                })
-                .map((interest) => {
-                  const isShared = overlaps.interests.has(interest);
-                  return (
-                    <span
-                      key={interest}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-medium ${
-                        isShared
-                          ? "bg-wine text-cream"
-                          : "bg-wine/8 text-ink border border-wine/10"
-                      }`}
-                    >
-                      {interest}{isShared ? " ✓" : ""}
-                    </span>
-                  );
-                })}
+            <div className="pt-1">
+              <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-2.5">Interests</p>
+              <div className="flex flex-wrap gap-2">
+                {/* Shared interests first */}
+                {profile.interests
+                  .sort((a, b) => {
+                    const aShared = overlaps.interests.has(a) ? 0 : 1;
+                    const bShared = overlaps.interests.has(b) ? 0 : 1;
+                    return aShared - bShared;
+                  })
+                  .map((interest) => {
+                    const isShared = overlaps.interests.has(interest);
+                    return (
+                      <span
+                        key={interest}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-medium ${
+                          isShared
+                            ? "bg-wine text-cream"
+                            : "bg-wine/8 text-ink border border-wine/10"
+                        }`}
+                      >
+                        {interest}{isShared ? " ✓" : ""}
+                      </span>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+          {/* More photos — Rick: foto's onder elkaar in plaats van carousel */}
+          {photos.length > 1 && (
+            <div className="pt-2 space-y-3">
+              <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold">More photos</p>
+              {photos.slice(1).map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => openViewerAt(i + 1)}
+                  className="block w-full relative aspect-[4/5] rounded-2xl overflow-hidden border border-ink/10 shadow-sm bg-stripe-white"
+                  aria-label={`View photo ${i + 2}`}
+                >
+                  <ShimmerImage
+                    src={url}
+                    alt={`${profile.displayName} photo ${i + 2}`}
+                    fill
+                    className="object-cover"
+                    draggable={false}
+                  />
+                </button>
+              ))}
             </div>
           )}
         </div>
       </motion.div>
 
-      {/* Action buttons */}
+      {/* Heart pop animation overlay */}
+      <AnimatePresence>
+        {showHeart && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.svg
+              width="80"
+              height="80"
+              viewBox="0 0 24 24"
+              fill="#6b1520"
+              initial={{ scale: 0.5, opacity: 0.8 }}
+              animate={{ scale: 1.2, opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </motion.svg>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Action buttons — Apple HIG minimum 44pt tap target (we use 64px for comfort) */}
       {!previewMode && (
-        <div className="flex justify-center gap-6 mt-5">
+        <div className="flex justify-center gap-8 mt-6">
           <button
             onClick={onPass}
-            className="w-14 h-14 rounded-full bg-white text-gray flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+            aria-label="Pass"
+            className="w-16 h-16 rounded-full bg-white text-gray flex items-center justify-center shadow-sm hover:shadow-md transition-all active:scale-95"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
           <button
-            onClick={onLike}
-            className="w-14 h-14 rounded-full bg-wine text-cream flex items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+            onClick={() => {
+              setShowHeart(true);
+              setTimeout(() => {
+                setShowHeart(false);
+                onLike();
+              }, 600);
+            }}
+            aria-label="Interested"
+            className="w-16 h-16 rounded-full bg-wine text-cream flex items-center justify-center shadow-sm hover:shadow-md transition-all active:scale-95"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
           </button>
@@ -296,6 +374,19 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
           />
         )}
       </AnimatePresence>
+
+      {/* Report / block bottom sheet */}
+      <ReportSheet
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        targetUid={profile.uid}
+        targetName={profile.displayName}
+        context="today"
+        onBlocked={() => {
+          // After block, immediately pass on this profile so they're removed from view
+          setTimeout(() => onPass(), 300);
+        }}
+      />
     </div>
   );
 }

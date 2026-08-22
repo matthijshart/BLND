@@ -1,15 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { signIn, signInWithGoogle, resetPassword } from "@/lib/auth";
 import { getUser } from "@/lib/db";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-wine" />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
+
+  // Pre-fill email from signup redirect (?email=...)
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) setEmail(emailParam);
+  }, [searchParams]);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,6 +103,8 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
+              autoComplete="email"
+              aria-label="Email address"
               className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
             />
 
@@ -113,8 +130,9 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
+                  className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
+                  {loading && <span className="w-4 h-4 rounded-full border-2 border-wine border-t-transparent animate-spin" />}
                   {loading ? "Sending..." : "Send reset link"}
                 </button>
                 <button
@@ -135,11 +153,15 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
+              autoComplete="email"
+              aria-label="Email address"
               className="w-full px-5 py-4 rounded-full bg-cream/10 text-cream border border-cream/20 placeholder:text-cream/30 focus:outline-none focus:border-cream/50 transition-colors"
             />
             <input
               type="password"
               value={password}
+              autoComplete="current-password"
+              aria-label="Password"
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
@@ -163,8 +185,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50"
+              className="w-full py-4 rounded-full bg-cream text-wine font-medium text-lg hover:bg-stripe-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
+              {loading && <span className="w-4 h-4 rounded-full border-2 border-wine border-t-transparent animate-spin" />}
               {loading ? "Signing in..." : "Sign in"}
             </button>
           </form>

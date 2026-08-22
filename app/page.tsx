@@ -15,13 +15,20 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showExample, setShowExample] = useState(false);
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email || isSubmitting) return;
+    const trimmed = email.trim();
+    if (!EMAIL_REGEX.test(trimmed)) {
+      setError("That doesn't look like a valid email.");
+      return;
+    }
     setIsSubmitting(true);
     setError("");
     try {
-      await addToWaitlist(email, "Amsterdam");
+      await addToWaitlist(trimmed, "Amsterdam");
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Try again.");
@@ -33,8 +40,11 @@ export default function LandingPage() {
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden scroll-smooth">
       {/* ─── TOP BANNER: Coming soon ─── */}
-      <div className="bg-cream text-wine/60 py-2 px-4 text-center text-[11px] font-mono tracking-wider">
-        Coming soon to the App Store
+      <div className="bg-wine text-cream py-2.5 px-4 text-center text-[11px] font-mono tracking-[0.2em] uppercase flex items-center justify-center gap-2">
+        <svg width="10" height="12" viewBox="0 0 24 24" fill="currentColor" className="opacity-70">
+          <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+        </svg>
+        <span>Coming soon to the App Store</span>
       </div>
 
       {/* ─── NAV: Subtle hamburger menu ─── */}
@@ -59,6 +69,7 @@ export default function LandingPage() {
           >
             {[
               { label: "How it works", href: "#how" },
+              { label: "The standard", href: "#standard" },
               { label: "Pricing", href: "#pricing" },
               { label: "For everyone", href: "#everyone" },
               { label: "A glimpse", href: "#glimpse" },
@@ -316,6 +327,71 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── THE BLEND STANDARD: trust as the product ─── */}
+      <section id="standard" className="bg-stripe-white py-24 sm:py-28 px-6 scroll-mt-12">
+        <div className="max-w-lg mx-auto">
+          <ScrollReveal variant="fade">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-4 text-center">
+              The BLEND standard
+            </p>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.1}>
+            <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug text-center">
+              Dating apps tolerate flakes.
+              <br />
+              <span className="text-wine">We don&apos;t.</span>
+            </h2>
+          </ScrollReveal>
+
+          <StaggerContainer className="mt-14 space-y-4" staggerDelay={0.12}>
+            {[
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1l2.4 2.5 3.4-.4 1.3 3.2 3 1.7-.7 3.4L23 13l-2.5 2.4.4 3.4-3.2 1.3-1.7 3-3.4-.7L9.6 23l-2.4-2.5-3.4.4-1.3-3.2-3-1.7.7-3.4L1 11l2.5-2.4-.4-3.4 3.2-1.3 1.7-3 3.4.7L12 1z" fill="#6b1520" stroke="none" opacity="0.12" />
+                    <path d="M9.5 12.5l2 2 4-4.5" />
+                  </svg>
+                ),
+                title: "Verified faces",
+                desc: "Selfie verification with a random pose. Catfishing doesn't survive a live camera.",
+              },
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" opacity="0.25" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                ),
+                title: "Zero-flake policy",
+                desc: "Cancel last-minute twice, or no-show once, and your account is gone. Permanently. People show up on BLEND.",
+              },
+              {
+                icon: (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b1520" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 8h1a4 4 0 110 8h-1" />
+                    <path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" />
+                  </svg>
+                ),
+                title: "Curated spots",
+                desc: "Hand-picked Amsterdam cafés — good light, good coffee, easy to find. We choose, so nobody has to negotiate.",
+              },
+            ].map((item, i) => (
+              <StaggerItem key={i}>
+                <div className="flex items-start gap-4 bg-cream rounded-2xl p-5">
+                  <div className="w-11 h-11 rounded-full bg-wine/8 flex items-center justify-center shrink-0">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-display text-lg text-ink">{item.title}</h3>
+                    <p className="text-ink-mid text-sm mt-1 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </div>
+      </section>
+
       {/* ─── FOR EVERYONE: Inclusive positioning ─── */}
       <section id="everyone" className="bg-cream py-24 sm:py-32 px-6 scroll-mt-12">
         <div className="max-w-lg mx-auto text-center">
@@ -345,24 +421,28 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── PRICING: Clean and bold ─── */}
-      <section id="pricing" className="bg-stripe-white py-24 sm:py-32 px-6 scroll-mt-12">
-        <div className="max-w-md mx-auto text-center">
+      {/* ─── PRICING: Editorial, subdued, on cream ─── */}
+      <section id="pricing" className="bg-cream py-24 sm:py-32 px-6 scroll-mt-12 relative overflow-hidden">
+        {/* Subtle decorative circle */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-wine/[0.04] pointer-events-none" />
+
+        <div className="max-w-md mx-auto text-center relative z-10">
           <ScrollReveal variant="fade">
-            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
-              Simple pricing
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine/60 mb-12">
+              — The cost of entry —
             </p>
           </ScrollReveal>
           <ScrollReveal variant="fade-up" delay={0.1}>
-            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine mb-3">
+            <p className="font-mono text-[10px] tracking-[0.5em] uppercase text-wine mb-4">
               Only
             </p>
             <div className="flex items-baseline justify-center gap-2">
-              <span className="text-7xl sm:text-8xl font-display text-ink">€8,99</span>
-              <span className="text-xl text-wine font-light">/month</span>
+              <span className="text-7xl sm:text-8xl font-display text-ink tracking-tight">€8,99</span>
+              <span className="text-xl text-wine font-light font-display">/month</span>
             </div>
-            <p className="mt-3 text-gray text-sm tracking-wide">
-              <span className="text-wine">Cancel every month. No strings attached.</span>
+            <div className="w-8 h-px bg-wine/30 mx-auto mt-8" />
+            <p className="mt-5 text-ink-mid text-sm italic font-display">
+              Cancel every month. No strings attached.
             </p>
           </ScrollReveal>
 

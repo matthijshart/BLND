@@ -14,8 +14,23 @@ import {
 import { db } from "./firebase";
 import type { User } from "@/types";
 
-function todayString() {
-  return new Date().toISOString().split("T")[0];
+/** The hour (local time) at which the daily batch drops. Core BLEND ritual. */
+export const DROP_HOUR = 11;
+
+/**
+ * LOCAL date string (YYYY-MM-DD) — the day flips at local midnight, so the
+ * 11:00 drop gate works in the user's own timezone. (Previously used
+ * toISOString() which is UTC — in Amsterdam that made "tomorrow" start at
+ * 02:00 and the promised 11:00 ritual didn't exist at all.)
+ */
+export function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** True when today's drop hasn't happened yet (local time). */
+export function isBeforeDrop(now: Date = new Date()): boolean {
+  return now.getHours() < DROP_HOUR;
 }
 
 export async function getDailyDoc(uid: string) {
@@ -151,9 +166,14 @@ export async function fetchCandidateProfiles(
     getMatchedUids(uid),
   ]);
 
-  users = users.filter(
-    (u) => !alreadySwiped.has(u.uid) && !alreadyMatched.has(u.uid)
-  );
+  // Mutual block filter: never show blocked users, and never show users who blocked you
+  const myBlocked = new Set(currentUser?.blockedUsers || []);
+  users = users.filter((u) => {
+    if (myBlocked.has(u.uid)) return false;
+    const theirBlocked = new Set(u.blockedUsers || []);
+    if (theirBlocked.has(uid)) return false;
+    return !alreadySwiped.has(u.uid) && !alreadyMatched.has(u.uid);
+  });
 
   // Shuffle and return max
   const shuffled = users.sort(() => Math.random() - 0.5);

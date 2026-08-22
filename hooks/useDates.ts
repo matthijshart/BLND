@@ -23,6 +23,9 @@ export function useDates() {
 
   useEffect(() => {
     if (!firebaseUser) {
+      // setState inside effect when guard fails — lint rule complains but
+      // this is correct: nothing to subscribe to, surface a stable empty state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
