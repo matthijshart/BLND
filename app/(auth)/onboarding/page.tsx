@@ -63,7 +63,7 @@ function calcAge(dob: string): number {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { firebaseUser, refreshProfile } = useAuthContext();
+  const { firebaseUser, hasProfile, loading: authLoading, refreshProfile } = useAuthContext();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +100,15 @@ export default function OnboardingPage() {
   const [uploading, setUploading] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeSlot, setActiveSlot] = useState(0);
+
+  // ─── Guard: onboarding is a one-time flow ───
+  // Nothing stopped a finished user from landing back here (back button, a
+  // bookmark, a redirect firing on a slow profile read) and running it again.
+  useEffect(() => {
+    if (!authLoading && firebaseUser && hasProfile) {
+      router.replace("/today");
+    }
+  }, [authLoading, firebaseUser, hasProfile, router]);
 
   // ─── Draft restore on mount ───
   useEffect(() => {
