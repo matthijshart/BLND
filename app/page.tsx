@@ -68,6 +68,7 @@ export default function LandingPage() {
             className="fixed inset-0 z-40 bg-wine/95 backdrop-blur-lg flex flex-col items-center justify-center gap-8"
           >
             {[
+              { label: "One rule", href: "#rule" },
               { label: "How it works", href: "#how" },
               { label: "The standard", href: "#standard" },
               { label: "Pricing", href: "#pricing" },
@@ -150,6 +151,15 @@ export default function LandingPage() {
             <div className="w-px h-5 bg-cream/20" />
             <div className="w-2.5 h-2.5 rounded-full bg-cream/80" />
           </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.6, ease: [0.25, 0.1, 0.25, 1] }}
+            className="mt-8 text-base sm:text-lg text-cream/40 max-w-xs mx-auto leading-relaxed"
+          >
+            Coffee with someone new, at eleven in the morning. An hour, not a night.
+          </motion.p>
         </div>
 
         {/* Scroll indicator — animated bounce */}
@@ -211,30 +221,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── QUOTE: One liner ─── */}
-      <section className="bg-wine py-16 sm:py-20 px-6">
-        <ScrollReveal variant="fade" duration={1.2}>
-          <p className="max-w-lg mx-auto text-center text-2xl sm:text-3xl font-display text-cream leading-snug">
-            &ldquo;Dating the way it should be: face to face.&rdquo;
-          </p>
-        </ScrollReveal>
-      </section>
-
-      {/* ─── NO ALCOHOL: Subtle sneer ─── */}
-      <section className="bg-cream py-14 sm:py-16 px-6">
-        <div className="max-w-md mx-auto text-center">
-          <ScrollReveal variant="fade-up">
-            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray/60 mb-4">
-              A conscious choice
+      {/* ─── QUOTE: The queue ─── */}
+      <section className="bg-wine py-20 sm:py-24 px-6">
+        <div className="max-w-lg mx-auto text-center">
+          <ScrollReveal variant="fade" duration={1.2}>
+            <p className="text-2xl sm:text-3xl font-display text-cream leading-snug">
+              There was a time people just said something in the queue for coffee.
             </p>
-            <h3 className="text-2xl sm:text-3xl font-display text-ink leading-snug">
-              No cocktails. No wine bars.<br />
-              <span className="text-wine">No liquid courage needed.</span>
-            </h3>
           </ScrollReveal>
-          <ScrollReveal variant="fade-up" delay={0.2}>
-            <p className="mt-5 text-ink-mid text-sm leading-relaxed max-w-sm mx-auto">
-              Other apps send you to a bar at 9pm. We think you&apos;re interesting enough without three glasses of Chardonnay. Daytime. Coffee. Just you.
+          <ScrollReveal variant="fade" delay={0.35} duration={1.2}>
+            <p className="mt-5 text-2xl sm:text-3xl font-display text-cream/50 leading-snug">
+              Nobody planned it. Nobody had to survive it.
             </p>
           </ScrollReveal>
         </div>
@@ -261,7 +258,7 @@ export default function LandingPage() {
           <StaggerContainer className="mt-12 space-y-6 text-ink-mid text-lg leading-relaxed" staggerDelay={0.15}>
             <StaggerItem>
               <p>
-                Dating apps promised connection but gave you a screen to hide behind. BLEND removes everything that gets in the way — the endless texting, the choosing where to go, the overthinking what to say first.
+                Somewhere along the way, meeting someone turned into work. Three weeks of texting to get to a Thursday. A bar at nine. A bill. A Sunday to recover from it. Nobody decided that was the price. It crept up, and most people quietly stopped paying it.
               </p>
             </StaggerItem>
             <StaggerItem>
@@ -270,6 +267,86 @@ export default function LandingPage() {
               </p>
             </StaggerItem>
           </StaggerContainer>
+        </div>
+      </section>
+
+      {/* ─── ONE RULE: No alcohol, daytime only — the argument the page rests on ─── */}
+      <section id="rule" className="bg-cream py-24 sm:py-32 px-6 scroll-mt-12">
+        <div className="max-w-lg mx-auto text-center">
+          <ScrollReveal variant="fade-up">
+            <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-gray mb-10">
+              One rule
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug">
+              No cocktails. No wine bars.<br />
+              <span className="text-wine">No liquid courage needed.</span>
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.15}>
+            <p className="mt-6 text-wine text-lg">
+              Nothing against a drink. This just isn&apos;t one.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal variant="fade-up" delay={0.25}>
+            <p className="mt-6 text-ink-mid text-base sm:text-lg leading-relaxed max-w-md mx-auto">
+              Other apps send you to a bar at 9pm. We think you&apos;re interesting enough without three glasses of Chardonnay. Daytime. Coffee. Just you.
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal variant="fade" delay={0.15}>
+            <div className="w-px h-12 bg-wine/15 mx-auto mt-16" />
+            <p className="mt-10 text-xl sm:text-2xl font-display text-ink leading-snug max-w-sm mx-auto">
+              Take out the drink and the evening goes with it.
+            </p>
+          </ScrollReveal>
+
+          <StaggerContainer className="mt-12 space-y-10 sm:space-y-12" staggerDelay={0.12}>
+            <StaggerItem>
+              <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine/60 mb-3">
+                The time
+              </p>
+              <p className="text-ink text-lg leading-relaxed max-w-sm mx-auto">
+                It happens at eleven, in daylight.
+              </p>
+            </StaggerItem>
+            <StaggerItem>
+              <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine/60 mb-3">
+                The length
+              </p>
+              <p className="text-ink text-lg leading-relaxed max-w-sm mx-auto">
+                Sixty minutes, with an ending built in. Nobody has to invent an excuse to leave.
+              </p>
+            </StaggerItem>
+            <StaggerItem>
+              <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine/60 mb-3">
+                The cost
+              </p>
+              <p className="text-ink text-lg leading-relaxed max-w-sm mx-auto">
+                It costs you an hour, not a night.
+              </p>
+              <p className="mt-2 text-gray text-base leading-relaxed max-w-sm mx-auto">
+                You&apos;re back on your bike by noon, with the whole Saturday still in front of you.
+              </p>
+            </StaggerItem>
+            <StaggerItem>
+              <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-wine/60 mb-3">
+                The person
+              </p>
+              <p className="text-ink text-lg leading-relaxed max-w-sm mx-auto">
+                You meet them, not their third drink.
+              </p>
+            </StaggerItem>
+          </StaggerContainer>
+
+          <ScrollReveal variant="fade-up" delay={0.1}>
+            <div className="w-12 h-px bg-wine/30 mx-auto mt-16" />
+            <p className="mt-10 text-2xl sm:text-3xl font-display text-ink leading-snug">
+              An hour is small. That is the point.
+            </p>
+            <p className="mt-5 text-ink-mid text-lg leading-relaxed max-w-md mx-auto">
+              But an hour of someone&apos;s whole attention, in daylight, with nothing else competing for it, is not a small thing to be given.
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -293,8 +370,8 @@ export default function LandingPage() {
               {[
                 { label: "11:00", title: "Profiles drop", desc: "8–12 curated people. Every morning." },
                 { label: "Like", title: "Like or pass", desc: "No infinite scroll. Today is today." },
-                { label: "Blend", title: "It\u0027s a blend", desc: "You both liked each other. Now pick your free slots — Fri to Sun, daytime." },
-                { label: "Spot", title: "We handle the rest", desc: "We match your times, pick a coffee spot between your neighborhoods." },
+                { label: "Blend", title: "It\u0027s a blend", desc: "You both liked each other. Pick your free hours — Fri to Sun, 9:00 to 15:00." },
+                { label: "Café", title: "We handle the rest", desc: "We match your hours and pick a café between your neighborhoods." },
                 { label: "Meet", title: "Show up", desc: "60 min. One coffee. No small talk beforehand. That\u0027s it." },
               ].map((step, i) => (
                 <StaggerItem key={i}>
@@ -337,7 +414,7 @@ export default function LandingPage() {
           </ScrollReveal>
           <ScrollReveal variant="fade-up" delay={0.1}>
             <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug text-center">
-              Dating apps tolerate flakes.
+              Most apps tolerate flakes.
               <br />
               <span className="text-wine">We don&apos;t.</span>
             </h2>
@@ -400,7 +477,8 @@ export default function LandingPage() {
               For everyone
             </p>
             <h2 className="text-3xl sm:text-4xl font-display text-ink leading-snug">
-              Looking for love, friendship, or just someone to grab coffee with.
+              Two people, one table, an hour.<br />
+              <span className="text-wine">What it turns into is nobody&apos;s business but yours.</span>
             </h2>
           </ScrollReveal>
           <ScrollReveal variant="fade-up" delay={0.15}>
@@ -410,7 +488,7 @@ export default function LandingPage() {
           </ScrollReveal>
 
           <StaggerContainer className="flex flex-wrap justify-center gap-2.5 mt-10" staggerDelay={0.08}>
-            {["Dating", "Friendship", "New in town", "Expats", "Coffee people"].map((tag) => (
+            {["New in town", "Expats", "Between circles", "Coffee people", "Curious"].map((tag) => (
               <StaggerItem key={tag}>
                 <span className="px-5 py-2 rounded-full bg-wine/8 text-wine text-sm font-medium border border-wine/10 inline-block">
                   {tag}
@@ -442,14 +520,14 @@ export default function LandingPage() {
             </div>
             <div className="w-8 h-px bg-wine/30 mx-auto mt-8" />
             <p className="mt-5 text-ink-mid text-sm italic font-display">
-              Cancel every month. No strings attached.
+              Cancel any month.
             </p>
           </ScrollReveal>
 
           <ScrollReveal variant="fade" delay={0.1}>
             <p className="mt-12 text-2xl sm:text-3xl font-display text-ink leading-snug">
-              &ldquo;Your matcha costs more.<br />
-              <span className="text-wine">And it never texts back.&rdquo;</span>
+              Your matcha costs more.<br />
+              <span className="text-wine">The coffee itself is still on you.</span>
             </p>
           </ScrollReveal>
 
@@ -474,7 +552,7 @@ export default function LandingPage() {
         <div className="max-w-md mx-auto text-center relative z-10">
           <ScrollReveal variant="blur" duration={1}>
             <h2 className="text-4xl sm:text-5xl font-display leading-tight">
-              Where dates<br />begin.
+              An hour is not<br />a big decision.
             </h2>
           </ScrollReveal>
           <ScrollReveal variant="fade-up" delay={0.2}>
@@ -531,10 +609,10 @@ export default function LandingPage() {
         <div className="flex gap-3 overflow-x-auto pl-6 pr-3 pb-4 snap-x snap-proximity scrollbar-hide">
           {[
             { src: "/images/Surf coffee.jpeg", alt: "Surf coffee", aspect: "aspect-[3/4]", width: "w-48" },
-            { src: "/images/date.jpeg", alt: "Coffee date", aspect: "aspect-[4/5]", width: "w-44" },
+            { src: "/images/date.jpeg", alt: "Two coffees at a café", aspect: "aspect-[4/5]", width: "w-44" },
             { src: "/images/Italian spot.jpeg", alt: "Italian spot", aspect: "aspect-[3/4]", width: "w-48" },
             { src: "/images/koffi3.jpeg", alt: "Coffee moment", aspect: "aspect-[4/5]", width: "w-44" },
-            { src: "/images/datemen2.jpeg", alt: "Coffee date", aspect: "aspect-[3/4]", width: "w-48" },
+            { src: "/images/datemen2.jpeg", alt: "Morning table", aspect: "aspect-[3/4]", width: "w-48" },
             { src: "/images/hip.jpeg", alt: "Hip café", aspect: "aspect-[4/5]", width: "w-44" },
             { src: "/images/bike.jpeg", alt: "Amsterdam bike", aspect: "aspect-[4/5]", width: "w-44" },
             { src: "/images/boekjelezen.jpeg", alt: "Reading at a café", aspect: "aspect-[3/4]", width: "w-48" },
