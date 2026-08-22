@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// BLEND — Cloud Storage security rules
+// Only path the app ever writes is lib/storage.ts:
+//   users/{uid}/photos/{0..5}.jpg
+//
+// Deploy with:  firebase deploy --only storage
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /users/{uid}/photos/{fileName} {
+      // Profile photos are already handed out as long-lived
+      // ?alt=media&token=… download URLs and are rendered on the public
+      // /p/{uid} share page, so reads stay open. If that page is ever made
+      // members-only, tighten this to `request.auth != null`.
+      allow read: if true;
+
+      allow create, update: if request.auth != null
+                            && request.auth.uid == uid
+                            && fileName.matches('^[0-5]\\.jpg$')
+                            && request.resource.size < 8 * 1024 * 1024
+                            && request.resource.contentType.matches('image/.*');
+
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // No other path in the bucket is writable or listable from a browser.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

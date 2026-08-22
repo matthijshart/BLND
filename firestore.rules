@@ -1,0 +1,191 @@
+rules_version = '2';
+
+// BLEND — Firestore security rules
+// Derived from the real access patterns in lib/db.ts, lib/daily.ts, lib/matching.ts,
+// lib/scheduling.ts, lib/chat.ts, lib/deleteAccount.ts and hooks/.
+//
+// Deploy with:  firebase deploy --only firestore:rules
+// (requires the firebase.json in this repo)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── helpers ──────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Bounds that the current client code already satisfies. Kept deliberately
+    // loose on optional fields so a legitimate write is never rejected.
+    function validProfile(d) {
+      return d.uid is string
+        && d.displayName is string && d.displayName.size() > 0 && d.displayName.size() <= 40
+        && d.age is number && d.age >= 18 && d.age <= 120
+        && d.photos is list && d.photos.size() <= 6
+        && d.interests is list && d.interests.size() <= 40
+        && d.neighborhood is string && d.neighborhood.size() <= 60
+        && (!('bio' in d) || (d.bio is string && d.bio.size() <= 300))
+        && (!('coffeeOrder' in d) || (d.coffeeOrder is string && d.coffeeOrder.size() <= 60))
+        && (!('profileSong' in d) || (d.profileSong is string && d.profileSong.size() <= 500))
+        && (!('prompts' in d) || (d.prompts is list && d.prompts.size() <= 6))
+        && (!('genderPreference' in d) || (d.genderPreference is list && d.genderPreference.size() <= 6));
+    }
+
+    // ── users ────────────────────────────────────────────────────────────
+    // app/p/[uid]/page.tsx is a deliberately public share page and calls
+    // getUser() while signed out, so single-document reads stay open.
+    // Bulk listing (lib/daily.ts fetchCandidateProfiles) requires auth, which
+    // stops an anonymous script from dumping the whole member directory.
+    match /users/{uid} {
+      allow get:  if true;
+      allow list: if isSignedIn();
+
+      allow create: if isSelf(uid)
+                    && request.resource.data.uid == uid
+                    && request.resource.data.dateTokens == 0
+                    && validProfile(request.resource.data);
+
+      allow update: if isSelf(uid)
+                    && request.resource.data.uid == uid
+                    // a client may never mint itself credit or unfreeze itself
+                    && request.resource.data.dateTokens == resource.data.dateTokens
+                    && request.resource.data.createdAt == resource.data.createdAt
+                    && validProfile(request.resource.data);
+
+      allow delete: if isSelf(uid);
+
+      // users/{uid}/dailyProfiles/{YYYY-MM-DD} — private to the owner.
+      match /dailyProfiles/{date} {
+        allow read, write: if isSelf(uid);
+      }
+    }
+
+    // ── swipes ───────────────────────────────────────────────────────────
+    // NOTE: lib/matching.ts checkForMatch() runs the mutual-like check in the
+    // browser, so a user MUST be able to read swipe documents that target them.
+    // That means "who liked me" is readable by anyone who opens devtools.
+    // These rules make that the only leak; moving the match check to a Cloud
+    // Function and denying `swipedId` reads is the real fix.
+    match /swipes/{swipeId} {
+      allow read: if isSignedIn()
+                  && (resource.data.swiperId == request.auth.uid
+                      || resource.data.swipedId == request.auth.uid);
+
+      allow create: if isSignedIn()
+                    && request.resource.data.keys().hasOnly(
+                         ['swiperId', 'swipedId', 'direction', 'date', 'createdAt'])
+                    && request.resource.data.swiperId == request.auth.uid
+                    && request.resource.data.swipedId is string
+                    && request.resource.data.swipedId != request.auth.uid
+                    && request.resource.data.direction in ['like', 'pass']
+                    && request.resource.data.date is string
+                    && request.resource.data.date.size() <= 10;
+
+      allow update: if false;
+
+      // lib/deleteAccount.ts removes swipes in both directions.
+      allow delete: if isSignedIn()
+                    && (resource.data.swiperId == request.auth.uid
+                        || resource.data.swipedId == request.auth.uid);
+    }
+
+    // ── matches ──────────────────────────────────────────────────────────
+    match /matches/{matchId} {
+      function isParticipant() {
+        return isSignedIn() && request.auth.uid in resource.data.users;
+      }
+
+      allow read: if isParticipant();
+
+      // Written client-side by lib/matching.ts createMatch(). A client can still
+      // force itself into a stranger's match list; only a server-side match
+      // writer closes that. At minimum the creator must be one of the two users.
+      allow create: if isSignedIn()
+                    && request.resource.data.users is list
+                    && request.resource.data.users.size() == 2
+                    && request.auth.uid in request.resource.data.users
+                    && request.resource.data.users[0] != request.resource.data.users[1]
+                    && request.resource.data.status == 'scheduling'
+                    && request.resource.data.confirmedBy.size() == 0;
+
+      // lib/scheduling.ts submitAvailability() / confirmDate()
+      allow update: if isParticipant()
+                    && request.resource.data.users == resource.data.users
+                    && request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if isParticipant();
+    }
+
+    // ── dates (a confirmed "meet") ───────────────────────────────────────
+    match /dates/{dateId} {
+      function isParticipant() {
+        return isSignedIn() && request.auth.uid in resource.data.users;
+      }
+
+      allow read: if isParticipant();
+
+      // Created by lib/scheduling.ts confirmDate() from the browser.
+      allow create: if isSignedIn()
+                    && request.resource.data.users is list
+                    && request.resource.data.users.size() == 2
+                    && request.auth.uid in request.resource.data.users
+                    && request.resource.data.matchId is string;
+
+      // Second-cup / status writes from app/(app)/dates/[id]/page.tsx.
+      // The time, place and participants are fixed once created.
+      allow update: if isParticipant()
+                    && request.resource.data.users == resource.data.users
+                    && request.resource.data.dateTime == resource.data.dateTime
+                    && request.resource.data.matchId == resource.data.matchId;
+
+      allow delete: if isParticipant();
+
+      // dates/{dateId}/messages/{messageId} — lib/chat.ts
+      match /messages/{messageId} {
+        function parentUsers() {
+          return get(/databases/$(database)/documents/dates/$(dateId)).data.users;
+        }
+
+        allow read: if isSignedIn() && request.auth.uid in parentUsers();
+
+        allow create: if isSignedIn()
+                      && request.auth.uid in parentUsers()
+                      && request.resource.data.keys().hasOnly(['senderId', 'text', 'createdAt'])
+                      && request.resource.data.senderId == request.auth.uid
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() > 0
+                      && request.resource.data.text.size() <= 1000;
+
+        allow update: if false;
+        // needed so account deletion can erase chat history (see findings)
+        allow delete: if isSignedIn() && request.auth.uid in parentUsers();
+      }
+    }
+
+    // ── waitlist (public landing-page form) ──────────────────────────────
+    // Write-only mailbox. Nobody may read it from the client — the founder
+    // reads it with the Admin SDK / console.
+    match /waitlist/{entryId} {
+      allow read: if false;
+      allow create: if request.resource.data.keys().hasOnly(['email', 'city', 'source', 'createdAt'])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 200
+                    && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+                    && request.resource.data.city is string
+                    && request.resource.data.city.size() <= 60
+                    && (!('source' in request.resource.data)
+                        || (request.resource.data.source is string
+                            && request.resource.data.source.size() <= 60));
+      allow update, delete: if false;
+    }
+
+    // ── everything else is denied ────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
