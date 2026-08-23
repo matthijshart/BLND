@@ -232,7 +232,7 @@ export default function ProfilePage() {
   async function removePhoto(index: number) {
     if (!firebaseUser) return;
     try {
-      await deleteUserPhoto(firebaseUser.uid, index);
+      await deleteUserPhoto(photos[index]);
       const newPhotos = photos.filter((_, i) => i !== index);
       setPhotos(newPhotos);
       await updateUser(firebaseUser.uid, { photos: newPhotos });

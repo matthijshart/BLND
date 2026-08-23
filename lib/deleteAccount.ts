@@ -73,12 +73,13 @@ async function deleteInChunks(refs: DocumentReference[]): Promise<void> {
  * - /users/{uid}/dailyProfiles/* subcollection
  * - /swipes where swiperId == uid OR swipedId == uid
  * - /matches where users contains uid
- * - /dates where users contains uid (includes inline messages)
+ * - /dates where users contains uid, and their /messages subcollections
  * - All photos in Storage under /users/{uid}/
  * - Firebase Auth account
  *
- * Chat messages are stored inline on date documents (no separate collection),
- * so deleting dates removes all messages the user participated in.
+ * Chat messages live in a SUBcollection at dates/{id}/messages. Firestore
+ * does not delete subcollections with their parent, so they are enumerated
+ * and deleted explicitly — otherwise every message survives erasure forever.
  *
  * Robust to Firestore's 500-write batch limit via chunking.
  */
@@ -128,6 +129,12 @@ export async function deleteAccount(uid: string): Promise<void> {
   const datesSnap = await getDocs(
     query(collection(db, "dates"), where("users", "array-contains", uid))
   );
+  // Messages first: once the parent date document is gone the subcollection
+  // is orphaned but NOT deleted, and it can no longer be reached to clean up.
+  const messageSnaps = await Promise.all(
+    datesSnap.docs.map((d) => getDocs(collection(db, "dates", d.id, "messages")))
+  );
+  messageSnaps.forEach((snap) => snap.docs.forEach((m) => toDelete.push(m.ref)));
   datesSnap.docs.forEach((d) => toDelete.push(d.ref));
 
   // Commit in 500-doc chunks
