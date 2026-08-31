@@ -7,15 +7,15 @@ import { useAuthContext } from "@/components/providers/AuthProvider";
 import { updateUser } from "@/lib/db";
 import { uploadUserPhoto, deleteUserPhoto } from "@/lib/storage";
 import { PreferencesCard } from "@/components/profile/PreferencesCard";
+import { IntentBadge } from "@/components/profile/IntentBadge";
 import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
-import { CoffeeRing } from "@/components/ui/CoffeeRing";
 import { VerificationFlow } from "@/components/verification/VerificationFlow";
 import { PromptPicker } from "@/components/prompts/PromptPicker";
 import { QuickPromptEdit } from "@/components/prompts/QuickPromptEdit";
-import { getProfileNumber, LANGUAGES, formatHeight, HEIGHT_MIN_CM, HEIGHT_MAX_CM } from "@/lib/userHelpers";
+import { LANGUAGES, formatHeight, HEIGHT_MIN_CM, HEIGHT_MAX_CM } from "@/lib/userHelpers";
 import { SpotifyPlayer, isValidSpotifyUrl } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import {
@@ -587,11 +587,6 @@ export default function ProfilePage() {
   // ─── VIEW MODE (default) — your own BLEND home ───
   // Personal identity page. NOT a preview of your photos — tap the hero to
   // see them all in the viewer. Editorial, BLEND-themed, warm.
-  const profileNumber = firebaseUser ? getProfileNumber(firebaseUser.uid) : "";
-  const memberSince = profile.createdAt?.toDate
-    ? profile.createdAt.toDate().toLocaleDateString("en-GB", { month: "short", year: "numeric" })
-    : "";
-
   function openViewerAt(idx: number) {
     setPhotoIndex(idx);
     setPhotoViewerOpen(true);
@@ -627,6 +622,7 @@ export default function ProfilePage() {
             <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/85 via-ink/40 to-transparent z-10 pointer-events-none" />
 
             <div className="absolute bottom-0 inset-x-0 p-6 pb-7 z-10 pointer-events-none">
+              <IntentBadge value={profile.lookingFor} className="mb-2.5" />
               <h1 className="text-[2rem] font-display text-white leading-tight flex items-center gap-2 flex-wrap">
                 <span>{profile.displayName}, {profile.age}</span>
                 {profile.verificationStatus === "verified" && (
@@ -686,61 +682,52 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* ───── BLEND member card — signature BLEND moment ─────
-          A "membership" card feel. Wine on cream, two-tone logo dots,
-          profile number on the right, joined date underneath. Tells the
-          user: you are part of something curated. */}
-      <div className="px-5 pt-6 relative">
-        <CoffeeRing variant="ring" className="-top-2 -right-3 w-24 h-24" opacity={0.05} rotate={18} />
-        <div className="relative bg-white rounded-2xl shadow-sm overflow-hidden">
-          {/* Top stripe: BLEND wordmark + profile number */}
-          <div className="bg-wine text-cream px-5 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {/* Two overlapping circles — the BLEND logo, condensed */}
-              <svg width="22" height="14" viewBox="0 0 80 60" aria-hidden="true">
-                <circle cx="28" cy="30" r="22" fill="#e8dfd1" opacity="0.85" />
-                <circle cx="52" cy="30" r="22" fill="#e8dfd1" opacity="0.55" />
-              </svg>
-              <span className="font-display text-base tracking-wide">BLEND</span>
+      {/* ───── The facts, one quiet line ─────
+          Was a wine-striped "member card" with a wordmark, a profile number
+          and a 2-col vitals grid, followed by the coffee order in a second
+          card with its own avatar circle. Two card languages for six short
+          strings. It is one unadorned list now — the facts survive, the
+          ceremony does not. */}
+      <div className="px-5 pt-6">
+        <dl className="flex flex-wrap gap-x-5 gap-y-2 text-[13px]">
+          {profile.coffeeOrder && (
+            <div className="flex items-baseline gap-1.5 w-full">
+              <dt className="text-gray">☕</dt>
+              <dd className="text-ink font-medium" dir="auto">{profile.coffeeOrder}</dd>
             </div>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-cream/80">
-              {profileNumber}
-            </span>
-          </div>
-          {/* Body — vitals in a clean grid */}
-          <div className="px-5 py-5 grid grid-cols-2 gap-x-4 gap-y-4">
-            {profile.hometown && <Vital label="From" value={profile.hometown} />}
-            {profile.heightCm && <Vital label="Height" value={formatHeight(profile.heightCm)} />}
-            {profile.work && <Vital label="Work" value={profile.work + (profile.company ? ` @ ${profile.company}` : "")} />}
-            {profile.education && <Vital label="Education" value={profile.education} />}
-            {memberSince && <Vital label="Joined" value={memberSince} />}
-            {/* Languages on their own full-width row — they're typically long
-                and Matthijs flagged the truncation as a visible bug. */}
-            {profile.languages && profile.languages.length > 0 && (
-              <Vital
-                label="Languages"
-                value={profile.languages.join(" · ")}
-                fullWidth
-              />
-            )}
-          </div>
-        </div>
+          )}
+          {profile.hometown && (
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-gray-light">From</dt>
+              <dd className="text-ink">{profile.hometown}</dd>
+            </div>
+          )}
+          {profile.heightCm && (
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-gray-light">Height</dt>
+              <dd className="text-ink">{formatHeight(profile.heightCm)}</dd>
+            </div>
+          )}
+          {profile.work && (
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-gray-light">Work</dt>
+              <dd className="text-ink">{profile.work}{profile.company ? ` @ ${profile.company}` : ""}</dd>
+            </div>
+          )}
+          {profile.education && (
+            <div className="flex items-baseline gap-1.5">
+              <dt className="text-gray-light">Studied</dt>
+              <dd className="text-ink">{profile.education}</dd>
+            </div>
+          )}
+          {profile.languages && profile.languages.length > 0 && (
+            <div className="flex items-baseline gap-1.5 w-full">
+              <dt className="text-gray-light">Speaks</dt>
+              <dd className="text-ink">{profile.languages.join(" · ")}</dd>
+            </div>
+          )}
+        </dl>
       </div>
-
-      {/* ───── Coffee order — signature element on its own ───── */}
-      {profile.coffeeOrder && (
-        <div className="px-5 pt-4">
-          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white shadow-sm">
-            <div className="w-10 h-10 rounded-full bg-wine/8 flex items-center justify-center shrink-0">
-              <span className="text-lg">☕</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">Go-to coffee</p>
-              <p className="text-ink font-medium text-[15px]" dir="auto">{profile.coffeeOrder}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ───── Bio — magazine drop-cap, edge to edge, no card ─────
           Editorial treatment instead of yet another rounded card. The
@@ -748,33 +735,19 @@ export default function ProfilePage() {
           left, with body text flowing around it like a New Yorker
           column. A thin wine rule above the section anchors it. */}
       {profile.bio && (
-        <div className="px-5 pt-10 relative">
-          {/* Section marker: thin rule + label */}
-          <div className="flex items-center gap-3 mb-4">
-            <span className="h-px w-6 bg-wine/30" />
-            <p className="text-[10px] text-wine uppercase tracking-[0.3em] font-mono">
-              About
-            </p>
-            <span className="h-px flex-1 bg-wine/10" />
-          </div>
-          <div className="font-body text-ink text-[17px] leading-[1.7] break-words" dir="auto">
-            <span className="float-left mr-2 mt-1 font-display text-wine text-6xl leading-[0.85] uppercase">
-              {profile.bio.trim().charAt(0)}
-            </span>
-            <span className="whitespace-pre-wrap">{profile.bio.trim().slice(1)}</span>
-          </div>
+        <div className="px-5 pt-7">
+          {/* The drop-cap and the rule+label marker are gone: a bio does not
+              need to be introduced, and the floated 6xl capital made short
+              bios unreadable. */}
+          <p className="text-ink text-[17px] leading-[1.65] whitespace-pre-wrap break-words" dir="auto">
+            {profile.bio.trim()}
+          </p>
         </div>
       )}
 
       {/* ───── Prompts — tap any card to quick-edit it ───── */}
       {profile.prompts && profile.prompts.length > 0 && (
         <div className="px-5 pt-6">
-          <div className="flex items-baseline justify-between mb-3">
-            <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold">
-              Prompts
-            </p>
-            <p className="text-[10px] text-gray-light tracking-wide">tap to edit</p>
-          </div>
           <div className="space-y-3">
             {profile.prompts.map((p, i) => (
               <button
@@ -834,21 +807,16 @@ export default function ProfilePage() {
 
       {/* ───── Profile song — wine card statement ───── */}
       {profile.profileSong && (
-        <div className="px-5 pt-5">
-          <div className="bg-wine rounded-2xl p-5 relative overflow-hidden">
-            <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-burgundy/30" />
-            <div className="relative">
-              <p className="text-cream/50 text-[10px] font-semibold uppercase tracking-[0.25em] mb-3">My song</p>
-              <SpotifyPlayer trackUrl={profile.profileSong} />
-            </div>
-          </div>
+        <div className="px-5 pt-6">
+          {/* The wine panel and burgundy blob were a third card language for
+              one embedded player. The player carries itself. */}
+          <SpotifyPlayer trackUrl={profile.profileSong} />
         </div>
       )}
 
       {/* ───── Interests — tag row with a label ───── */}
       {profile.interests && profile.interests.length > 0 && (
         <div className="px-5 pt-6">
-          <p className="text-[10px] text-gray uppercase tracking-[0.25em] font-semibold mb-3">Interests</p>
           <div className="flex flex-wrap gap-2">
             {profile.interests.map((interest) => (
               <span key={interest} className="px-3.5 py-1.5 rounded-full bg-wine/8 text-ink text-[13px] font-medium border border-wine/10">{interest}</span>
@@ -856,21 +824,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-
-      {/* ───── Editorial tagline — BLEND signature close ───── */}
-      <div className="px-5 pt-10 pb-2 relative">
-        <CoffeeRing variant="drip" className="-bottom-4 -left-3 w-20 h-20" opacity={0.05} rotate={-12} />
-        <div className="relative text-center">
-          <p className="text-[10px] text-gray uppercase tracking-[0.35em] font-mono mb-2">
-            ☕  ☕
-          </p>
-          <p className="text-ink font-display text-lg leading-snug max-w-[260px] mx-auto">
-            Less swiping.
-            <br />
-            More sipping.
-          </p>
-        </div>
-      </div>
 
       {/* Share + actions */}
       <div className="px-5 pb-5 flex gap-3">
@@ -1141,25 +1094,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-// Vitals item — lives-in, from, height, etc. on profile view.
-// Long values wrap to multiple lines rather than truncating (Matthijs:
-// "Spanish, English, Dutch" was getting cut to "Spanis…"). Pass
-// `fullWidth` for items that need the whole row, e.g. languages.
-function Vital({
-  label,
-  value,
-  fullWidth,
-}: {
-  label: string;
-  value: string;
-  fullWidth?: boolean;
-}) {
-  return (
-    <div className={fullWidth ? "col-span-2" : ""}>
-      <p className="text-[9px] text-gray uppercase tracking-[0.25em] font-medium">{label}</p>
-      <p className="text-ink text-[14px] mt-0.5 leading-snug break-words" title={value}>
-        {value}
-      </p>
-    </div>
-  );
-}

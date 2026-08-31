@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { getUser } from "@/lib/db";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
+import { IntentBadge } from "@/components/profile/IntentBadge";
 import type { User } from "@/types";
 
 function PhotoCarousel({
@@ -16,6 +17,7 @@ function PhotoCarousel({
   name,
   age,
   neighborhood,
+  lookingFor,
 }: {
   photos: string[];
   index: number;
@@ -23,6 +25,7 @@ function PhotoCarousel({
   name: string;
   age: number;
   neighborhood: string;
+  lookingFor?: User["lookingFor"];
 }) {
   const [direction, setDirection] = useState(0);
 
@@ -108,6 +111,7 @@ function PhotoCarousel({
       {/* Gradient + name */}
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 inset-x-0 p-6 z-10 pointer-events-none">
+        <IntentBadge value={lookingFor} className="mb-2.5" />
         <h1 className="text-3xl font-display text-white">{name}, {age}</h1>
         <div className="flex items-center gap-2 mt-1">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60">
@@ -201,6 +205,7 @@ export default function PublicProfilePage() {
             name={profile.displayName}
             age={profile.age}
             neighborhood={profile.neighborhood}
+            lookingFor={profile.lookingFor}
           />
         )}
 
