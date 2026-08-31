@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from "framer-motion";
 import type { User } from "@/types";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
 import { PhotoViewer } from "@/components/ui/PhotoViewer";
@@ -49,7 +49,6 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
   // Rick: foto's onder elkaar i.p.v. carousel. We open the fullscreen
   // viewer on tap and let users scroll the page to see additional photos.
   const [photoIndex, setPhotoIndex] = useState(0);
-  const [dragDirection, setDragDirection] = useState<"left" | "right" | null>(null);
   const [exitX, setExitX] = useState(0);
   const [swiped, setSwiped] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -59,9 +58,18 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
   const photos = profile.photos?.length > 0 ? profile.photos : ["/images/sipping.png"];
   const overlaps = getOverlaps(currentUser, profile);
 
+  // Drag position drives both the tilt and the strength of the LIKE/PASS
+  // stamps, so the feedback is continuous instead of snapping in at 50px.
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-220, 0, 220], [-11, 0, 11]);
+  const likeOpacity = useTransform(x, [30, 130], [0, 1]);
+  const passOpacity = useTransform(x, [-130, -30], [1, 0]);
+
   function handleDragEnd(_: unknown, info: PanInfo) {
-    const threshold = 150; // Higher threshold — need to really mean it
-    const velocityThreshold = 500;
+    // 150px was more than a thumb travels comfortably on a phone, which made
+    // the gesture feel like it wasn't working. 110 still takes intent.
+    const threshold = 110;
+    const velocityThreshold = 450;
 
     if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
       // Swipe right — like
@@ -74,13 +82,6 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
       setSwiped(true);
       setTimeout(() => onPass(), 300);
     }
-    setDragDirection(null);
-  }
-
-  function handleDrag(_: unknown, info: PanInfo) {
-    if (info.offset.x > 50) setDragDirection("right");
-    else if (info.offset.x < -50) setDragDirection("left");
-    else setDragDirection(null);
   }
 
   function openViewerAt(i: number) {
@@ -94,15 +95,18 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
       <motion.div
         drag={previewMode || swiped ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.15}
-        onDrag={handleDrag}
+        // 0.15 meant the card moved 15% of the finger's travel — it read as a
+        // dead, unresponsive UI. It now tracks the thumb almost 1:1.
+        dragElastic={0.9}
         onDragEnd={handleDragEnd}
         animate={swiped ? { x: exitX, opacity: 0, rotate: exitX > 0 ? 15 : -15 } : { x: 0 }}
         transition={swiped ? { duration: 0.3, ease: "easeOut" } : { type: "spring", stiffness: 500, damping: 30 }}
         // touchAction pan-y lets iOS scroll the page vertically while
         // we still capture horizontal drags. Prevents the native
         // back-swipe gesture from competing with the like/pass swipe.
-        style={{ rotate: 0, touchAction: "pan-y" }}
+        // rotate was hard-pinned to 0, so the card never tilted and the drag
+        // had no physical feel. It now leans into the direction of travel.
+        style={{ x, rotate, touchAction: "pan-y" }}
         whileDrag={{ scale: 1.02 }}
         className="rounded-2xl overflow-hidden shadow-lg bg-white cursor-grab active:cursor-grabbing"
       >
@@ -146,25 +150,20 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
             </button>
           )}
 
-          {/* Drag indicator — large and clear */}
-          {dragDirection === "right" && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="absolute top-12 left-6 px-6 py-3 rounded-2xl bg-wine/90 backdrop-blur-sm text-cream font-display text-xl rotate-[-12deg] z-20 shadow-lg border-2 border-cream/30"
-            >
-              ☕ Interested
-            </motion.div>
-          )}
-          {dragDirection === "left" && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="absolute top-12 right-6 px-6 py-3 rounded-2xl bg-ink/70 backdrop-blur-sm text-white font-display text-xl rotate-[12deg] z-20 shadow-lg border-2 border-white/20"
-            >
-              Pass
-            </motion.div>
-          )}
+          {/* Drag stamps — opacity tracks the drag, so the card answers the
+              thumb continuously instead of popping in at a fixed 50px. */}
+          <motion.div
+            style={{ opacity: likeOpacity }}
+            className="absolute top-12 left-6 px-6 py-3 rounded-2xl bg-wine/90 backdrop-blur-sm text-cream font-display text-xl rotate-[-12deg] z-20 shadow-lg border-2 border-cream/30 pointer-events-none"
+          >
+            ☕ Coffee
+          </motion.div>
+          <motion.div
+            style={{ opacity: passOpacity }}
+            className="absolute top-12 right-6 px-6 py-3 rounded-2xl bg-ink/70 backdrop-blur-sm text-white font-display text-xl rotate-[12deg] z-20 shadow-lg border-2 border-white/20 pointer-events-none"
+          >
+            Not today
+          </motion.div>
 
           {/* Gradient + name overlay */}
           <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent z-10" />
@@ -333,35 +332,56 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
         )}
       </AnimatePresence>
 
-      {/* Action buttons — Apple HIG minimum 44pt tap target (we use 64px for comfort) */}
+      {/* Action bar.
+          Previously this sat in normal flow under the whole card — photo, bio,
+          prompts and extra photos — so reaching it meant scrolling to the
+          bottom of a long page. It is pinned above the tab bar now, so the
+          two choices are always within thumb reach.
+          Labels are explicit: two unlabelled circles did not say what they do,
+          and the heart was romance language the rest of the app dropped. */}
       {!previewMode && (
-        <div className="flex justify-center gap-8 mt-6">
-          <button
-            onClick={onPass}
-            aria-label="Pass"
-            className="w-16 h-16 rounded-full bg-white text-gray flex items-center justify-center shadow-sm hover:shadow-md transition-all active:scale-95"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-          <button
-            onClick={() => {
-              setShowHeart(true);
-              setTimeout(() => {
-                setShowHeart(false);
-                onLike();
-              }, 600);
-            }}
-            aria-label="Interested"
-            className="w-16 h-16 rounded-full bg-wine text-cream flex items-center justify-center shadow-sm hover:shadow-md transition-all active:scale-95"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-            </svg>
-          </button>
-        </div>
+        <>
+          {/* Spacer so the end of the card is never hidden behind the bar */}
+          <div className="h-28" aria-hidden="true" />
+          <div className="fixed inset-x-0 z-30 pointer-events-none bottom-[calc(3.5rem+env(safe-area-inset-bottom))]">
+            <div className="mx-auto max-w-sm px-6 pb-4 pt-6 bg-gradient-to-t from-cream via-cream/95 to-transparent">
+              <div className="flex justify-center gap-4 pointer-events-auto">
+                <button
+                  onClick={onPass}
+                  aria-label="Not today"
+                  className="flex-1 h-14 rounded-full bg-white border border-ink/10 text-ink-mid flex items-center justify-center gap-2 shadow-sm active:scale-[0.97] transition-transform"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                  <span className="text-sm font-medium">Not today</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowHeart(true);
+                    setTimeout(() => {
+                      setShowHeart(false);
+                      onLike();
+                    }, 600);
+                  }}
+                  aria-label="Coffee"
+                  className="flex-1 h-14 rounded-full bg-wine text-cream flex items-center justify-center gap-2 shadow-md active:scale-[0.97] transition-transform"
+                >
+                  {/* The two overlapping cups — the BLEND mark, not a heart */}
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="9" cy="12" r="6" opacity="0.9" />
+                    <circle cx="15" cy="12" r="6" opacity="0.9" />
+                  </svg>
+                  <span className="text-sm font-medium">Coffee</span>
+                </button>
+              </div>
+              <p className="text-center text-gray-light text-[11px] mt-2.5">
+                or swipe the card
+              </p>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Fullscreen photo viewer */}

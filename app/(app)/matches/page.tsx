@@ -172,14 +172,61 @@ function Section({ label, color, children }: { label: string; color: "coral" | "
   );
 }
 
+type ChipState = { label: string; style: string };
+
+const CHIP_ACTION = "bg-coral text-white";
+const CHIP_NUDGE = "bg-coral/10 text-coral";
+const CHIP_WAITING = "bg-stripe-white text-gray";
+const CHIP_DONE = "bg-wine/10 text-wine";
+
+function resolveMatchStatus(
+  match: ReturnType<typeof useMatches>["matches"][number],
+  myUid: string | undefined,
+  otherName: string
+): ChipState {
+  const firstName = otherName.split(" ")[0];
+  const otherUid = myUid ? match.users?.find((u) => u !== myUid) : undefined;
+  const iSubmitted = !!(myUid && match.availability?.[myUid]?.length);
+  const theySubmitted = !!(otherUid && match.availability?.[otherUid]?.length);
+
+  switch (match.status) {
+    case "scheduling":
+      // Both submitted but the status never advanced to date_proposed means
+      // the two sets of times did not overlap — same derivation the match
+      // detail page uses. That needs action, not a waiting state.
+      if (iSubmitted && theySubmitted) return { label: "No overlap — add times", style: CHIP_ACTION };
+      if (iSubmitted) return { label: `Waiting for ${firstName}`, style: CHIP_WAITING };
+      if (theySubmitted) return { label: "Your turn — pick times", style: CHIP_ACTION };
+      return { label: "Pick your times", style: CHIP_NUDGE };
+
+    case "date_proposed": {
+      const iConfirmed = !!(myUid && (match.confirmedBy || []).includes(myUid));
+      return iConfirmed
+        ? { label: `Waiting for ${firstName}`, style: CHIP_WAITING }
+        : { label: "Confirm coffee", style: CHIP_ACTION };
+    }
+
+    case "date_confirmed":
+      return { label: "Coffee planned ✓", style: CHIP_DONE };
+    case "second_cup":
+      return { label: "☕☕", style: "bg-wine text-cream" };
+    case "expired":
+      return { label: "Expired", style: CHIP_WAITING };
+    case "cancelled":
+      return { label: "Cancelled", style: CHIP_WAITING };
+    case "completed":
+      return { label: "Done", style: CHIP_DONE };
+    default:
+      return { label: match.status, style: CHIP_WAITING };
+  }
+}
+
 function MatchRow({ match, profile }: { match: ReturnType<typeof useMatches>["matches"][number]; profile: User | null }) {
-  const statusMap: Record<string, { label: string; style: string }> = {
-    scheduling: { label: "Plan coffee", style: "bg-coral/10 text-coral" },
-    date_proposed: { label: "Confirm coffee", style: "bg-coral text-white" },
-    date_confirmed: { label: "Planned ✓", style: "bg-wine/10 text-wine" },
-    second_cup: { label: "☕☕", style: "bg-wine text-cream" },
-  };
-  const s = statusMap[match.status] || { label: match.status, style: "bg-stripe-white text-gray" };
+  // The chip has to answer one question: is the ball in MY court?
+  // Keying it off match.status alone could not do that — after you submitted
+  // your times it still read "Plan coffee", as if you had not just done it.
+  // Coral = you need to act. Muted = you are waiting on them.
+  const s = resolveMatchStatus(match, profile?.uid, match.otherUser.displayName);
 
   return (
     <Link
