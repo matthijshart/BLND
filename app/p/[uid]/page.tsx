@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, animate, useMotionValue } from "framer-motion";
 import Link from "next/link";
 import { getUser } from "@/lib/db";
 import { SpotifyPlayer } from "@/components/ui/SpotifyPlayer";
@@ -27,58 +27,86 @@ function PhotoCarousel({
   neighborhood: string;
   lookingFor?: User["lookingFor"];
 }) {
-  const [direction, setDirection] = useState(0);
+  // Same continuous track as the fullscreen viewer: every photo is really
+  // mounted side by side and dragged in px, so the neighbours move with your
+  // finger. The previous version mounted one photo and cross-faded it at 12%
+  // elasticity, which is why paging felt inert.
+  const [pageWidth, setPageWidth] = useState(0);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el) return;
+    const measure = () => setPageWidth(el.clientWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!pageWidth) return;
+    const controls = animate(x, -index * pageWidth, {
+      type: "spring",
+      stiffness: 320,
+      damping: 34,
+      restDelta: 0.5,
+    });
+    return () => controls.stop();
+  }, [index, pageWidth, x]);
 
   const goTo = useCallback(
     (newIndex: number) => {
       if (newIndex < 0 || newIndex >= photos.length) return;
-      setDirection(newIndex > index ? 1 : -1);
       onChangeIndex(newIndex);
     },
-    [index, photos.length, onChangeIndex]
+    [photos.length, onChangeIndex]
   );
 
   function handleDragEnd(_: unknown, info: { offset: { x: number }; velocity: { x: number } }) {
-    if (info.offset.x < -50 || info.velocity.x < -300) {
-      goTo(index + 1);
-    } else if (info.offset.x > 50 || info.velocity.x > 300) {
-      goTo(index - 1);
+    const w = pageWidth || 1;
+    const travelled = -info.offset.x / w;
+    const flick = Math.abs(info.velocity.x) > 400 ? Math.sign(-info.velocity.x) : 0;
+    const step = Math.abs(travelled) > 0.28 ? Math.sign(travelled) : flick;
+    const next = Math.max(0, Math.min(photos.length - 1, index + step));
+    if (next !== index) {
+      onChangeIndex(next);
+    } else {
+      animate(x, -index * w, { type: "spring", stiffness: 320, damping: 34 });
     }
   }
 
-  const variants = {
-    enter: (dir: number) => ({ x: dir > 0 ? "40%" : "-40%", opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir: number) => ({ x: dir > 0 ? "-40%" : "40%", opacity: 0 }),
-  };
-
   return (
-    <div className="relative aspect-[3/4] mx-4 rounded-2xl overflow-hidden shadow-lg">
-      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+    <div
+      ref={frameRef}
+      className="relative aspect-[3/4] mx-4 rounded-2xl overflow-hidden shadow-lg"
+      style={{ touchAction: "pan-y" }}
+    >
+      {pageWidth > 0 && (
         <motion.div
-          key={index}
-          custom={direction}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ x: { type: "spring", stiffness: 500, damping: 40 }, opacity: { duration: 0.15 } }}
+          className="absolute inset-0 flex"
+          style={{ x, width: photos.length * pageWidth }}
           drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
+          dragConstraints={{ left: -(photos.length - 1) * pageWidth, right: 0 }}
           dragElastic={0.12}
+          dragMomentum={false}
           onDragEnd={handleDragEnd}
-          className="absolute inset-0"
         >
-          <Image
-            src={photos[index]}
-            alt={name}
-            fill
-            className="object-cover pointer-events-none select-none"
-            priority
-            draggable={false}
-          />
+          {photos.map((src, i) => (
+            <div key={src + i} className="relative h-full shrink-0" style={{ width: pageWidth }}>
+              <Image
+                src={src}
+                alt={name}
+                fill
+                className="object-cover pointer-events-none select-none"
+                priority={i === 0}
+                draggable={false}
+              />
+            </div>
+          ))}
         </motion.div>
-      </AnimatePresence>
+      )}
 
       {/* Progress bars */}
       {photos.length > 1 && (

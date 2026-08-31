@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import { motion, animate, useMotionValue, type PanInfo } from "framer-motion";
 import Image from "next/image";
 import { Portal } from "@/components/ui/Portal";
 
@@ -33,7 +33,12 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
   // Clamp initialIndex defensively — if a caller passes a stale index, don't crash
   const safeInitial = Math.max(0, Math.min(initialIndex, photos.length - 1));
   const [index, setIndex] = useState(safeInitial);
-  const [direction, setDirection] = useState(0);
+  // Width of one page. The track is positioned in px, not percentages, so
+  // the drag offset and the rest position are in the same unit and the
+  // photo can track the finger exactly.
+  const [pageWidth, setPageWidth] = useState(0);
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
   const [showArrows, setShowArrows] = useState(true);
   const arrowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -57,6 +62,31 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
     };
   }, [index]);
 
+  // Measure the photo surface and keep it current through rotation and the
+  // iOS URL bar collapsing.
+  useEffect(() => {
+    const el = surfaceRef.current;
+    if (!el) return;
+    const measure = () => setPageWidth(el.clientWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Settle the track on the current page whenever the index or the width
+  // changes. This is the only thing that moves the track other than a drag.
+  useEffect(() => {
+    if (!pageWidth) return;
+    const controls = animate(x, -index * pageWidth, {
+      type: "spring",
+      stiffness: 320,
+      damping: 34,
+      restDelta: 0.5,
+    });
+    return () => controls.stop();
+  }, [index, pageWidth, x]);
+
   // Hardware-back / Escape close
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -72,36 +102,36 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
   const goTo = useCallback(
     (newIndex: number) => {
       if (newIndex < 0 || newIndex >= photos.length) return;
-      setDirection(newIndex > index ? 1 : -1);
       setIndex(newIndex);
     },
-    [index, photos.length]
+    [photos.length]
   );
 
   function handleDragEnd(_: unknown, info: PanInfo) {
-    const SWIPE_X = 60;
-    const SWIPE_Y = 120;
-    const VEL_X = 350;
-    const VEL_Y = 550;
-
-    // Vertical takes priority — swipe down dismisses
-    if (info.offset.y > SWIPE_Y || info.velocity.y > VEL_Y) {
+    // Swipe down to dismiss. dragDirectionLock means a gesture is either
+    // vertical or horizontal, never both, so this no longer competes with
+    // paging the way the old free-2D drag did.
+    if (info.offset.y > 120 || info.velocity.y > 550) {
       onClose();
       return;
     }
-    // Then horizontal navigation
-    if (info.offset.x < -SWIPE_X || info.velocity.x < -VEL_X) {
-      goTo(index + 1);
-    } else if (info.offset.x > SWIPE_X || info.velocity.x > VEL_X) {
-      goTo(index - 1);
+
+    // Page on distance OR flick speed. A fast flick should advance even if
+    // the finger barely travelled — that is what makes it feel responsive.
+    const w = pageWidth || 1;
+    const travelled = -info.offset.x / w;
+    const flick = Math.abs(info.velocity.x) > 400 ? Math.sign(-info.velocity.x) : 0;
+    const step = Math.abs(travelled) > 0.28 ? Math.sign(travelled) : flick;
+
+    const next = Math.max(0, Math.min(photos.length - 1, index + step));
+    if (next !== index) {
+      setIndex(next);
+    } else {
+      // Snap back to the current page — the effect above only reacts to an
+      // index change, so a cancelled swipe needs its own settle.
+      animate(x, -index * w, { type: "spring", stiffness: 320, damping: 34 });
     }
   }
-
-  const variants = {
-    enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir: number) => ({ x: dir > 0 ? "-100%" : "100%", opacity: 0 }),
-  };
 
   return (
     <Portal>
@@ -138,6 +168,7 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
       {/* Photo surface — drag here. Bezel taps (the dark margin around
           the image) close the viewer because it bubbles up to root. */}
       <div
+        ref={surfaceRef}
         className="flex-1 relative overflow-hidden"
         onClick={(e) => {
           // Only close on direct bezel taps, not on drag end / image taps
@@ -145,39 +176,48 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
         }}
         style={{ touchAction: "none" }}
       >
-        <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        {/* One continuous track holding every photo, dragged in px.
+            The previous version mounted a single photo and cross-faded it,
+            so during a swipe there was nothing beside the image to follow
+            your finger — it read as a slide transition rather than a
+            carousel. Now the neighbouring photos are really there, moving
+            with the gesture, and the constraints give you the iOS
+            rubber-band at the first and last photo. */}
+        {pageWidth > 0 && (
           <motion.div
-            key={index}
-            custom={direction}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 400, damping: 36 },
-              opacity: { duration: 0.15 },
-            }}
+            className="absolute inset-0 flex"
+            style={{ x, width: photos.length * pageWidth }}
             drag
-            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-            dragElastic={0.25}
-            dragDirectionLock={false}
+            dragDirectionLock
+            dragConstraints={{
+              left: -(photos.length - 1) * pageWidth,
+              right: 0,
+              top: 0,
+              bottom: 0,
+            }}
+            dragElastic={{ left: 0.12, right: 0.12, top: 0.5, bottom: 0.5 }}
+            dragMomentum={false}
             onDragEnd={handleDragEnd}
-            className="absolute inset-0 flex items-center justify-center"
           >
-            {/* Image stays inside the motion div, object-contain preserves AR */}
-            <div className="relative w-full h-full">
-              <Image
-                src={photos[index]}
-                alt=""
-                fill
-                className="object-contain pointer-events-none select-none"
-                priority
-                draggable={false}
-                sizes="100vw"
-              />
-            </div>
+            {photos.map((src, i) => (
+              <div
+                key={src + i}
+                className="relative h-full shrink-0"
+                style={{ width: pageWidth }}
+              >
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  className="object-contain pointer-events-none select-none"
+                  priority={i === safeInitial}
+                  draggable={false}
+                  sizes="100vw"
+                />
+              </div>
+            ))}
           </motion.div>
-        </AnimatePresence>
+        )}
 
         {/* Side arrows — visible briefly on photo change, also auto-fade */}
         {photos.length > 1 && (
@@ -238,7 +278,6 @@ export function PhotoViewer({ photos, initialIndex, onClose }: PhotoViewerProps)
                   key={i}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setDirection(i > index ? 1 : -1);
                     setIndex(i);
                   }}
                   className="flex-1 h-1 rounded-full overflow-hidden bg-white/20 active:bg-white/30 transition-colors"
