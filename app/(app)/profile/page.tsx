@@ -825,8 +825,15 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Share + actions */}
-      <div className="px-5 pb-5 flex gap-3">
+      {/* Share + actions.
+          This block had no top padding at all — it inherited its breathing
+          room from the tagline block that used to sit above it, and lost it
+          when that was cut. A hairline marks the boundary between the profile
+          itself and the things you can do with it. */}
+      <div className="px-5 pt-8">
+        <div className="h-px bg-wine/10" />
+      </div>
+      <div className="px-5 pt-6 pb-5 flex gap-3">
         <button
           onClick={async () => {
             const url = `https://bl-nd.nl/p/${firebaseUser?.uid}`;
