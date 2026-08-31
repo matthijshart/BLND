@@ -8,6 +8,7 @@ import { PhotoViewer } from "@/components/ui/PhotoViewer";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { ReportSheet } from "@/components/ui/ReportSheet";
+import { IntentBadge } from "@/components/profile/IntentBadge";
 
 interface ProfileCardProps {
   profile: User;
@@ -168,6 +169,7 @@ export function ProfileCard({ profile, onLike, onPass, previewMode, currentUser 
           {/* Gradient + name overlay */}
           <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/80 via-ink/40 to-transparent z-10" />
           <div className="absolute inset-x-0 bottom-0 p-5 z-10">
+            <IntentBadge value={profile.lookingFor} size="sm" className="mb-2" />
             <h3 className="text-2xl font-display text-white truncate flex items-center gap-1.5" title={`${profile.displayName}, ${profile.age}`}>
               <span className="truncate">{profile.displayName}, {profile.age}</span>
               {profile.verificationStatus === "verified" && (
