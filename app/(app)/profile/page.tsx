@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContext } from "@/components/providers/AuthProvider";
 import { updateUser } from "@/lib/db";
 import { uploadUserPhoto, deleteUserPhoto } from "@/lib/storage";
+import { PreferencesCard } from "@/components/profile/PreferencesCard";
 import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { ShimmerImage } from "@/components/ui/ShimmerImage";
@@ -568,22 +569,10 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {/* Preferences moved to /preferences — Rick: dedicated page */}
-        <section className="px-5 py-4 border-t border-wine/5">
-          <button
-            type="button"
-            onClick={() => router.push("/preferences")}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-white hover:bg-stripe-white transition-colors text-left"
-          >
-            <div>
-              <p className="text-ink font-medium text-sm">Preferences</p>
-              <p className="text-gray-light text-[11px] mt-0.5">Who you&apos;d like to meet, age range, what you&apos;re open to</p>
-            </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-wine">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </section>
+        {/* Preferences, inline. Previously a link to /preferences, which meant
+            you could not see what you were currently set to without leaving
+            the page. The dedicated route still exists and still works. */}
+        <PreferencesCard />
 
         {/* Sign out */}
         <section className="px-5 py-6 border-t border-wine/5">
